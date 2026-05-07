@@ -236,6 +236,10 @@ npm run dev
 
 Your vault data, localStorage, and local settings are unaffected.
 
+### Build Info card
+
+The **App Updates** tab shows a **Build Info** card listing the app name, build label, mode, update source, and vault safety status. After installing an update and restarting, this card confirms which version is running.
+
 ### Generated file changes
 
 Sometimes Next.js and npm locally modify generated/install files:

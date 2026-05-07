@@ -495,7 +495,28 @@ export function UpdatesTab() {
         </div>
       )}
 
-      {/* Info footer */}
+      {/* Build Info */}
+      <div className="p-3.5 rounded-xl bg-surface-soft border border-border">
+        <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2.5">
+          Build Info
+        </div>
+        <div className="space-y-1.5">
+          {[
+            { label: 'App',           value: 'PromptVault' },
+            { label: 'Build',         value: 'Update test build 002' },
+            { label: 'Mode',          value: 'Local-first' },
+            { label: 'Update source', value: 'GitHub main branch' },
+            { label: 'Vault safety',  value: 'vault/ ignored — never uploaded' },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-center gap-2">
+              <span className="text-[10px] text-text-dim w-24 flex-shrink-0">{label}</span>
+              <span className="text-[11px] font-mono text-text-muted">{value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* How this updater works */}
       <div className="p-3.5 rounded-xl bg-surface-soft border border-border">
         <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
           How this updater works
@@ -515,9 +536,6 @@ export function UpdatesTab() {
             </li>
           ))}
         </ul>
-        <p className="text-[10px] text-text-dim mt-2.5 pt-2 border-t border-border">
-          Updater test build: 001
-        </p>
       </div>
     </div>
   )
