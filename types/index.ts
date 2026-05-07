@@ -244,6 +244,10 @@ export interface UpdateCheckResult {
   workingTreeClean?: boolean
   vaultIgnored?: boolean
   canInstall?: boolean
+  dirtyFiles?: string[]
+  autoFixableDirtyFiles?: string[]
+  blockingDirtyFiles?: string[]
+  onlyAutoFixableChanges?: boolean
   warnings: string[]
   errors: string[]
 }
@@ -253,5 +257,12 @@ export interface UpdateInstallResult {
   success: boolean
   logs: string[]
   restartRequired?: boolean
+  errors: string[]
+}
+
+export interface UpdateCleanGeneratedResult {
+  ok: boolean
+  success: boolean
+  logs: string[]
   errors: string[]
 }

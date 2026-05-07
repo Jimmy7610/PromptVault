@@ -13,6 +13,9 @@ function git(args: string[]) {
   return execFileAsync('git', args, { cwd: PROJECT_ROOT, timeout: 30_000 })
 }
 
+// Files that are generated/installed and can be safely restored without losing user work.
+const AUTO_FIXABLE = new Set(['next-env.d.ts', 'package-lock.json'])
+
 // git porcelain format: "XY path" — path starts at char 3.
 // Exclude vault/ lines so local data files are never counted as dirty code.
 function nonVaultDirtyLines(porcelain: string): string[] {
@@ -25,6 +28,15 @@ function nonVaultDirtyLines(porcelain: string): string[] {
       !filePath.startsWith('vault\\')
     )
   })
+}
+
+// Extract the file path from a porcelain status line.
+// Handles renames ("R  old -> new") by taking the destination.
+function extractFilePath(line: string): string {
+  const raw = line.slice(3)
+  const arrow = raw.indexOf(' -> ')
+  const name = arrow >= 0 ? raw.slice(arrow + 4) : raw
+  return name.replace(/^"/, '').replace(/"$/, '').trim()
 }
 
 export async function GET() {
@@ -125,18 +137,31 @@ export async function GET() {
 
     // ── 7. Working tree clean (vault/ excluded) ────────────────────────────────
     let workingTreeClean = false
+    let dirtyFiles: string[] = []
+    let autoFixableDirtyFiles: string[] = []
+    let blockingDirtyFiles: string[] = []
+    let onlyAutoFixableChanges = false
+
     try {
       const { stdout } = await git(['status', '--porcelain'])
       const relevantLines = nonVaultDirtyLines(stdout)
-      workingTreeClean = relevantLines.length === 0
-      if (!workingTreeClean) {
-        const sample = relevantLines
-          .slice(0, 3)
-          .map((l) => l.trim())
-          .join(', ')
+      dirtyFiles = relevantLines.map(extractFilePath)
+      autoFixableDirtyFiles = dirtyFiles.filter((f) => AUTO_FIXABLE.has(path.basename(f)))
+      blockingDirtyFiles = dirtyFiles.filter((f) => !AUTO_FIXABLE.has(path.basename(f)))
+      onlyAutoFixableChanges = dirtyFiles.length > 0 && blockingDirtyFiles.length === 0
+      workingTreeClean = dirtyFiles.length === 0
+
+      if (blockingDirtyFiles.length > 0) {
+        const sample = blockingDirtyFiles.slice(0, 3).join(', ')
         errors.push(
-          `Working tree has uncommitted changes: ${sample}. ` +
-            'Commit, stash, or discard local code changes before updating.'
+          `Working tree has uncommitted code changes: ${sample}. ` +
+            'Commit, stash, or discard these changes before updating.'
+        )
+      } else if (onlyAutoFixableChanges) {
+        warnings.push(
+          `Only generated/install files have changed (${autoFixableDirtyFiles.join(', ')}). ` +
+            'These can be safely restored before updating using "Clean generated changes". ' +
+            'Your vault data and saved prompts are not affected.'
         )
       }
     } catch {
@@ -196,6 +221,10 @@ export async function GET() {
       workingTreeClean,
       vaultIgnored,
       canInstall,
+      dirtyFiles,
+      autoFixableDirtyFiles,
+      blockingDirtyFiles,
+      onlyAutoFixableChanges,
       warnings,
       errors,
     })

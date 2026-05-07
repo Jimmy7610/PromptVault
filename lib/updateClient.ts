@@ -1,4 +1,4 @@
-import { UpdateCheckResult, UpdateInstallResult } from '@/types'
+import { UpdateCheckResult, UpdateInstallResult, UpdateCleanGeneratedResult } from '@/types'
 
 export async function checkForUpdates(): Promise<UpdateCheckResult> {
   try {
@@ -10,6 +10,21 @@ export async function checkForUpdates(): Promise<UpdateCheckResult> {
       ok: false,
       errors: [err instanceof Error ? err.message : 'Network error checking for updates.'],
       warnings: [],
+    }
+  }
+}
+
+export async function cleanGeneratedChanges(): Promise<UpdateCleanGeneratedResult> {
+  try {
+    const res = await fetch('/api/system/update/clean-generated', { method: 'POST' })
+    const data = await res.json()
+    return data as UpdateCleanGeneratedResult
+  } catch (err) {
+    return {
+      ok: false,
+      success: false,
+      logs: [],
+      errors: [err instanceof Error ? err.message : 'Network error during clean.'],
     }
   }
 }
