@@ -10,7 +10,7 @@ import { AssetGrid } from '@/components/assets/AssetGrid'
 import { AssetDetailPanel } from '@/components/inspector/AssetDetailPanel'
 import { Toast } from '@/components/ui/Toast'
 import { NewAssetModal } from '@/components/forms/NewAssetModal'
-import { LoginScreen } from '@/components/auth/LoginScreen'
+import { LandingPage } from '@/components/landing/LandingPage'
 
 function LoadingSplash() {
   return (
@@ -67,7 +67,7 @@ export default function PromptVaultApp() {
   // Wait for localStorage to be read before deciding which screen to show
   if (!hasHydrated) return <LoadingSplash />
 
-  if (!isLoggedIn) return <LoginScreen />
+  if (!isLoggedIn) return <LandingPage />
 
   const showStats = activeSection === 'dashboard'
 

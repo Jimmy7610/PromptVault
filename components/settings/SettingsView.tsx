@@ -23,6 +23,8 @@ import {
   FolderOpen,
   RotateCcw,
   CircleDot,
+  BookOpen,
+  Shield,
 } from 'lucide-react'
 import { useUserStore, getUserInitials } from '@/stores/useUserStore'
 import { useAppStore } from '@/stores/useAppStore'
@@ -34,6 +36,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { InviteTeamModal } from '@/components/team/InviteTeamModal'
 import { testOllamaConnection, fetchOllamaModels } from '@/lib/ollama'
 import { initVault, syncAssetsToVault, getVaultAssets, rebuildVaultIndex } from '@/lib/vaultClient'
+import { AppGuideModal } from '@/components/settings/AppGuideModal'
 
 const ACCENT_OPTIONS: { value: AccentColor; label: string; color: string }[] = [
   { value: 'blue', label: 'Blue', color: '#3b82f6' },
@@ -130,6 +133,7 @@ export function SettingsView() {
   const [vaultOpMessage, setVaultOpMessage] = useState<{ text: string; ok: boolean } | null>(null)
   const [loadConfirmOpen, setLoadConfirmOpen] = useState(false)
   const [pendingLoadAssets, setPendingLoadAssets] = useState<Asset[]>([])
+  const [guideOpen, setGuideOpen] = useState(false)
 
   const initials = user ? getUserInitials(user.name) : '?'
   const trashCount = assets.filter((a) => a.status === 'trash').length
@@ -303,7 +307,7 @@ export function SettingsView() {
   return (
     <div className="flex gap-0 h-full max-w-4xl mx-auto">
       {/* Sidebar tabs */}
-      <div className="w-44 flex-shrink-0 pt-1 pr-4">
+      <div className="w-44 flex-shrink-0 pt-1 pr-4 flex flex-col">
         <div className="text-xs font-semibold text-text-main mb-3">Settings</div>
         <nav className="space-y-0.5">
           {TABS.map((tab) => {
@@ -326,10 +330,39 @@ export function SettingsView() {
             )
           })}
         </nav>
+
+        {/* Guide button */}
+        <div className="mt-4 pt-4 border-t border-border">
+          <button
+            onClick={() => setGuideOpen(true)}
+            className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs text-text-muted hover:text-accent-blue hover:bg-accent-blue/8 transition-all"
+          >
+            <BookOpen size={13} className="flex-shrink-0" />
+            App Guide
+          </button>
+        </div>
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0 border-l border-border pl-6 pt-1">
+
+        {/* Local-first info card */}
+        <div className="flex items-start gap-3 p-3.5 rounded-xl bg-accent-blue/5 border border-accent-blue/15 mb-5">
+          <Shield size={13} className="text-accent-blue flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-text-muted leading-relaxed">
+              <span className="font-semibold text-text-main">PromptVault is local-first.</span>{' '}
+              Your vault files stay in your project folder and are ignored from Git by default. Nothing is uploaded to any server.
+            </p>
+          </div>
+          <button
+            onClick={() => setGuideOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-accent-blue/10 hover:bg-accent-blue/20 text-accent-blue text-[11px] font-medium transition-colors flex-shrink-0"
+          >
+            <BookOpen size={11} />
+            App Guide
+          </button>
+        </div>
 
         {/* Profile */}
         {activeTab === 'profile' && (
@@ -950,6 +983,11 @@ export function SettingsView() {
             </div>
           </div>
         )}
+
+        {/* Footer */}
+        <div className="mt-8 pt-4 border-t border-border text-center">
+          <p className="text-[10px] text-text-dim">PromptVault — Local-first AI Workspace</p>
+        </div>
       </div>
 
       {/* Modals */}
@@ -985,6 +1023,7 @@ export function SettingsView() {
         danger={false}
       />
       <InviteTeamModal open={inviteModalOpen} onClose={() => setInviteModalOpen(false)} />
+      <AppGuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
 
       {/* Load from Vault confirmation */}
       <ConfirmModal
