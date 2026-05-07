@@ -16,6 +16,7 @@ import {
   BookOpen,
 } from 'lucide-react'
 import { useUserStore, getUserInitials } from '@/stores/useUserStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { cn } from '@/lib/utils'
 import { AppGuideModal } from '@/components/settings/AppGuideModal'
 
@@ -64,6 +65,7 @@ function FeatureCard({ icon: Icon, label, desc }: { icon: React.ElementType; lab
 
 function LoginCard() {
   const { user, login, resumeSession } = useUserStore()
+  const { t } = useI18n()
   const [mode, setMode] = useState<'returning' | 'new'>(user ? 'returning' : 'new')
   const [form, setForm] = useState({
     name: user?.name ?? '',
@@ -75,8 +77,8 @@ function LoginCard() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name.trim()) { setError('Name is required.'); return }
-    if (!form.email.trim() || !form.email.includes('@')) { setError('A valid email is required.'); return }
+    if (!form.name.trim()) { setError(t('landing.nameRequired')); return }
+    if (!form.email.trim() || !form.email.includes('@')) { setError(t('landing.emailRequired')); return }
     login({ name: form.name, email: form.email, workspaceName: form.workspaceName })
   }
 
@@ -86,7 +88,7 @@ function LoginCard() {
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent-violet to-accent-blue flex items-center justify-center mb-3 flex-shrink-0 shadow-glow">
           <span className="text-base font-bold text-white">{initials}</span>
         </div>
-        <p className="text-[11px] text-text-muted tracking-wide uppercase font-medium">Welcome back</p>
+        <p className="text-[11px] text-text-muted tracking-wide uppercase font-medium">{t('landing.welcomeBack')}</p>
         <p className="text-sm font-semibold text-text-main mt-1">{user.name}</p>
         <p className="text-xs text-text-dim mt-0.5">{user.email}</p>
         {user.workspaceName && (
@@ -96,7 +98,7 @@ function LoginCard() {
           onClick={resumeSession}
           className="w-full flex items-center justify-center gap-2 mt-5 py-2.5 rounded-xl bg-accent-blue hover:bg-blue-500 text-white text-sm font-semibold transition-all shadow-glow hover:shadow-none"
         >
-          Continue as {user.name.split(' ')[0]}
+          {t('landing.continueAs')} {user.name.split(' ')[0]}
           <ArrowRight size={14} />
         </button>
         <button
@@ -104,7 +106,7 @@ function LoginCard() {
           className="flex items-center gap-1.5 mt-3 text-xs text-text-dim hover:text-text-muted transition-colors"
         >
           <UserX size={11} />
-          Use a different account
+          {t('landing.differentAccount')}
         </button>
       </div>
     )
@@ -114,17 +116,17 @@ function LoginCard() {
     <>
       <div className="mb-4">
         <p className="text-sm font-semibold text-text-main">
-          {user ? 'Update your details' : 'Create your workspace'}
+          {user ? t('landing.updateDetails') : t('landing.createWorkspace')}
         </p>
         <p className="text-xs text-text-dim mt-0.5">
-          {user ? 'Edit and continue.' : 'No account needed — data stays local.'}
+          {user ? t('landing.editAndContinue') : t('landing.noAccount')}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-2.5">
         <div>
           <label className="block text-[11px] font-medium text-text-muted mb-1">
-            Name <span className="text-danger">*</span>
+            {t('landing.nameLabel')} <span className="text-danger">*</span>
           </label>
           <input
             type="text"
@@ -137,7 +139,7 @@ function LoginCard() {
         </div>
         <div>
           <label className="block text-[11px] font-medium text-text-muted mb-1">
-            Email <span className="text-danger">*</span>
+            {t('landing.emailLabel')} <span className="text-danger">*</span>
           </label>
           <input
             type="email"
@@ -149,7 +151,7 @@ function LoginCard() {
         </div>
         <div>
           <label className="block text-[11px] font-medium text-text-muted mb-1">
-            Workspace <span className="text-[10px] text-text-dim font-normal">(optional)</span>
+            {t('landing.workspaceLabel')} <span className="text-[10px] text-text-dim font-normal">({t('common.optional')})</span>
           </label>
           <input
             type="text"
@@ -168,7 +170,7 @@ function LoginCard() {
           type="submit"
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-accent-blue hover:bg-blue-500 text-white text-sm font-semibold transition-all shadow-glow hover:shadow-none mt-1"
         >
-          {user ? 'Save & Continue' : 'Get Started'}
+          {user ? t('landing.editContinue') : t('landing.getStarted')}
           <ArrowRight size={14} />
         </button>
 
@@ -178,13 +180,13 @@ function LoginCard() {
             onClick={() => setMode('returning')}
             className="w-full py-1.5 text-xs text-text-dim hover:text-text-muted transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
         )}
       </form>
 
       <p className="text-[10px] text-text-dim text-center mt-3">
-        All data stored locally · No cloud account required
+        {t('landing.allDataLocal')}
       </p>
     </>
   )
@@ -221,6 +223,7 @@ function DashboardPreview() {
 
 export function LandingPage() {
   const [guideOpen, setGuideOpen] = useState(false)
+  const { t } = useI18n()
 
   return (
     // Full-viewport, no scroll
@@ -251,7 +254,7 @@ export function LandingPage() {
           </div>
           <div className="flex items-center gap-5">
             <span className="text-[11px] text-text-dim hidden md:block">
-              Local-first · Open source · No cloud required
+              {t('landing.localFirst')}
             </span>
           </div>
         </header>
@@ -266,7 +269,7 @@ export function LandingPage() {
             <div className="flex items-center gap-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-blue/10 border border-accent-blue/20 text-[11px] text-accent-blue font-medium">
                 <Shield size={10} />
-                Local-first AI Workspace
+                {t('landing.tagline')}
               </div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-border text-[11px] text-text-dim">
                 <Cpu size={10} />
@@ -277,15 +280,14 @@ export function LandingPage() {
             {/* Headline */}
             <div>
               <h1 className="text-[2.6rem] xl:text-[3rem] font-extrabold text-text-main leading-[1.15] tracking-tight">
-                Your local-first workspace
+                {t('landing.headline1')}
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-blue via-blue-400 to-accent-violet">
-                  for agents, prompts &amp; AI workflows
+                  {t('landing.headline2')}
                 </span>
               </h1>
               <p className="text-[15px] text-text-muted leading-relaxed mt-3 max-w-[520px]">
-                Organize, run, test, copy, store, and reuse your best AI assets — locally.
-                No cloud. No subscription. No API key required.
+                {t('landing.subheadline')}
               </p>
             </div>
 
@@ -296,7 +298,7 @@ export function LandingPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm text-text-muted hover:text-text-main hover:border-accent-blue/40 hover:bg-surface-hover transition-all"
               >
                 <BookOpen size={14} className="text-accent-blue" />
-                What is PromptVault?
+                {t('landing.openGuide')}
               </button>
             </div>
 
@@ -304,15 +306,15 @@ export function LandingPage() {
             <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-amber-500/[0.08] border border-amber-500/20 max-w-[520px]">
               <Sparkles size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-[11px] text-amber-300/90 leading-snug">
-                <span className="font-semibold text-amber-300">Demo assets included.</span>{' '}
-                The library shows example assets on first launch — safely delete them and replace with your own.
+                <span className="font-semibold text-amber-300">{t('landing.demoNotice')}</span>{' '}
+                {t('landing.demoDesc')}
               </p>
             </div>
 
             {/* Feature cards */}
             <div>
               <p className="text-[10px] font-semibold text-text-dim uppercase tracking-widest mb-2.5">
-                What you can store
+                {t('landing.whatYouCanStore')}
               </p>
               <div className="grid grid-cols-4 gap-2">
                 {FEATURES.map((f) => (

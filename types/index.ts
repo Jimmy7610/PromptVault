@@ -43,6 +43,8 @@ export type AccentColor = 'blue' | 'purple' | 'green' | 'orange'
 
 export type ThemeMode = 'dark' | 'light' | 'system'
 
+export type AppLanguage = 'en' | 'sv'
+
 export interface Variable {
   name: string
   value: string
@@ -92,6 +94,14 @@ export interface Asset {
   trashedAt?: string
 }
 
+export interface AssetVersion {
+  id: string
+  assetId: string
+  createdAt: string
+  reason: 'edit' | 'restore'
+  snapshot: Asset
+}
+
 export interface Collection {
   id: string
   name: string
@@ -139,6 +149,7 @@ export interface AppSettings {
   defaultViewMode: ViewMode
   showUsageCount: boolean
   compactCards: boolean
+  language: AppLanguage
 }
 
 // ── Team Invites ──────────────────────────────────────────────────────────────

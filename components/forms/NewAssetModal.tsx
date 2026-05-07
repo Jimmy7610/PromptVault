@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { AssetType } from '@/types'
 import { cn, assetTypeConfig } from '@/lib/utils'
 
@@ -43,6 +44,7 @@ interface FormData {
 export function NewAssetModal() {
   const { isNewAssetModalOpen, closeNewAssetModal, newAssetType, addAsset, showToast, setSelectedAsset } =
     useAppStore()
+  const { t } = useI18n()
 
   const [step, setStep] = useState<'type' | 'form'>(newAssetType ? 'form' : 'type')
   const [selectedType, setSelectedType] = useState<AssetType>(newAssetType ?? 'prompt')
@@ -91,8 +93,8 @@ export function NewAssetModal() {
       systemPrompt: form.systemPrompt.trim() || undefined,
       instructions: form.instructions.trim() || undefined,
       negativePrompt: form.negativePrompt.trim() || undefined,
-      tools: form.tools ? form.tools.split(',').map((t) => t.trim()).filter(Boolean) : [],
-      tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      tools: form.tools ? form.tools.split(',').map((s) => s.trim()).filter(Boolean) : [],
+      tags: form.tags ? form.tags.split(',').map((s) => s.trim()).filter(Boolean) : [],
       language: form.language.trim() || undefined,
       isFavorite: false,
       status: 'active',
@@ -115,14 +117,14 @@ export function NewAssetModal() {
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div>
             <h2 className="text-base font-semibold text-text-main">
-              {step === 'type' ? 'Create New Asset' : `New ${assetTypeConfig[selectedType].label}`}
+              {step === 'type' ? t('newAsset.title') : `${t('newAsset.create')} ${assetTypeConfig[selectedType].label}`}
             </h2>
             {step === 'form' && (
               <button
                 onClick={() => setStep('type')}
                 className="text-[11px] text-text-muted hover:text-text-main mt-0.5 transition-colors"
               >
-                ← Change type
+                {t('newAsset.changeType')}
               </button>
             )}
           </div>
@@ -137,7 +139,7 @@ export function NewAssetModal() {
         {/* Type selector */}
         {step === 'type' && (
           <div className="p-6">
-            <p className="text-xs text-text-muted mb-4">Choose the type of asset you want to create.</p>
+            <p className="text-xs text-text-muted mb-4">{t('newAsset.chooseType')}</p>
             <div className="grid grid-cols-3 gap-2">
               {ASSET_TYPES.map(({ type, icon: Icon, description }) => {
                 const config = assetTypeConfig[type]
@@ -172,7 +174,7 @@ export function NewAssetModal() {
               {/* Title */}
               <div>
                 <label className="block text-xs font-medium text-text-muted mb-1.5">
-                  Title <span className="text-danger">*</span>
+                  {t('newAsset.titleField')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -187,7 +189,7 @@ export function NewAssetModal() {
 
               {/* Description */}
               <div>
-                <label className="block text-xs font-medium text-text-muted mb-1.5">Description</label>
+                <label className="block text-xs font-medium text-text-muted mb-1.5">{t('newAsset.description')}</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -201,7 +203,7 @@ export function NewAssetModal() {
               {selectedType === 'agent' && (
                 <>
                   <div>
-                    <label className="block text-xs font-medium text-text-muted mb-1.5">System Prompt</label>
+                    <label className="block text-xs font-medium text-text-muted mb-1.5">{t('newAsset.systemPrompt')}</label>
                     <textarea
                       value={form.systemPrompt}
                       onChange={(e) => setForm({ ...form, systemPrompt: e.target.value })}
@@ -211,7 +213,7 @@ export function NewAssetModal() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-text-muted mb-1.5">Instructions</label>
+                    <label className="block text-xs font-medium text-text-muted mb-1.5">{t('newAsset.instructions')}</label>
                     <textarea
                       value={form.instructions}
                       onChange={(e) => setForm({ ...form, instructions: e.target.value })}
@@ -227,10 +229,9 @@ export function NewAssetModal() {
               {selectedType !== 'agent' && (
                 <div>
                   <label className="block text-xs font-medium text-text-muted mb-1.5">
-                    {selectedType === 'prompt' ? 'Prompt' :
-                     selectedType === 'code' ? 'Code' :
-                     selectedType === 'markdown' ? 'Content' :
-                     'Content'}
+                    {selectedType === 'prompt' ? t('newAsset.prompt') :
+                     selectedType === 'code' ? t('newAsset.code') :
+                     t('newAsset.content')}
                   </label>
                   <textarea
                     value={form.content}
@@ -249,7 +250,7 @@ export function NewAssetModal() {
               {/* Negative prompt for image/prompt types */}
               {(selectedType === 'prompt' || selectedType === 'image') && (
                 <div>
-                  <label className="block text-xs font-medium text-text-muted mb-1.5">Negative Prompt</label>
+                  <label className="block text-xs font-medium text-text-muted mb-1.5">{t('newAsset.negativePrompt')}</label>
                   <textarea
                     value={form.negativePrompt}
                     onChange={(e) => setForm({ ...form, negativePrompt: e.target.value })}
@@ -263,7 +264,7 @@ export function NewAssetModal() {
               {/* Language for code */}
               {selectedType === 'code' && (
                 <div>
-                  <label className="block text-xs font-medium text-text-muted mb-1.5">Language</label>
+                  <label className="block text-xs font-medium text-text-muted mb-1.5">{t('newAsset.language')}</label>
                   <select
                     value={form.language}
                     onChange={(e) => setForm({ ...form, language: e.target.value })}
@@ -280,7 +281,7 @@ export function NewAssetModal() {
               {/* Tools */}
               <div>
                 <label className="block text-xs font-medium text-text-muted mb-1.5">
-                  Tools <span className="text-text-dim font-normal">(comma-separated)</span>
+                  {t('newAsset.tools')} <span className="text-text-dim font-normal">({t('newAsset.commaSeparated')})</span>
                 </label>
                 <input
                   type="text"
@@ -294,7 +295,7 @@ export function NewAssetModal() {
               {/* Tags */}
               <div>
                 <label className="block text-xs font-medium text-text-muted mb-1.5">
-                  Tags <span className="text-text-dim font-normal">(comma-separated)</span>
+                  {t('newAsset.tags')} <span className="text-text-dim font-normal">({t('newAsset.commaSeparated')})</span>
                 </label>
                 <input
                   type="text"
@@ -313,14 +314,14 @@ export function NewAssetModal() {
                 onClick={handleClose}
                 className="px-4 py-2 text-sm text-text-muted hover:text-text-main transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={!form.title.trim()}
                 className="px-5 py-2 text-sm font-medium rounded-lg bg-accent-blue hover:bg-blue-500 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Create {assetTypeConfig[selectedType].label}
+                {t('newAsset.create')} {assetTypeConfig[selectedType].label}
               </button>
             </div>
           </form>

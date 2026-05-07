@@ -3,6 +3,8 @@ import { useState, useRef } from 'react'
 import { X, Plus, Trash2 } from 'lucide-react'
 import { Asset, Variable } from '@/types'
 import { useAppStore } from '@/stores/useAppStore'
+import { useVersionStore } from '@/stores/useVersionStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { cn, assetTypeConfig } from '@/lib/utils'
 
 interface FormState {
@@ -52,6 +54,8 @@ const LABEL_CLS = 'block text-xs font-medium text-text-muted mb-1.5'
 
 export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
   const { updateAsset, showToast } = useAppStore()
+  const { saveVersion } = useVersionStore()
+  const { t } = useI18n()
   const initialRef = useRef<FormState>(assetToForm(asset))
   const [form, setForm] = useState<FormState>(initialRef.current)
   const [isSaving, setIsSaving] = useState(false)
@@ -62,7 +66,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
     setForm((prev) => ({ ...prev, [key]: val }))
 
   const handleClose = () => {
-    if (isDirty && !confirm('Discard unsaved changes?')) return
+    if (isDirty && !confirm(t('common.unsavedChanges') + '?')) return
     onClose()
   }
 
@@ -71,12 +75,15 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
     if (!form.title.trim()) return
     setIsSaving(true)
 
+    // Snapshot current state BEFORE applying changes
+    saveVersion(asset, 'edit')
+
     const updates: Partial<Asset> = {
       title: form.title.trim(),
       description: form.description.trim(),
       content: form.content.trim(),
-      tools: form.tools ? form.tools.split(',').map((t) => t.trim()).filter(Boolean) : [],
-      tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      tools: form.tools ? form.tools.split(',').map((s) => s.trim()).filter(Boolean) : [],
+      tags: form.tags ? form.tags.split(',').map((s) => s.trim()).filter(Boolean) : [],
       notes: form.notes.trim() || undefined,
       version: form.version.trim() || '1.0.0',
       variables: form.variables.filter((v) => v.name.trim()),
@@ -145,12 +152,12 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
           <div className="flex items-center gap-2.5">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold text-text-main">Edit Asset</h2>
+                <h2 className="text-base font-semibold text-text-main">{t('editModal.title')}</h2>
                 <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-semibold border', config.badgeClass)}>
                   {config.label}
                 </span>
               </div>
-              <p className="text-[11px] text-text-dim mt-0.5">Type is locked for existing assets</p>
+              <p className="text-[11px] text-text-dim mt-0.5">{t('editModal.typeLockedHint')}</p>
             </div>
           </div>
           <button
@@ -168,12 +175,12 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
 
             {/* ── Basic Info ── */}
             <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider pb-1 border-b border-border">
-              Basic Info
+              {t('editModal.basicInfo')}
             </div>
 
             <div>
               <label className={LABEL_CLS}>
-                Title <span className="text-danger">*</span>
+                {t('editModal.titleField')} <span className="text-danger">*</span>
               </label>
               <input
                 type="text"
@@ -187,7 +194,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
             </div>
 
             <div>
-              <label className={LABEL_CLS}>Description</label>
+              <label className={LABEL_CLS}>{t('editModal.description')}</label>
               <textarea
                 value={form.description}
                 onChange={(e) => set('description', e.target.value)}
@@ -200,7 +207,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={LABEL_CLS}>
-                  Tools <span className="text-text-dim font-normal">(comma-separated)</span>
+                  {t('editModal.tools')} <span className="text-text-dim font-normal">({t('editModal.commaSeparated')})</span>
                 </label>
                 <input
                   type="text"
@@ -212,7 +219,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
               </div>
               <div>
                 <label className={LABEL_CLS}>
-                  Tags <span className="text-text-dim font-normal">(comma-separated)</span>
+                  {t('editModal.tags')} <span className="text-text-dim font-normal">({t('editModal.commaSeparated')})</span>
                 </label>
                 <input
                   type="text"
@@ -226,14 +233,14 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
 
             {/* ── Content ── */}
             <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider pt-2 pb-1 border-b border-border">
-              Content
+              {t('editModal.content')}
             </div>
 
             {/* Agent: system prompt + instructions + example output */}
             {asset.type === 'agent' && (
               <>
                 <div>
-                  <label className={LABEL_CLS}>System Prompt</label>
+                  <label className={LABEL_CLS}>{t('editModal.systemPrompt')}</label>
                   <textarea
                     value={form.systemPrompt}
                     onChange={(e) => set('systemPrompt', e.target.value)}
@@ -243,7 +250,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
                   />
                 </div>
                 <div>
-                  <label className={LABEL_CLS}>Instructions</label>
+                  <label className={LABEL_CLS}>{t('editModal.instructions')}</label>
                   <textarea
                     value={form.instructions}
                     onChange={(e) => set('instructions', e.target.value)}
@@ -253,7 +260,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
                   />
                 </div>
                 <div>
-                  <label className={LABEL_CLS}>Example Output</label>
+                  <label className={LABEL_CLS}>{t('editModal.exampleOutput')}</label>
                   <textarea
                     value={form.exampleOutput}
                     onChange={(e) => set('exampleOutput', e.target.value)}
@@ -270,12 +277,12 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
               <div>
                 <label className={LABEL_CLS}>
                   {asset.type === 'prompt'
-                    ? 'Prompt'
+                    ? t('editModal.prompt')
                     : asset.type === 'image'
-                    ? 'Generation Prompt'
+                    ? t('editModal.generationPrompt')
                     : asset.type === 'code'
-                    ? 'Code'
-                    : 'Content'}
+                    ? t('editModal.code')
+                    : t('editModal.content')}
                 </label>
                 <textarea
                   value={form.content}
@@ -296,7 +303,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
             {/* Negative Prompt */}
             {(asset.type === 'prompt' || asset.type === 'image') && (
               <div>
-                <label className={LABEL_CLS}>Negative Prompt</label>
+                <label className={LABEL_CLS}>{t('editModal.negativePrompt')}</label>
                 <textarea
                   value={form.negativePrompt}
                   onChange={(e) => set('negativePrompt', e.target.value)}
@@ -310,7 +317,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
             {/* Code language */}
             {asset.type === 'code' && (
               <div>
-                <label className={LABEL_CLS}>Language</label>
+                <label className={LABEL_CLS}>{t('editModal.language')}</label>
                 <select
                   value={form.language}
                   onChange={(e) => set('language', e.target.value)}
@@ -340,20 +347,20 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
 
             {/* ── Advanced ── */}
             <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider pt-2 pb-1 border-b border-border">
-              Advanced
+              {t('editModal.advanced')}
             </div>
 
             {/* Variables */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className={cn(LABEL_CLS, 'mb-0')}>Variables</label>
+                <label className={cn(LABEL_CLS, 'mb-0')}>{t('editModal.variables')}</label>
                 <button
                   type="button"
                   onClick={addVariable}
                   className="flex items-center gap-1 text-[11px] text-accent-blue hover:text-blue-400 transition-colors"
                 >
                   <Plus size={11} />
-                  Add variable
+                  {t('editModal.addVariable')}
                 </button>
               </div>
               {form.variables.length === 0 ? (
@@ -389,7 +396,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
             </div>
 
             <div>
-              <label className={LABEL_CLS}>Notes</label>
+              <label className={LABEL_CLS}>{t('editModal.notes')}</label>
               <textarea
                 value={form.notes}
                 onChange={(e) => set('notes', e.target.value)}
@@ -400,7 +407,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
             </div>
 
             <div>
-              <label className={LABEL_CLS}>Version</label>
+              <label className={LABEL_CLS}>{t('editModal.version')}</label>
               <input
                 type="text"
                 value={form.version}
@@ -414,7 +421,7 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
           {/* Footer */}
           <div className="flex items-center justify-between px-6 py-4 border-t border-border flex-shrink-0 bg-surface rounded-b-2xl">
             <span className={cn('text-xs', isDirty ? 'text-amber-400' : 'text-text-dim')}>
-              {isDirty ? 'Unsaved changes' : 'No changes'}
+              {isDirty ? t('common.unsavedChanges') : t('common.noChanges')}
             </span>
             <div className="flex items-center gap-3">
               <button
@@ -422,14 +429,14 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
                 onClick={handleClose}
                 className="px-4 py-2 text-sm text-text-muted hover:text-text-main transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={!form.title.trim() || isSaving}
                 className="px-5 py-2 text-sm font-medium rounded-lg bg-accent-blue hover:bg-blue-500 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {isSaving ? 'Saving…' : 'Save Changes'}
+                {isSaving ? t('editModal.saving') : t('editModal.saveChanges')}
               </button>
             </div>
           </div>

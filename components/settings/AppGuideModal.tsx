@@ -23,6 +23,7 @@ import {
   Activity,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/useI18n'
 
 interface Props {
   open: boolean
@@ -41,17 +42,17 @@ type GuideSection =
   | 'privacy'
   | 'workflow'
 
-const SECTIONS: { id: GuideSection; label: string; icon: React.ElementType }[] = [
-  { id: 'what',     label: 'What is PromptVault?',  icon: Lightbulb },
-  { id: 'login',    label: 'Login & Profile',        icon: User },
-  { id: 'assets',   label: 'Asset Library',          icon: Library },
-  { id: 'agents',   label: 'Agents & Local AI',      icon: Bot },
-  { id: 'vault',    label: 'Vault Storage',           icon: HardDrive },
-  { id: 'backup',   label: 'Backup & Transfer',       icon: Download },
-  { id: 'trash',    label: 'Trash & Delete',          icon: Trash2 },
-  { id: 'updates',  label: 'App Updates',             icon: RefreshCw },
-  { id: 'privacy',  label: 'Privacy & Local-first',  icon: Shield },
-  { id: 'workflow', label: 'Recommended Workflow',   icon: GitBranch },
+const SECTION_DEFS: { id: GuideSection; key: string; icon: React.ElementType }[] = [
+  { id: 'what',     key: 'guide.sections.what',     icon: Lightbulb },
+  { id: 'login',    key: 'guide.sections.login',    icon: User },
+  { id: 'assets',   key: 'guide.sections.assets',   icon: Library },
+  { id: 'agents',   key: 'guide.sections.agents',   icon: Bot },
+  { id: 'vault',    key: 'guide.sections.vault',    icon: HardDrive },
+  { id: 'backup',   key: 'guide.sections.backup',   icon: Download },
+  { id: 'trash',    key: 'guide.sections.trash',    icon: Trash2 },
+  { id: 'updates',  key: 'guide.sections.updates',  icon: RefreshCw },
+  { id: 'privacy',  key: 'guide.sections.privacy',  icon: Shield },
+  { id: 'workflow', key: 'guide.sections.workflow', icon: GitBranch },
 ]
 
 function GuideCard({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) {
@@ -95,6 +96,7 @@ function WorkflowStep({ n, text }: { n: number; text: string }) {
 
 export function AppGuideModal({ open, onClose }: Props) {
   const [section, setSection] = useState<GuideSection>('what')
+  const { t } = useI18n()
 
   if (!open) return null
 
@@ -116,8 +118,8 @@ export function AppGuideModal({ open, onClose }: Props) {
               <Lightbulb size={14} className="text-white" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-text-main">App Guide</h2>
-              <p className="text-[10px] text-text-dim">Everything you need to know about PromptVault</p>
+              <h2 className="text-sm font-semibold text-text-main">{t('guide.title')}</h2>
+              <p className="text-[10px] text-text-dim">{t('guide.subtitle')}</p>
             </div>
           </div>
           <button
@@ -134,7 +136,7 @@ export function AppGuideModal({ open, onClose }: Props) {
           {/* Section nav */}
           <div className="w-44 flex-shrink-0 border-r border-border p-3 overflow-y-auto">
             <nav className="space-y-0.5">
-              {SECTIONS.map((s) => {
+              {SECTION_DEFS.map((s) => {
                 const Icon = s.icon
                 return (
                   <button
@@ -148,7 +150,7 @@ export function AppGuideModal({ open, onClose }: Props) {
                     )}
                   >
                     <Icon size={12} className="flex-shrink-0" />
-                    {s.label}
+                    {t(s.key)}
                   </button>
                 )
               })}

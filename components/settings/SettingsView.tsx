@@ -30,7 +30,8 @@ import {
 import { useUserStore, getUserInitials } from '@/stores/useUserStore'
 import { useAppStore } from '@/stores/useAppStore'
 import { useNotificationStore } from '@/stores/useNotificationStore'
-import { AccentColor, Asset, InviteRole, PendingInvite, SortOption, ViewMode, VaultHealthResult, VaultImportResult } from '@/types'
+import { useI18n } from '@/lib/i18n/useI18n'
+import { AccentColor, AppLanguage, Asset, InviteRole, PendingInvite, SortOption, ViewMode, VaultHealthResult, VaultImportResult } from '@/types'
 import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
 import { downloadAllJSON, downloadAllMarkdown, parseImportJSON } from '@/lib/export'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
@@ -58,16 +59,16 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 
 type SettingsTab = 'profile' | 'appearance' | 'library' | 'export' | 'team' | 'ollama' | 'vault' | 'updates' | 'danger'
 
-const TABS: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
-  { id: 'profile', label: 'Profile', icon: User },
-  { id: 'appearance', label: 'Appearance', icon: Palette },
-  { id: 'library', label: 'Library', icon: Library },
-  { id: 'export', label: 'Export & Backup', icon: Download },
-  { id: 'team', label: 'Team', icon: Users },
-  { id: 'ollama', label: 'Local AI', icon: Cpu },
-  { id: 'vault', label: 'Vault Storage', icon: HardDrive },
-  { id: 'updates', label: 'App Updates', icon: RefreshCw },
-  { id: 'danger', label: 'Danger Zone', icon: AlertTriangle },
+const TAB_IDS: { id: SettingsTab; icon: React.ElementType; key: string }[] = [
+  { id: 'profile',    icon: User,          key: 'settings.tabs.profile' },
+  { id: 'appearance', icon: Palette,       key: 'settings.tabs.appearance' },
+  { id: 'library',    icon: Library,       key: 'settings.tabs.library' },
+  { id: 'export',     icon: Download,      key: 'settings.tabs.export' },
+  { id: 'team',       icon: Users,         key: 'settings.tabs.team' },
+  { id: 'ollama',     icon: Cpu,           key: 'settings.tabs.ollama' },
+  { id: 'vault',      icon: HardDrive,     key: 'settings.tabs.vault' },
+  { id: 'updates',    icon: RefreshCw,     key: 'settings.tabs.updates' },
+  { id: 'danger',     icon: AlertTriangle, key: 'settings.tabs.danger' },
 ]
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
@@ -112,7 +113,8 @@ function SettingRow({ label, description, children }: { label: string; descripti
 }
 
 export function SettingsView() {
-  const { user, settings, invites, ollama, ollamaStatus, vault, updateProfile, setAccentColor, setDefaultSort, setDefaultViewMode, toggleShowUsageCount, toggleCompactCards, logout, clearAll: clearUserData, removeInvite, updateOllama, setOllamaStatus, setOllamaModels, updateVault, setVaultStatus } = useUserStore()
+  const { user, settings, invites, ollama, ollamaStatus, vault, updateProfile, setAccentColor, setDefaultSort, setDefaultViewMode, toggleShowUsageCount, toggleCompactCards, logout, clearAll: clearUserData, removeInvite, updateOllama, setOllamaStatus, setOllamaModels, updateVault, setVaultStatus, setLanguage } = useUserStore()
+  const { t } = useI18n()
   const { assets, emptyTrash, clearAllAssets, showToast } = useAppStore()
   const { clearAll: clearNotifications } = useNotificationStore()
 
@@ -371,9 +373,9 @@ export function SettingsView() {
     <div className="flex gap-0 h-full max-w-4xl mx-auto">
       {/* Sidebar tabs */}
       <div className="w-44 flex-shrink-0 pt-1 pr-4 flex flex-col">
-        <div className="text-xs font-semibold text-text-main mb-3">Settings</div>
+        <div className="text-xs font-semibold text-text-main mb-3">{t('settings.title')}</div>
         <nav className="space-y-0.5">
-          {TABS.map((tab) => {
+          {TAB_IDS.map((tab) => {
             const Icon = tab.icon
             return (
               <button
@@ -388,7 +390,7 @@ export function SettingsView() {
                 )}
               >
                 <Icon size={13} className="flex-shrink-0" />
-                {tab.label}
+                {t(tab.key)}
               </button>
             )
           })}
@@ -489,9 +491,33 @@ export function SettingsView() {
         {/* Appearance */}
         {activeTab === 'appearance' && (
           <div>
-            <SectionLabel>Appearance</SectionLabel>
+            <SectionLabel>{t('settings.appearance.heading')}</SectionLabel>
+
+            {/* Language selector */}
             <div className="mb-5">
-              <div className="text-xs font-medium text-text-muted mb-3">Accent Color</div>
+              <div className="text-xs font-medium text-text-muted mb-1">{t('settings.appearance.language')}</div>
+              <p className="text-[11px] text-text-dim mb-3">{t('settings.appearance.languageDesc')}</p>
+              <div className="flex gap-2">
+                {(['en', 'sv'] as AppLanguage[]).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setLanguage(lang)}
+                    className={cn(
+                      'flex items-center gap-2 px-4 py-2 rounded-lg border text-xs font-medium transition-all',
+                      (settings?.language ?? 'en') === lang
+                        ? 'border-accent-blue/50 bg-accent-blue/10 text-accent-blue'
+                        : 'border-border text-text-muted hover:text-text-main hover:bg-surface-hover'
+                    )}
+                  >
+                    <span className="text-base leading-none">{lang === 'en' ? '🇬🇧' : '🇸🇪'}</span>
+                    {lang === 'en' ? 'English' : 'Svenska'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-5">
+              <div className="text-xs font-medium text-text-muted mb-3">{t('settings.appearance.accentColor')}</div>
               <div className="flex gap-3">
                 {ACCENT_OPTIONS.map((opt) => (
                   <button
@@ -520,7 +546,7 @@ export function SettingsView() {
 
             <div className="p-4 rounded-xl bg-accent-blue/5 border border-accent-blue/15">
               <div className="text-xs text-text-muted">
-                The accent color changes the highlight color throughout the entire app. Changes apply instantly.
+                {t('settings.appearance.accentDesc')}
               </div>
             </div>
           </div>

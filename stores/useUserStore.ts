@@ -1,7 +1,7 @@
 'use client'
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { UserProfile, AppSettings, PendingInvite, InviteRole, AccentColor, SortOption, ViewMode, OllamaSettings, OllamaStatus, OllamaModel, VaultSettings, VaultStatus } from '@/types'
+import { UserProfile, AppSettings, PendingInvite, InviteRole, AccentColor, SortOption, ViewMode, OllamaSettings, OllamaStatus, OllamaModel, VaultSettings, VaultStatus, AppLanguage } from '@/types'
 import { generateId } from '@/lib/utils'
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   defaultViewMode: 'grid',
   showUsageCount: true,
   compactCards: false,
+  language: 'en',
 }
 
 const DEFAULT_VAULT: VaultSettings = {
@@ -64,6 +65,7 @@ interface UserState {
   setDefaultViewMode: (mode: ViewMode) => void
   toggleShowUsageCount: () => void
   toggleCompactCards: () => void
+  setLanguage: (lang: AppLanguage) => void
 
   // Invites
   addInvite: (data: { email: string; role: InviteRole; message?: string }) => void
@@ -174,6 +176,9 @@ export const useUserStore = create<UserState>()(
         set((state) => ({
           settings: { ...state.settings, compactCards: !state.settings.compactCards },
         })),
+
+      setLanguage: (lang) =>
+        set((state) => ({ settings: { ...state.settings, language: lang } })),
 
       addInvite: (data) => {
         const invite: PendingInvite = {

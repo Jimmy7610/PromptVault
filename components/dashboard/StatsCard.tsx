@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
 import { useCopyStore } from '@/stores/useCopyStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { AssetType } from '@/types'
 
 interface StatsCardProps {
@@ -57,6 +58,7 @@ export function StatsRow() {
   const copiedToday = useCopyStore((s) =>
     s.copyEvents.filter((e) => isSameLocalDay(e.copiedAt)).length
   )
+  const { t } = useI18n()
 
   const active = assets.filter((a) => a.status !== 'trash')
   const total     = active.length
@@ -67,9 +69,9 @@ export function StatsRow() {
 
   const stats = [
     {
-      label: 'Total Assets',
+      label: t('stats.totalAssets'),
       value: total,
-      trend: 'active assets',
+      trend: t('stats.activeAssets'),
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-blue-400">
@@ -82,9 +84,9 @@ export function StatsRow() {
       iconBg: 'bg-blue-500/15',
     },
     {
-      label: 'Agents',
+      label: t('stats.agents'),
       value: agents,
-      trend: 'saved agents',
+      trend: t('stats.savedAgents'),
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-violet-400">
@@ -95,9 +97,9 @@ export function StatsRow() {
       iconBg: 'bg-violet-500/15',
     },
     {
-      label: 'Prompts',
+      label: t('stats.prompts'),
       value: prompts,
-      trend: 'saved prompts',
+      trend: t('stats.savedPrompts'),
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-blue-400">
@@ -108,9 +110,9 @@ export function StatsRow() {
       iconBg: 'bg-blue-500/15',
     },
     {
-      label: 'Files',
+      label: t('stats.files'),
       value: files,
-      trend: 'file-like assets',
+      trend: t('stats.fileLikeAssets'),
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-yellow-400">
@@ -121,9 +123,9 @@ export function StatsRow() {
       iconBg: 'bg-yellow-500/15',
     },
     {
-      label: 'Copied Today',
+      label: t('stats.copiedToday'),
       value: copiedToday,
-      trend: 'copy actions today',
+      trend: t('stats.copyActionsToday'),
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-green-400">
@@ -134,9 +136,9 @@ export function StatsRow() {
       iconBg: 'bg-green-500/15',
     },
     {
-      label: 'Templates',
+      label: t('stats.templates'),
       value: templates,
-      trend: 'saved templates',
+      trend: t('stats.savedTemplates'),
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-indigo-400">

@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
 import { useUserStore, getUserInitials } from '@/stores/useUserStore'
 import { useAssetCounts } from '@/hooks/useFilteredAssets'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { NavSection } from '@/types'
 import { InviteTeamModal } from '@/components/team/InviteTeamModal'
 
@@ -57,6 +58,7 @@ export function Sidebar() {
   const { activeSection, setActiveSection, openNewAssetModal, openClipboardModal } = useAppStore()
   const { user, logout } = useUserStore()
   const counts = useAssetCounts()
+  const { t } = useI18n()
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
 
@@ -66,37 +68,37 @@ export function Sidebar() {
 
   const navGroups: NavGroup[] = [
     {
-      items: [{ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }],
+      items: [{ id: 'dashboard', label: t('nav.dashboard'), icon: LayoutDashboard }],
     },
     {
-      label: 'LIBRARY',
+      label: t('sidebar.library'),
       items: [
-        { id: 'all', label: 'All Assets', icon: Layers, count: counts.all },
-        { id: 'agents', label: 'Agents', icon: Bot, count: counts.agents },
-        { id: 'prompts', label: 'Prompts', icon: MessageSquare, count: counts.prompts },
-        { id: 'images', label: 'Images', icon: Image, count: counts.images },
-        { id: 'markdown', label: 'Markdown Files', icon: FileText, count: counts.markdown },
-        { id: 'code', label: 'Code Snippets', icon: Code2, count: counts.code },
-        { id: 'workflows', label: 'Workflows', icon: GitBranch, count: counts.workflows },
+        { id: 'all',       label: t('nav.allAssets'),    icon: Layers,       count: counts.all },
+        { id: 'agents',    label: t('nav.agents'),       icon: Bot,          count: counts.agents },
+        { id: 'prompts',   label: t('nav.prompts'),      icon: MessageSquare,count: counts.prompts },
+        { id: 'images',    label: t('nav.images'),       icon: Image,        count: counts.images },
+        { id: 'markdown',  label: t('nav.markdownFiles'),icon: FileText,     count: counts.markdown },
+        { id: 'code',      label: t('nav.codeSnippets'), icon: Code2,        count: counts.code },
+        { id: 'workflows', label: t('nav.workflows'),    icon: GitBranch,    count: counts.workflows },
       ],
     },
     {
-      label: 'ORGANIZE',
+      label: t('sidebar.organize'),
       items: [
-        { id: 'collections', label: 'Collections', icon: FolderOpen },
-        { id: 'templates', label: 'Templates', icon: Layout, count: counts.templates },
+        { id: 'collections', label: t('nav.collections'), icon: FolderOpen },
+        { id: 'templates',   label: t('nav.templates'),   icon: Layout, count: counts.templates },
       ],
     },
     {
       items: [
-        { id: 'recent', label: 'Recent', icon: Clock },
-        { id: 'favorites', label: 'Favorites', icon: Star, count: counts.favorites },
-        { id: 'trash', label: 'Trash', icon: Trash2, count: counts.trash || undefined },
+        { id: 'recent',    label: t('nav.recent'),    icon: Clock },
+        { id: 'favorites', label: t('nav.favorites'), icon: Star,   count: counts.favorites },
+        { id: 'trash',     label: t('nav.trash'),     icon: Trash2, count: counts.trash || undefined },
       ],
     },
     {
-      label: 'SYSTEM',
-      items: [{ id: 'settings', label: 'Settings', icon: Settings }],
+      label: t('sidebar.system'),
+      items: [{ id: 'settings', label: t('nav.settings'), icon: Settings }],
     },
   ]
 
@@ -123,14 +125,14 @@ export function Sidebar() {
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-accent-blue hover:bg-blue-500 text-white text-sm font-medium transition-colors"
           >
             <Plus size={15} />
-            New Asset
+            {t('sidebar.newAsset')}
           </button>
           <button
             onClick={() => openClipboardModal()}
             className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-text-muted hover:text-text-main hover:border-accent-blue/40 hover:bg-surface-hover text-xs transition-all"
           >
             <ClipboardPaste size={12} />
-            From Clipboard
+            {t('sidebar.fromClipboard')}
           </button>
         </div>
 
@@ -220,7 +222,7 @@ export function Sidebar() {
                     }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-muted hover:text-text-main hover:bg-surface-hover transition-colors"
                   >
-                    <User size={12} /> Edit Profile
+                    <User size={12} /> {t('sidebar.editProfile')}
                   </button>
                   <button
                     onClick={() => {
@@ -229,14 +231,14 @@ export function Sidebar() {
                     }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-muted hover:text-text-main hover:bg-surface-hover transition-colors"
                   >
-                    <Settings size={12} /> Settings
+                    <Settings size={12} /> {t('nav.settings')}
                   </button>
                   <div className="my-1 border-t border-border" />
                   <button
                     onClick={() => { setProfileMenuOpen(false); logout() }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-danger hover:bg-danger/10 transition-colors"
                   >
-                    <LogOut size={12} /> Log Out
+                    <LogOut size={12} /> {t('sidebar.logOut')}
                   </button>
                 </div>
               </>
@@ -246,7 +248,7 @@ export function Sidebar() {
           {/* Storage bar */}
           <div className="mb-3">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] text-text-muted">Local Storage</span>
+              <span className="text-[10px] text-text-muted">{t('sidebar.localStorage')}</span>
               <span className="text-[10px] text-text-dim">Browser</span>
             </div>
             <div className="h-1 bg-surface-soft rounded-full overflow-hidden">
@@ -262,7 +264,7 @@ export function Sidebar() {
             className="w-full flex items-center justify-center gap-1.5 text-[11px] text-text-muted hover:text-text-main border border-border hover:border-border-soft rounded-lg py-1.5 transition-all"
           >
             <Users size={11} />
-            Invite Team Members
+            {t('sidebar.inviteTeam')}
           </button>
         </div>
       </aside>
