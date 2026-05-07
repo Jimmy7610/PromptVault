@@ -84,6 +84,11 @@ export interface Asset {
   language?: string
   imageUrl?: string
   imageColor?: string
+  imagePath?: string
+  imageFileName?: string
+  imageMimeType?: string
+  imageSize?: number
+  imageUploadedAt?: string
   trashedAt?: string
 }
 

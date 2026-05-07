@@ -1,14 +1,148 @@
 'use client'
-import { Download, Image as ImageIcon } from 'lucide-react'
+import { useRef, useState } from 'react'
+import {
+  Download,
+  Image as ImageIcon,
+  Upload,
+  X,
+  AlertTriangle,
+  RefreshCw,
+  Loader2,
+} from 'lucide-react'
 import { Asset } from '@/types'
 import { CopyButton } from '@/components/ui/CopyButton'
-import { formatDate, formatRelativeTime } from '@/lib/utils'
+import { formatDate, formatRelativeTime, cn } from '@/lib/utils'
+import { useAppStore } from '@/stores/useAppStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { updateVaultAsset } from '@/lib/vaultClient'
 
 interface ImageDetailProps {
   asset: Asset
 }
 
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp']
+const MAX_BYTES = 20 * 1024 * 1024
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export function ImageDetail({ asset }: ImageDetailProps) {
+  const { updateAsset, showToast } = useAppStore()
+  const { vault } = useUserStore()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+
+  const hasImage = !!asset.imagePath
+  const vaultReady = vault.vaultEnabled && vault.vaultInitialized
+
+  const triggerFilePicker = () => {
+    if (!vaultReady) {
+      setUploadError(
+        'Image attachments require Local Vault Storage. Enable and initialize Vault in Settings → Vault Storage first.'
+      )
+      return
+    }
+    setUploadError('')
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setUploadError('Unsupported format. Please use PNG, JPG, or WebP.')
+      return
+    }
+    if (file.size > MAX_BYTES) {
+      setUploadError(`File too large (${formatBytes(file.size)}). Maximum is 20 MB.`)
+      return
+    }
+
+    setUploading(true)
+    setUploadError('')
+
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch(`/api/vault/images/${asset.id}`, { method: 'POST', body: form })
+      const data = await res.json()
+
+      if (!res.ok || !data.ok) {
+        setUploadError(data.error ?? 'Upload failed.')
+        return
+      }
+
+      const updates: Partial<Asset> = {
+        imagePath:       data.imagePath,
+        imageFileName:   data.imageFileName,
+        imageMimeType:   data.imageMimeType,
+        imageSize:       data.imageSize,
+        imageUploadedAt: data.imageUploadedAt,
+      }
+
+      updateAsset(asset.id, updates)
+
+      // Sync updated asset to vault file
+      if (vault.vaultEnabled) {
+        const updated = useAppStore.getState().assets.find((a) => a.id === asset.id)
+        if (updated) updateVaultAsset(updated as Asset).catch(console.error)
+      }
+
+      showToast('Image attached')
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleDownload = async () => {
+    if (!hasImage) return
+    try {
+      const res = await fetch(`/api/vault/images/${asset.id}`)
+      if (!res.ok) throw new Error('Fetch failed')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = asset.imageFileName ?? `image-${asset.id}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {
+      showToast('Download failed', 'error')
+    }
+  }
+
+  const handleRemove = () => {
+    // Move image folder to .deleted (non-blocking)
+    fetch(`/api/vault/images/${asset.id}`, { method: 'DELETE' }).catch(console.error)
+
+    const updates: Partial<Asset> = {
+      imagePath:       undefined,
+      imageFileName:   undefined,
+      imageMimeType:   undefined,
+      imageSize:       undefined,
+      imageUploadedAt: undefined,
+    }
+
+    updateAsset(asset.id, updates)
+
+    if (vault.vaultEnabled) {
+      const updated = useAppStore.getState().assets.find((a) => a.id === asset.id)
+      if (updated) updateVaultAsset(updated as Asset).catch(console.error)
+    }
+
+    showToast('Image removed')
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -23,24 +157,124 @@ export function ImageDetail({ asset }: ImageDetailProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {/* Image Preview */}
+        {/* Image area */}
         <div className="px-4 pt-4">
-          <div
-            className="w-full h-48 rounded-xl border border-border flex items-center justify-center mb-4 overflow-hidden"
-            style={{
-              background: asset.imageColor
-                ? `linear-gradient(135deg, ${asset.imageColor} 0%, #0E1421 100%)`
-                : 'linear-gradient(135deg, #1a0a2e 0%, #0E1421 100%)',
-            }}
-          >
-            <div className="text-center">
-              <ImageIcon size={32} className="text-white/20 mx-auto mb-2" />
-              <div className="text-[10px] text-white/30">Image Preview</div>
+          {hasImage ? (
+            <div className="mb-4">
+              {/* Preview */}
+              <div className="w-full rounded-xl border border-border overflow-hidden bg-background mb-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={asset.imagePath}
+                  src={`/api/vault/images/${asset.id}`}
+                  alt={asset.title}
+                  className="w-full object-contain max-h-72"
+                />
+              </div>
+
+              {/* File metadata */}
+              <div className="bg-surface-soft rounded-xl border border-border px-3 py-2.5 mb-3 space-y-1.5">
+                {asset.imageFileName && (
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-text-dim flex-shrink-0">File</span>
+                    <span className="text-text-muted font-mono truncate max-w-[160px] text-right">{asset.imageFileName}</span>
+                  </div>
+                )}
+                {asset.imageMimeType && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-text-dim">Type</span>
+                    <span className="text-text-muted">{asset.imageMimeType}</span>
+                  </div>
+                )}
+                {asset.imageSize != null && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-text-dim">Size</span>
+                    <span className="text-text-muted">{formatBytes(asset.imageSize)}</span>
+                  </div>
+                )}
+                {asset.imageUploadedAt && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-text-dim">Attached</span>
+                    <span className="text-text-muted">{formatRelativeTime(asset.imageUploadedAt)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Image action buttons */}
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={triggerFilePicker}
+                  disabled={uploading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-xs text-text-muted hover:text-text-main hover:border-border-soft transition-colors disabled:opacity-50"
+                >
+                  {uploading ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
+                  Replace
+                </button>
+                <button
+                  onClick={handleDownload}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-xs text-text-muted hover:text-text-main hover:border-border-soft transition-colors"
+                >
+                  <Download size={11} /> Download
+                </button>
+                <button
+                  onClick={handleRemove}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-xs text-text-muted hover:text-danger hover:border-danger/30 transition-colors"
+                >
+                  <X size={11} /> Remove
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            /* No image placeholder */
+            <div className="mb-4">
+              <div
+                className="w-full h-44 rounded-xl border border-border flex flex-col items-center justify-center mb-2.5"
+                style={{
+                  background: asset.imageColor
+                    ? `linear-gradient(135deg, ${asset.imageColor} 0%, #0E1421 100%)`
+                    : 'linear-gradient(135deg, #1a0a2e 0%, #0E1421 100%)',
+                }}
+              >
+                <ImageIcon size={28} className="text-white/20 mb-2" />
+                <div className="text-[11px] text-white/30 mb-3">No image attached</div>
+                <button
+                  onClick={triggerFilePicker}
+                  disabled={uploading}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                    'bg-white/10 hover:bg-white/20 text-white/70 hover:text-white/90 border border-white/15',
+                    'disabled:opacity-50'
+                  )}
+                >
+                  {uploading ? <Loader2 size={11} className="animate-spin" /> : <Upload size={11} />}
+                  {uploading ? 'Uploading…' : 'Add Image'}
+                </button>
+              </div>
+              <p className="text-[10px] text-text-dim text-center">
+                Attach a generated result, reference image, or moodboard · PNG · JPG · WebP · max 20 MB
+              </p>
+            </div>
+          )}
+
+          {/* Upload error / vault warning */}
+          {uploadError && (
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-500/5 border border-amber-500/20 mb-3">
+              <AlertTriangle size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
+              <p className="text-[11px] text-amber-400/90 leading-snug">{uploadError}</p>
+            </div>
+          )}
+
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={handleFileChange}
+            className="hidden"
+          />
         </div>
 
-        {/* Prompt used */}
+        {/* Generation Prompt */}
         {asset.content && (
           <div className="px-4 mb-4">
             <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
@@ -124,9 +358,23 @@ export function ImageDetail({ asset }: ImageDetailProps) {
       <div className="px-4 py-3 border-t border-border flex-shrink-0 bg-surface">
         <div className="flex flex-wrap gap-2">
           {asset.content && <CopyButton text={asset.content} label="Copy Prompt" assetId={asset.id} />}
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-text-muted hover:text-text-main text-xs transition-colors">
-            <Download size={11} /> Download
-          </button>
+          {hasImage ? (
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-text-muted hover:text-text-main text-xs transition-colors"
+            >
+              <Download size={11} /> Download Image
+            </button>
+          ) : (
+            <button
+              onClick={triggerFilePicker}
+              disabled={uploading}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-text-muted hover:text-text-main text-xs transition-colors disabled:opacity-50"
+            >
+              {uploading ? <Loader2 size={11} className="animate-spin" /> : <Upload size={11} />}
+              Add Image
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -48,6 +48,7 @@ PromptVault gives you a **real library** — searchable, filterable, taggable �
 | **Run Agents** | Execute agents against Ollama local models — real generation with fallback preview |
 | **Test Agents** | Config validation + optional Ollama test panel with live output |
 | **Local Vault** | Save every asset as a real `.md` or `.json` file on disk |
+| **Image Attachments** | Attach a real PNG/JPG/WebP file to any Image asset — stored locally in `vault/images/`, included in backups |
 | **Import / Export** | Export all assets as JSON or Markdown; import from JSON backup |
 | **Notifications** | In-app notification bell for asset events (created, trashed, restored, deleted) |
 | **Keyboard Shortcuts** | `N` — new asset · `F` — toggle favorite · `Esc` — close panel |
@@ -193,6 +194,17 @@ The result panel shows:
 - A reminder to use **Rebuild Vault Index** if file references are out of sync
 
 > Health Check never reads or uploads your prompt, agent, or template content. It only inspects folder structure and index metadata.
+
+### Image file attachments
+
+Image assets can have a real image file attached directly in the inspector panel:
+
+- Click **Add Image** (or **Replace Image**) on any Image asset — accepts PNG, JPG, WebP up to 20 MB
+- The file is saved to `vault/images/[assetId]/original.[ext]` with a `metadata.json` sidecar
+- Attached images are served back through `/api/vault/images/[assetId]` for preview and download
+- Image binary files are included automatically in **Export Vault Backup** (`.zip`)
+- Removing an image moves the folder to `vault/.deleted/images/` — never hard-deleted
+- Vault Storage must be initialized and enabled before images can be attached
 
 ### Implementation details
 

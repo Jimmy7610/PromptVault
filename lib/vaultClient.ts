@@ -192,6 +192,45 @@ export async function importVaultBackup(file: File): Promise<VaultImportResult> 
   }
 }
 
+// ── Image attachments ─────────────────────────────────────────────────────────
+
+/** Upload (or replace) a binary image file for an Image asset. */
+export async function uploadAssetImage(
+  assetId: string,
+  file: File
+): Promise<{
+  ok: boolean
+  imagePath?: string
+  imageFileName?: string
+  imageMimeType?: string
+  imageSize?: number
+  imageUploadedAt?: string
+  error?: string
+}> {
+  try {
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch(`/api/vault/images/${assetId}`, { method: 'POST', body: form })
+    return await res.json()
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Upload failed.' }
+  }
+}
+
+/** Returns the URL to display/download the attached image. */
+export function getAssetImageUrl(assetId: string): string {
+  return `/api/vault/images/${assetId}`
+}
+
+/** Move the attached image folder to vault/.deleted (non-destructive removal). */
+export async function removeAssetImage(assetId: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    return await vaultFetch(`/api/vault/images/${assetId}`, { method: 'DELETE' })
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
 /** Run a read-only health check on the vault folder structure and index. */
 export async function healthCheckVault(): Promise<VaultHealthResult> {
   try {

@@ -251,6 +251,11 @@ export function AppGuideModal({ open, onClose }: Props) {
                   <p>Agents also support <strong className="text-text-main">named variables</strong> — placeholders like <code className="bg-surface-soft px-1 rounded text-text-main">{"{{topic}}"}</code> that you fill in each time you run the agent.</p>
                 </GuideCard>
 
+                <GuideCard icon={Image} title="Image attachments">
+                  <p>Image assets can store both a generation prompt and a real attached image file. Click <strong className="text-text-main">Add Image</strong> in the Image detail panel to attach a PNG, JPG, or WebP file (max 20 MB).</p>
+                  <p>Attached images are saved to <code className="bg-surface-soft px-1 rounded text-text-main">vault/images/[assetId]/</code> and are included automatically in Vault Backup exports. Nothing is uploaded — files stay entirely local. Vault Storage must be enabled first.</p>
+                </GuideCard>
+
                 <GuideCard icon={Sparkles} title="Demo assets">
                   <p>The assets on first launch are demo assets — examples only. Delete them individually (trash icon in detail panel) or all at once via <strong className="text-text-main">Settings → Danger Zone → Clear All Assets</strong>.</p>
                 </GuideCard>
@@ -319,6 +324,11 @@ export function AppGuideModal({ open, onClose }: Props) {
                 <GuideCard icon={Activity} title="Vault Health Check">
                   <p>Click <strong className="text-text-main">Run Vault Health Check</strong> to verify your vault is intact. It checks: vault folder exists, index.json exists and is valid, all required folders are present, all file references are on disk, and no duplicate asset IDs. Results are shown immediately in the panel — green for healthy, amber for warnings, red for errors.</p>
                   <p className="text-text-dim">Health Check never reads your prompt or agent content — it only inspects folder structure and index metadata.</p>
+                </GuideCard>
+
+                <GuideCard icon={Image} title="Image file attachments">
+                  <p>Image assets can have a real image file attached (PNG, JPG, WebP). The file is stored in <code className="bg-surface-soft px-1 rounded text-text-main">vault/images/[assetId]/original.[ext]</code> alongside a small <code className="bg-surface-soft px-1 rounded text-text-main">metadata.json</code>.</p>
+                  <p>Attached images are automatically included in Vault Backup exports and excluded from Git via <code className="bg-surface-soft px-1 rounded text-text-main">.gitignore</code>.</p>
                 </GuideCard>
 
                 <div className="bg-accent-blue/5 border border-accent-blue/20 rounded-xl p-4 text-xs text-text-muted leading-relaxed">

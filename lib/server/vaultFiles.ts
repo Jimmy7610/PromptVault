@@ -81,6 +81,15 @@ export function assetToFileContent(asset: Asset): string {
   if (asset.trashedAt) fm.trashedAt = asset.trashedAt
   if (asset.language) fm.language = asset.language
 
+  // Image attachment metadata in frontmatter
+  if (asset.type === 'image') {
+    if (asset.imagePath)     fm.imagePath     = asset.imagePath
+    if (asset.imageFileName) fm.imageFileName = asset.imageFileName
+    if (asset.imageMimeType) fm.imageMimeType = asset.imageMimeType
+    if (asset.imageSize != null) fm.imageSize = asset.imageSize
+    if (asset.imageUploadedAt) fm.imageUploadedAt = asset.imageUploadedAt
+  }
+
   // Build markdown body
   let body = `# ${asset.title}\n\n`
 
@@ -101,6 +110,9 @@ export function assetToFileContent(asset: Asset): string {
       Object.entries(asset.settings).forEach(([k, v]) => { body += `- ${k}: ${v}\n` })
       body += '\n'
     }
+  } else if (asset.type === 'image') {
+    if (asset.content) body += `## Generation Prompt\n\n${asset.content}\n\n`
+    if (asset.negativePrompt) body += `## Negative Prompt\n\n${asset.negativePrompt}\n\n`
   } else {
     if (asset.content) body += `${asset.content}\n\n`
   }
@@ -151,6 +163,17 @@ export function fileContentToAsset(raw: string, ext: string): Partial<Asset> {
   } else if (asset.type === 'prompt') {
     if (sections['prompt']) asset.content = sections['prompt']
     if (sections['negative_prompt']) asset.negativePrompt = sections['negative_prompt']
+  } else if (asset.type === 'image') {
+    // Support both new format (## Generation Prompt) and old format (raw body)
+    if (sections['generation_prompt']) asset.content = sections['generation_prompt']
+    else if (sections['_body']) asset.content = sections['_body']
+    if (sections['negative_prompt']) asset.negativePrompt = sections['negative_prompt']
+    // Image attachment metadata from frontmatter
+    if (d.imagePath)     asset.imagePath     = d.imagePath     as string
+    if (d.imageFileName) asset.imageFileName = d.imageFileName as string
+    if (d.imageMimeType) asset.imageMimeType = d.imageMimeType as string
+    if (d.imageSize != null) asset.imageSize = d.imageSize as number
+    if (d.imageUploadedAt) asset.imageUploadedAt = toStr(d.imageUploadedAt)
   } else {
     if (sections['_body']) asset.content = sections['_body']
   }
