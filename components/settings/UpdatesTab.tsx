@@ -430,6 +430,9 @@ export function UpdatesTab() {
             </li>
           ))}
         </ul>
+        <p className="text-[10px] text-text-dim mt-2.5 pt-2 border-t border-border">
+          Updater test build: 001
+        </p>
       </div>
     </div>
   )
