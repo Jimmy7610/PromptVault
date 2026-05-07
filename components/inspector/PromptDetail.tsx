@@ -16,16 +16,20 @@ function Section({ title, children, defaultOpen = true, action }: SectionProps) 
   const [open, setOpen] = useState(defaultOpen)
   return (
     <div className="border-b border-border last:border-b-0">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider hover:text-text-main transition-colors"
-      >
-        <span>{title}</span>
+      <div className="w-full flex items-center justify-between px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex-1 text-left hover:text-text-main transition-colors"
+        >
+          {title}
+        </button>
         <div className="flex items-center gap-2">
-          {action && <span onClick={(e) => e.stopPropagation()}>{action}</span>}
-          {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          {action}
+          <button onClick={() => setOpen(!open)} className="hover:text-text-main transition-colors">
+            {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </button>
         </div>
-      </button>
+      </div>
       {open && <div className="px-4 pb-4">{children}</div>}
     </div>
   )
