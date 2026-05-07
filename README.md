@@ -154,6 +154,31 @@ You are an expert SEO content writer...
 3. **Sync to Vault** — writes all current assets to disk
 4. From now on, every create/update/trash/restore/delete is mirrored to disk automatically
 
+### Vault Health Check
+
+**Settings → Vault Storage → Run Vault Health Check** runs a read-only inspection of the local vault and shows the result in-panel immediately.
+
+It checks:
+
+| Check | What it verifies |
+|-------|-----------------|
+| Vault folder | `vault/` exists on disk |
+| index.json | `vault/index.json` exists |
+| JSON valid | `index.json` parses as valid JSON with an assets array |
+| Required folders | All 11 required sub-folders exist |
+| File references | Every asset in the index has a matching file on disk |
+| Duplicate IDs | No two index entries share the same asset ID |
+
+The result panel shows:
+
+- **Overall status** — Healthy (green) / Warning (yellow) / Error (red)
+- **Checklist** of all six checks with pass/fail per row
+- **Summary numbers** — total assets, trashed, missing file references, duplicate IDs
+- **Explanation** of any warnings or errors
+- A reminder to use **Rebuild Vault Index** if file references are out of sync
+
+> Health Check never reads or uploads your prompt, agent, or template content. It only inspects folder structure and index metadata.
+
 ### Implementation details
 
 - **Atomic writes** — `index.json` uses a `.tmp` → rename pattern (crash-safe)

@@ -1,4 +1,4 @@
-import { Asset, VaultIndex, VaultIndexAsset } from '@/types'
+import { Asset, VaultIndex, VaultIndexAsset, VaultHealthResult } from '@/types'
 
 // ── Generic fetch helper ──────────────────────────────────────────────────────
 
@@ -137,5 +137,27 @@ export async function rebuildVaultIndex(): Promise<{ ok: boolean; count?: number
     return await vaultFetch('/api/vault/rebuild-index', { method: 'POST' })
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+/** Run a read-only health check on the vault folder structure and index. */
+export async function healthCheckVault(): Promise<VaultHealthResult> {
+  try {
+    return await vaultFetch<VaultHealthResult>('/api/vault/health')
+  } catch (err) {
+    return {
+      ok: false,
+      status: 'error',
+      vaultExists: false,
+      indexExists: false,
+      indexValid: false,
+      requiredFolders: [],
+      assetCount: 0,
+      trashedCount: 0,
+      missingFiles: [],
+      duplicateIds: [],
+      warnings: [],
+      errors: [err instanceof Error ? err.message : 'Health check request failed.'],
+    }
   }
 }

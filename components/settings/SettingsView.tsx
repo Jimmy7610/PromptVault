@@ -25,17 +25,18 @@ import {
   CircleDot,
   BookOpen,
   Shield,
+  Activity,
 } from 'lucide-react'
 import { useUserStore, getUserInitials } from '@/stores/useUserStore'
 import { useAppStore } from '@/stores/useAppStore'
 import { useNotificationStore } from '@/stores/useNotificationStore'
-import { AccentColor, Asset, InviteRole, PendingInvite, SortOption, ViewMode } from '@/types'
+import { AccentColor, Asset, InviteRole, PendingInvite, SortOption, ViewMode, VaultHealthResult } from '@/types'
 import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
 import { downloadAllJSON, downloadAllMarkdown, parseImportJSON } from '@/lib/export'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { InviteTeamModal } from '@/components/team/InviteTeamModal'
 import { testOllamaConnection, fetchOllamaModels } from '@/lib/ollama'
-import { initVault, syncAssetsToVault, getVaultAssets, rebuildVaultIndex } from '@/lib/vaultClient'
+import { initVault, syncAssetsToVault, getVaultAssets, rebuildVaultIndex, healthCheckVault } from '@/lib/vaultClient'
 import { AppGuideModal } from '@/components/settings/AppGuideModal'
 import { UpdatesTab } from '@/components/settings/UpdatesTab'
 
@@ -136,6 +137,8 @@ export function SettingsView() {
   const [loadConfirmOpen, setLoadConfirmOpen] = useState(false)
   const [pendingLoadAssets, setPendingLoadAssets] = useState<Asset[]>([])
   const [guideOpen, setGuideOpen] = useState(false)
+  const [healthLoading, setHealthLoading] = useState(false)
+  const [healthResult, setHealthResult] = useState<VaultHealthResult | null>(null)
 
   const initials = user ? getUserInitials(user.name) : '?'
   const trashCount = assets.filter((a) => a.status === 'trash').length
@@ -304,6 +307,14 @@ export function SettingsView() {
       setVaultOpMessage({ ok: false, text: result.error ?? 'Rebuild failed.' })
     }
     setVaultOpLoading(false)
+  }
+
+  const handleHealthCheck = async () => {
+    setHealthLoading(true)
+    setHealthResult(null)
+    const result = await healthCheckVault()
+    setHealthResult(result)
+    setHealthLoading(false)
   }
 
   return (
@@ -914,7 +925,142 @@ export function SettingsView() {
                   <div className="text-xs text-text-dim mt-0.5">Scan vault folders and regenerate index.json (use after manual file edits)</div>
                 </div>
               </button>
+
+              {/* Health check */}
+              <button
+                onClick={handleHealthCheck}
+                disabled={healthLoading}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-border hover:border-border-soft hover:bg-surface-hover text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center flex-shrink-0">
+                  {healthLoading
+                    ? <Loader2 size={14} className="text-teal-400 animate-spin" />
+                    : <Activity size={14} className="text-teal-400" />}
+                </div>
+                <div>
+                  <div className="text-sm text-text-main">Run Vault Health Check</div>
+                  <div className="text-xs text-text-dim mt-0.5">Verify folder structure, index.json, asset counts, and file references</div>
+                </div>
+              </button>
             </div>
+
+            {/* Health check result */}
+            {healthResult && (() => {
+              const isHealthy = healthResult.status === 'healthy'
+              const isWarning = healthResult.status === 'warning'
+              const isError   = healthResult.status === 'error'
+
+              const statusColor = isHealthy ? 'text-green-400' : isWarning ? 'text-amber-400' : 'text-danger'
+              const statusBg    = isHealthy ? 'bg-green-500/5 border-green-500/20' : isWarning ? 'bg-amber-500/5 border-amber-500/20' : 'bg-danger/5 border-danger/20'
+              const StatusIcon  = isHealthy ? CheckCircle2 : isWarning ? AlertTriangle : XCircle
+
+              const checks: { label: string; ok: boolean; detail?: string }[] = [
+                { label: 'Vault folder',      ok: healthResult.vaultExists },
+                { label: 'index.json',        ok: healthResult.indexExists },
+                { label: 'JSON valid',        ok: healthResult.indexValid },
+                {
+                  label: 'Required folders',
+                  ok: healthResult.requiredFolders.every((f) => f.exists),
+                  detail: healthResult.requiredFolders.filter((f) => !f.exists).map((f) => f.name).join(', ') || undefined,
+                },
+                {
+                  label: 'File references',
+                  ok: healthResult.missingFiles.length === 0,
+                  detail: healthResult.missingFiles.length > 0 ? `${healthResult.missingFiles.length} missing` : undefined,
+                },
+                {
+                  label: 'Duplicate IDs',
+                  ok: healthResult.duplicateIds.length === 0,
+                  detail: healthResult.duplicateIds.length > 0 ? `${healthResult.duplicateIds.length} found` : undefined,
+                },
+              ]
+
+              return (
+                <div className="rounded-xl border border-border overflow-hidden">
+                  {/* Header */}
+                  <div className={cn('flex items-center gap-2.5 px-4 py-3 border-b border-border', statusBg)}>
+                    <StatusIcon size={14} className={statusColor} />
+                    <span className={cn('text-sm font-semibold', statusColor)}>
+                      {isHealthy ? 'Vault is healthy' : isWarning ? 'Vault has warnings' : 'Vault has errors'}
+                    </span>
+                  </div>
+
+                  {/* Checklist */}
+                  <div className="divide-y divide-border">
+                    {checks.map(({ label, ok, detail }) => (
+                      <div key={label} className="flex items-center justify-between px-4 py-2.5">
+                        <div className="flex items-center gap-2">
+                          {ok
+                            ? <Check size={11} className="text-green-400 flex-shrink-0" />
+                            : <XCircle size={11} className="text-danger flex-shrink-0" />}
+                          <span className="text-xs text-text-muted">{label}</span>
+                        </div>
+                        {detail
+                          ? <span className="text-[10px] font-mono text-danger/80">{detail}</span>
+                          : ok
+                          ? <span className="text-[10px] text-green-400/70">OK</span>
+                          : null}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Summary numbers */}
+                  <div className="grid grid-cols-4 divide-x divide-border border-t border-border">
+                    {[
+                      { label: 'Assets',       value: healthResult.assetCount },
+                      { label: 'Trashed',      value: healthResult.trashedCount },
+                      { label: 'Missing files', value: healthResult.missingFiles.length },
+                      { label: 'Dup IDs',      value: healthResult.duplicateIds.length },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="flex flex-col items-center py-2.5 gap-0.5">
+                        <span className={cn('text-base font-bold font-mono', value > 0 && label !== 'Assets' && label !== 'Trashed' ? 'text-amber-400' : 'text-text-main')}>{value}</span>
+                        <span className="text-[9px] text-text-dim uppercase tracking-wide">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Warnings */}
+                  {healthResult.warnings.length > 0 && (
+                    <div className="px-4 py-3 border-t border-border space-y-1.5">
+                      {healthResult.warnings.map((w, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <AlertTriangle size={11} className="text-amber-400 flex-shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-amber-400/90 leading-snug">{w}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Errors */}
+                  {healthResult.errors.length > 0 && (
+                    <div className="px-4 py-3 border-t border-border space-y-1.5">
+                      {healthResult.errors.map((e, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <XCircle size={11} className="text-danger flex-shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-danger/90 leading-snug">{e}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Rebuild hint if issues were found */}
+                  {(healthResult.warnings.length > 0 || healthResult.errors.length > 0) && (
+                    <div className="px-4 py-2.5 border-t border-border bg-surface-soft">
+                      <p className="text-[11px] text-text-dim leading-snug">
+                        You can try <span className="text-text-muted font-medium">Rebuild Vault Index</span> if files were edited manually or file references are out of sync.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Privacy note */}
+                  <div className="px-4 py-2.5 border-t border-border">
+                    <p className="text-[10px] text-text-dim leading-snug">
+                      Health Check only inspects folder structure and index metadata. It does not read or upload your prompt contents.
+                    </p>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Explanation */}
             <div className="p-4 rounded-xl bg-surface-soft border border-border space-y-2">

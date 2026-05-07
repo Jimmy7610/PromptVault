@@ -23,7 +23,8 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Local PromptVault data - DO NOT COMMIT
-vault/
+# /vault/ anchors to repo root only, so app/api/vault/ is NOT affected
+/vault/
 
 # TypeScript build cache
 tsconfig.tsbuildinfo

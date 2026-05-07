@@ -266,6 +266,26 @@ export interface UpdateInstallResult {
   errors: string[]
 }
 
+export interface VaultFolderStatus {
+  name: string
+  exists: boolean
+}
+
+export interface VaultHealthResult {
+  ok: boolean
+  status: 'healthy' | 'warning' | 'error'
+  vaultExists: boolean
+  indexExists: boolean
+  indexValid: boolean
+  requiredFolders: VaultFolderStatus[]
+  assetCount: number
+  trashedCount: number
+  missingFiles: string[]
+  duplicateIds: string[]
+  warnings: string[]
+  errors: string[]
+}
+
 export interface UpdateCleanGeneratedResult {
   ok: boolean
   success: boolean
