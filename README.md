@@ -524,4 +524,10 @@ If you use PromptVault as a base for your own project, a mention or credit is ap
 
 ---
 
+## Ownership
+
+PromptVault is created by Jimmy Eliasson. Copyright © Jimmy Eliasson.
+
+---
+
 *PromptVault — Local-first AI Workspace · Built with Next.js, Tailwind, and Zustand*

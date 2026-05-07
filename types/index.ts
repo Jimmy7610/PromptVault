@@ -183,6 +183,7 @@ export interface VaultSettings {
   vaultInitialized: boolean
   vaultLastSyncedAt: string | null
   vaultStatus: VaultStatus
+  lastVaultBackupAt?: string | null
 }
 
 export interface VaultIndexAsset {

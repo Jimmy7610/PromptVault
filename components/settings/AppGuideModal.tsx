@@ -15,6 +15,12 @@ import {
   Trash2,
   Lightbulb,
   ChevronRight,
+  User,
+  Library,
+  Download,
+  Upload,
+  RefreshCw,
+  Activity,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -25,23 +31,27 @@ interface Props {
 
 type GuideSection =
   | 'what'
+  | 'login'
   | 'assets'
-  | 'demo'
+  | 'agents'
   | 'vault'
+  | 'backup'
   | 'trash'
-  | 'ollama'
+  | 'updates'
   | 'privacy'
   | 'workflow'
 
 const SECTIONS: { id: GuideSection; label: string; icon: React.ElementType }[] = [
   { id: 'what',     label: 'What is PromptVault?',  icon: Lightbulb },
-  { id: 'assets',   label: 'What you can store',    icon: Sparkles },
-  { id: 'demo',     label: 'Demo assets',           icon: FileText },
-  { id: 'vault',    label: 'Local Vault storage',   icon: HardDrive },
-  { id: 'trash',    label: 'Trash & delete',        icon: Trash2 },
-  { id: 'ollama',   label: 'Ollama / Local AI',     icon: Cpu },
-  { id: 'privacy',  label: 'Privacy & local-first', icon: Shield },
-  { id: 'workflow', label: 'Recommended workflow',  icon: GitBranch },
+  { id: 'login',    label: 'Login & Profile',        icon: User },
+  { id: 'assets',   label: 'Asset Library',          icon: Library },
+  { id: 'agents',   label: 'Agents & Local AI',      icon: Bot },
+  { id: 'vault',    label: 'Vault Storage',           icon: HardDrive },
+  { id: 'backup',   label: 'Backup & Transfer',       icon: Download },
+  { id: 'trash',    label: 'Trash & Delete',          icon: Trash2 },
+  { id: 'updates',  label: 'App Updates',             icon: RefreshCw },
+  { id: 'privacy',  label: 'Privacy & Local-first',  icon: Shield },
+  { id: 'workflow', label: 'Recommended Workflow',   icon: GitBranch },
 ]
 
 function GuideCard({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) {
@@ -183,14 +193,39 @@ export function AppGuideModal({ open, onClose }: Props) {
               </>
             )}
 
+            {section === 'login' && (
+              <>
+                <h2 className="text-base font-bold text-text-main mb-1">Login & Profile</h2>
+                <p className="text-xs text-text-dim mb-4">A local identity — no account, no server, no password.</p>
+
+                <GuideCard icon={User} title="What the login screen is">
+                  <p>When you first open PromptVault, you see a login screen that asks for a name and email. This is <strong className="text-text-main">not</strong> creating an account on any server. Your name and email are stored only in your own browser's localStorage — they are used to personalize the interface and identify you locally.</p>
+                  <p>There is no password, no server-side account, no email verification, and no data sent anywhere. You can enter any name and email you like.</p>
+                </GuideCard>
+
+                <GuideCard icon={User} title="Returning users">
+                  <p>If you have used PromptVault before and your browser still has the localStorage data, the app will recognize your previous session and log you in automatically. If localStorage was cleared (e.g. you cleared browser data), you will see the login screen again — just enter the same name and email and your assets will be waiting in the vault if you have Vault Storage enabled.</p>
+                </GuideCard>
+
+                <GuideCard icon={User} title="Editing your profile">
+                  <p>Go to <strong className="text-text-main">Settings → Profile</strong> to update your display name, email, and optional workspace name. These changes are saved locally only.</p>
+                </GuideCard>
+
+                <div className="bg-accent-blue/5 border border-accent-blue/15 rounded-xl p-4 text-xs text-text-muted leading-relaxed">
+                  <strong className="text-text-main">Privacy:</strong> Your profile data never leaves your browser. PromptVault has no user accounts, no authentication server, and no backend that stores your identity.
+                </div>
+              </>
+            )}
+
             {section === 'assets' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">What you can store</h2>
-                <p className="text-xs text-text-dim mb-4">PromptVault supports 11 asset types.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">Asset Library</h2>
+                <p className="text-xs text-text-dim mb-4">11 asset types, instant search, advanced filters, and one-click copy.</p>
 
                 <div className="bg-surface border border-border rounded-xl p-4 mb-4">
+                  <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-3">Asset Types</div>
                   <div className="space-y-0.5">
-                    <AssetTypeRow icon={Bot}      label="Agents"      desc="full agent instructions with system prompt, variables, tools, and example output" />
+                    <AssetTypeRow icon={Bot}       label="Agents"      desc="full agent instructions with system prompt, variables, tools, and example output" />
                     <AssetTypeRow icon={Sparkles}  label="Prompts"     desc="single prompts by category (image, text, code, video, music, general)" />
                     <AssetTypeRow icon={Image}     label="Images"      desc="image generation references — prompts, style notes, negative prompts" />
                     <AssetTypeRow icon={FileText}  label="Markdown"    desc="notes, documentation, and structured text" />
@@ -202,68 +237,129 @@ export function AppGuideModal({ open, onClose }: Props) {
                   </div>
                 </div>
 
-                <GuideCard icon={Sparkles} title="Tags, tools, and metadata">
-                  <p>Every asset can have tags, associated AI tools, a visibility setting (private / team / public), a version number, and a description. You can filter and sort by all of these in the main library view.</p>
+                <GuideCard icon={Sparkles} title="Search & filter">
+                  <p>Use the <strong className="text-text-main">search bar</strong> to instantly search across all asset titles, content, and tags. Use the <strong className="text-text-main">sidebar</strong> to navigate by type (Agents, Prompts, Images…) or section (Recents, Favorites, Trash). Use the <strong className="text-text-main">Filters</strong> button to combine filters by tag, tool, visibility, and favorite status.</p>
+                  <p>Sort by: last used, newest, recently updated, alphabetical, most used, most copied.</p>
                 </GuideCard>
 
-                <GuideCard icon={Sparkles} title="Variables in agents">
-                  <p>Agents support named variables — placeholders you fill in when running the agent. For example, you can define a <code className="bg-surface-soft px-1 rounded text-text-main">{"{{topic}}"}</code> variable and fill it with a specific topic each time you run the agent without editing the template.</p>
+                <GuideCard icon={Sparkles} title="Copy to clipboard">
+                  <p>Every asset has a <strong className="text-text-main">Copy</strong> button. Clicking it copies the asset content to your clipboard in one click — ready to paste into ChatGPT, Claude, Midjourney, or any other tool. Copy count is tracked so you can see which assets you use most.</p>
+                </GuideCard>
+
+                <GuideCard icon={Sparkles} title="Tags, tools, and metadata">
+                  <p>Every asset can have tags, associated AI tools, a visibility setting (private / team / public), a version number, and a description. You can filter and sort by all of these in the main library view.</p>
+                  <p>Agents also support <strong className="text-text-main">named variables</strong> — placeholders like <code className="bg-surface-soft px-1 rounded text-text-main">{"{{topic}}"}</code> that you fill in each time you run the agent.</p>
+                </GuideCard>
+
+                <GuideCard icon={Sparkles} title="Demo assets">
+                  <p>The assets on first launch are demo assets — examples only. Delete them individually (trash icon in detail panel) or all at once via <strong className="text-text-main">Settings → Danger Zone → Clear All Assets</strong>.</p>
                 </GuideCard>
               </>
             )}
 
-            {section === 'demo' && (
+            {section === 'agents' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Demo assets</h2>
-                <p className="text-xs text-text-dim mb-4">The assets on your first launch are examples — not your real data.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">Agents & Local AI</h2>
+                <p className="text-xs text-text-dim mb-4">Run agents locally with Ollama — or preview them without AI.</p>
 
-                <div className="bg-amber-500/10 border border-amber-500/25 rounded-xl p-4 mb-4">
-                  <div className="flex items-start gap-2.5">
-                    <Sparkles size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
-                    <div className="text-xs text-amber-300/90 leading-relaxed">
-                      <strong className="text-amber-300">The assets you see on first launch are demo assets.</strong> They exist only to show what PromptVault can do. You can safely delete them and replace them with your own prompts, agents, notes, workflows, and templates.
-                    </div>
-                  </div>
-                </div>
-
-                <GuideCard icon={FileText} title="Why are demo assets included?">
-                  <p>An empty app is hard to understand. Demo assets show you the different asset types, what the detail inspector looks like, and how tags and tools work — so you can start using PromptVault immediately instead of starting from scratch in an empty interface.</p>
+                <GuideCard icon={Bot} title="What an Agent is">
+                  <p>An Agent asset contains everything you need to define an AI assistant: a <strong className="text-text-main">system prompt</strong>, an optional <strong className="text-text-main">instruction block</strong>, named <strong className="text-text-main">variables</strong>, a list of <strong className="text-text-main">tools</strong>, and an <strong className="text-text-main">example output</strong>. Think of it as a saved AI persona or task configuration.</p>
                 </GuideCard>
 
-                <GuideCard icon={Trash2} title="How to delete demo assets">
-                  <p>You can delete demo assets individually: select an asset and click the trash icon in the detail panel. To delete all at once, go to <strong className="text-text-main">Settings → Danger Zone → Clear All Assets</strong>. After clearing, you can start fresh with only your own assets.</p>
-                  <p className="text-text-dim">Note: demo assets exist only in your browser localStorage and in this app — they are not committed to GitHub or stored anywhere else.</p>
+                <GuideCard icon={Bot} title="Run Agent (with Ollama)">
+                  <p>Click <strong className="text-text-main">Run</strong> in the Agent detail panel. If Ollama is connected, the agent system prompt and instructions are sent to your local model. You fill in any variable values before running. The response is streamed back in the panel.</p>
+                  <p>No data leaves your machine. No API cost. The model runs 100% locally.</p>
+                </GuideCard>
+
+                <GuideCard icon={Bot} title="Mock preview (no Ollama)">
+                  <p>If Ollama is not enabled, clicking <strong className="text-text-main">Run</strong> opens a mock preview that shows exactly what would be sent to the model — the full constructed prompt with your variables filled in. This is useful for reviewing and refining your agent config before running it.</p>
+                </GuideCard>
+
+                <GuideCard icon={Bot} title="Test Agent">
+                  <p>The <strong className="text-text-main">Test</strong> button validates your agent configuration: it checks that required fields are present and optionally runs a quick test prompt against Ollama with response time and model info shown.</p>
+                </GuideCard>
+
+                <GuideCard icon={Cpu} title="Setting up Ollama">
+                  <ol className="space-y-1 mt-1 ml-2 list-decimal list-inside">
+                    <li>Install Ollama from <strong className="text-text-main">ollama.ai</strong></li>
+                    <li>Pull a model: <code className="bg-surface-soft px-1 rounded text-text-main">ollama pull llama3</code></li>
+                    <li>Go to <strong className="text-text-main">Settings → Local AI</strong></li>
+                    <li>Enable Ollama and click <strong className="text-text-main">Test Connection</strong></li>
+                  </ol>
+                  <p className="text-text-dim mt-2">Ollama is entirely optional — everything except live agent execution works without it.</p>
                 </GuideCard>
               </>
             )}
 
             {section === 'vault' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Local Vault Storage</h2>
+                <h2 className="text-base font-bold text-text-main mb-1">Vault Storage</h2>
                 <p className="text-xs text-text-dim mb-4">Save every asset as a real file on your disk.</p>
 
                 <GuideCard icon={HardDrive} title="What the Vault is">
-                  <p>By default, PromptVault stores assets in your browser's localStorage — which means they only exist in your browser and can be lost if you clear browser data. The Vault feature saves every asset as a real file in a <code className="bg-surface-soft px-1 rounded text-text-main">vault/</code> folder inside the project directory on your computer.</p>
-                  <p>Once enabled, every asset you create, update, trash, restore, or delete is automatically mirrored to disk — no manual action required.</p>
+                  <p>By default, PromptVault stores assets in your browser's localStorage — which can be lost if you clear browser data. Vault Storage saves every asset as a real file in a <code className="bg-surface-soft px-1 rounded text-text-main">vault/</code> folder inside the project directory on your computer.</p>
+                  <p>Agents, prompts, notes, and templates are saved as <code className="bg-surface-soft px-1 rounded text-text-main">.md</code> files with YAML frontmatter. Workflows and JSON assets are saved as <code className="bg-surface-soft px-1 rounded text-text-main">.json</code> files. Each file is human-readable.</p>
                 </GuideCard>
 
-                <GuideCard icon={FileText} title="File format">
-                  <p>Agents, prompts, notes, and templates are saved as <code className="bg-surface-soft px-1 rounded text-text-main">.md</code> files with YAML frontmatter. Workflows and JSON assets are saved as <code className="bg-surface-soft px-1 rounded text-text-main">.json</code> files. Each file is human-readable — you can open and edit them in any text editor.</p>
-                </GuideCard>
-
-                <GuideCard icon={HardDrive} title="How to set up the Vault">
-                  <p>Go to <strong className="text-text-main">Settings → Vault Storage</strong> and:</p>
+                <GuideCard icon={HardDrive} title="How to set up Vault Storage">
                   <ol className="space-y-1 mt-1 ml-2 list-decimal list-inside">
-                    <li>Click <strong className="text-text-main">Initialize Vault</strong> to create the folder structure.</li>
-                    <li>Enable the Vault toggle.</li>
-                    <li>Click <strong className="text-text-main">Sync to Vault</strong> to write all your current assets to disk.</li>
+                    <li>Go to <strong className="text-text-main">Settings → Vault Storage</strong></li>
+                    <li>Click <strong className="text-text-main">Initialize Vault</strong> — creates the folder structure and index.json</li>
+                    <li>Enable the Vault toggle</li>
+                    <li>Click <strong className="text-text-main">Sync Current Assets to Vault</strong> to write all your assets to disk</li>
                   </ol>
-                  <p className="text-text-dim mt-2">From that point on, vault writes happen automatically in the background.</p>
+                  <p className="text-text-dim mt-2">After syncing, every create/update/trash/restore/delete is automatically mirrored to disk.</p>
+                </GuideCard>
+
+                <GuideCard icon={HardDrive} title="Vault tools">
+                  <p><strong className="text-text-main">Load Assets from Vault</strong> — reads vault files and merges them into your library. Useful when moving the app to a new browser or after a clean reinstall.</p>
+                  <p><strong className="text-text-main">Rebuild Vault Index</strong> — scans all vault folders and regenerates index.json. Use this after manually editing vault files outside the app.</p>
+                </GuideCard>
+
+                <GuideCard icon={Activity} title="Vault Health Check">
+                  <p>Click <strong className="text-text-main">Run Vault Health Check</strong> to verify your vault is intact. It checks: vault folder exists, index.json exists and is valid, all required folders are present, all file references are on disk, and no duplicate asset IDs. Results are shown immediately in the panel — green for healthy, amber for warnings, red for errors.</p>
+                  <p className="text-text-dim">Health Check never reads your prompt or agent content — it only inspects folder structure and index metadata.</p>
                 </GuideCard>
 
                 <div className="bg-accent-blue/5 border border-accent-blue/20 rounded-xl p-4 text-xs text-text-muted leading-relaxed">
-                  <strong className="text-text-main">Privacy reminder:</strong> The <code className="bg-surface-soft px-1 rounded text-text-main">vault/</code> folder is listed in <code className="bg-surface-soft px-1 rounded text-text-main">.gitignore</code> by default. If you push this project to GitHub, your vault files will not be included. Keep this in mind if you choose to remove vault from .gitignore.
+                  <strong className="text-text-main">Privacy reminder:</strong> The <code className="bg-surface-soft px-1 rounded text-text-main">vault/</code> folder is listed in <code className="bg-surface-soft px-1 rounded text-text-main">.gitignore</code>. If you push this project to GitHub, your vault files are not included.
                 </div>
+              </>
+            )}
+
+            {section === 'backup' && (
+              <>
+                <h2 className="text-base font-bold text-text-main mb-1">Vault Backup & Transfer</h2>
+                <p className="text-xs text-text-dim mb-4">Move your vault between computers with a .zip backup.</p>
+
+                <div className="bg-amber-500/10 border border-amber-500/25 rounded-xl p-4 mb-4">
+                  <div className="flex items-start gap-2.5">
+                    <Sparkles size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-xs text-amber-300/90 leading-relaxed">
+                      <strong className="text-amber-300">Nothing is uploaded by PromptVault.</strong> Export and import work entirely locally — the zip file never leaves your machine unless you choose to move it yourself.
+                    </div>
+                  </div>
+                </div>
+
+                <GuideCard icon={Download} title="Export Vault Backup">
+                  <p>Go to <strong className="text-text-main">Settings → Vault Storage → Export Vault Backup</strong>. A <code className="bg-surface-soft px-1 rounded text-text-main">.zip</code> file downloads to your computer containing the entire contents of your vault folder.</p>
+                  <p>Use this to: back up your vault before a reinstall, transfer to another computer, or archive a specific state of your library.</p>
+                </GuideCard>
+
+                <GuideCard icon={Upload} title="Import Vault Backup">
+                  <p>On the target computer, go to <strong className="text-text-main">Settings → Vault Storage → Import Vault Backup</strong>. Select the zip file and type <code className="bg-surface-soft px-1 rounded text-text-main">IMPORT</code> to confirm. The import process:</p>
+                  <ol className="space-y-1 mt-1 ml-2 list-decimal list-inside">
+                    <li>Validates the zip contains a valid vault structure</li>
+                    <li>Backs up your current vault to <code className="bg-surface-soft px-1 rounded text-text-main">vault-import-backups/</code></li>
+                    <li>Replaces the vault with the imported one</li>
+                    <li>Runs a Health Check automatically</li>
+                  </ol>
+                  <p className="text-text-dim mt-2">After import, click <strong className="text-text-main">Load Assets from Vault</strong> to bring the imported assets into the app library.</p>
+                </GuideCard>
+
+                <GuideCard icon={HardDrive} title="Backup reminder">
+                  <p>The <strong className="text-text-main">Vault Backup</strong> card in Settings → Vault Storage shows when you last exported a backup. The status is <strong className="text-text-main text-green-400">Backup current</strong> if the last backup was within 7 days, or <strong className="text-amber-400">Backup recommended</strong> if it has been longer or you have never backed up.</p>
+                </GuideCard>
               </>
             )}
 
@@ -273,7 +369,7 @@ export function AppGuideModal({ open, onClose }: Props) {
                 <p className="text-xs text-text-dim mb-4">Two levels of deletion to keep your data safe.</p>
 
                 <GuideCard icon={Trash2} title="Move to Trash">
-                  <p>When you delete an asset normally (via the trash icon), the asset is moved to the <strong className="text-text-main">Trash</strong> section in the sidebar. It is hidden from your main library but not permanently gone.</p>
+                  <p>When you delete an asset normally (via the trash icon in the detail panel), the asset is moved to the <strong className="text-text-main">Trash</strong> section in the sidebar. It is hidden from your main library but not permanently gone.</p>
                   <p>If Vault is enabled, the asset is marked as trashed in the vault index — the file itself stays in place.</p>
                 </GuideCard>
 
@@ -284,31 +380,45 @@ export function AppGuideModal({ open, onClose }: Props) {
                 <GuideCard icon={Trash2} title="Permanent Delete">
                   <p>In the Trash view, you can permanently delete an asset. This removes it from the app completely. If Vault is enabled, the asset file is moved to the <code className="bg-surface-soft px-1 rounded text-text-main">vault/.deleted/</code> folder — it is never hard-deleted from disk, so you can still recover it manually if needed.</p>
                 </GuideCard>
+
+                <GuideCard icon={Trash2} title="Empty Trash">
+                  <p>Go to <strong className="text-text-main">Settings → Danger Zone → Empty Trash</strong> to permanently delete all trashed assets at once. This requires typing <code className="bg-surface-soft px-1 rounded text-text-main">DELETE</code> to confirm.</p>
+                </GuideCard>
               </>
             )}
 
-            {section === 'ollama' && (
+            {section === 'updates' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Ollama / Local AI</h2>
-                <p className="text-xs text-text-dim mb-4">Run AI agents locally with any Ollama model — no API key required.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">App Updates</h2>
+                <p className="text-xs text-text-dim mb-4">Pull the latest version from GitHub without touching your vault.</p>
 
-                <GuideCard icon={Cpu} title="What Ollama integration does">
-                  <p>Ollama is a free tool that lets you run large language models (like Llama 3, Mistral, or Qwen) locally on your own computer. When you enable the Ollama integration in PromptVault, you can run your agents against any model that is available in your local Ollama instance.</p>
-                  <p>No data leaves your machine. No API costs. No API key required.</p>
+                <GuideCard icon={RefreshCw} title="How to update">
+                  <p>Go to <strong className="text-text-main">Settings → App Updates</strong> and click <strong className="text-text-main">Check for Updates</strong>. The updater fetches the latest commit from the GitHub main branch and shows you the current vs. latest commit.</p>
+                  <p>If an update is available and all safety checks pass, click <strong className="text-text-main">Install Update</strong>. After it finishes, restart the dev server manually.</p>
                 </GuideCard>
 
-                <GuideCard icon={Cpu} title="How to enable Ollama">
+                <GuideCard icon={RefreshCw} title="Three-phase install">
+                  <p>The updater runs three phases in order:</p>
                   <ol className="space-y-1 mt-1 ml-2 list-decimal list-inside">
-                    <li>Install Ollama from <strong className="text-text-main">ollama.ai</strong></li>
-                    <li>Pull a model: <code className="bg-surface-soft px-1 rounded text-text-main">ollama pull llama3</code></li>
-                    <li>Go to <strong className="text-text-main">Settings → Local AI</strong></li>
-                    <li>Enable Ollama and click <strong className="text-text-main">Test Connection</strong></li>
-                    <li>Run an agent using the Run button in the Agent detail panel</li>
+                    <li><strong className="text-text-main">Phase 1 — Download:</strong> <code className="bg-surface-soft px-1 rounded text-text-main">git pull --ff-only origin main</code></li>
+                    <li><strong className="text-text-main">Phase 2 — Dependencies:</strong> <code className="bg-surface-soft px-1 rounded text-text-main">npm install</code></li>
+                    <li><strong className="text-text-main">Phase 3 — Verify:</strong> <code className="bg-surface-soft px-1 rounded text-text-main">npm run build</code></li>
                   </ol>
+                  <p className="text-text-dim mt-2">After build completes, restart the dev server manually. The updater never kills the running process.</p>
                 </GuideCard>
 
-                <GuideCard icon={Cpu} title="Ollama is optional">
-                  <p>PromptVault works perfectly without Ollama. The Ollama integration is only needed if you want to actually run/generate text from your agents locally. Everything else — storing, organizing, copying, and managing assets — works without it.</p>
+                <GuideCard icon={RefreshCw} title="Partial update (amber warning)">
+                  <p>If Phase 1 (git pull) succeeds but npm install or npm run build fails, the updater shows an <strong className="text-amber-400">amber warning</strong> instead of a red failure. The app code is already updated on disk.</p>
+                  <p>In that case, run the fix commands manually in a terminal:</p>
+                  <div className="bg-surface-soft rounded-lg px-3 py-2 mt-2 font-mono text-[10px] text-text-dim leading-relaxed">
+                    npm install<br />
+                    npm run build<br />
+                    npm run dev
+                  </div>
+                </GuideCard>
+
+                <GuideCard icon={RefreshCw} title="Safety guarantees">
+                  <p>The updater refuses to install if your working tree has uncommitted code changes, and refuses if <code className="bg-surface-soft px-1 rounded text-text-main">vault/</code> is not git-ignored. Your vault data, localStorage, and personal assets are never touched by the update process.</p>
                 </GuideCard>
               </>
             )}
@@ -320,7 +430,7 @@ export function AppGuideModal({ open, onClose }: Props) {
 
                 <GuideCard icon={Shield} title="No cloud, no tracking">
                   <p>PromptVault does not use any cloud service, database, or third-party API by default. Your profile, assets, settings, and vault files are stored only on your computer — in browser localStorage and in the local vault folder.</p>
-                  <p>There is no telemetry, no analytics, and no data collection.</p>
+                  <p>There is no telemetry, no analytics, and no data collection of any kind.</p>
                 </GuideCard>
 
                 <GuideCard icon={Shield} title="What is stored where">
@@ -330,6 +440,10 @@ export function AppGuideModal({ open, onClose }: Props) {
 
                 <GuideCard icon={Shield} title="Git and GitHub">
                   <p>The <code className="bg-surface-soft px-1 rounded text-text-main">vault/</code> folder is listed in <code className="bg-surface-soft px-1 rounded text-text-main">.gitignore</code>. If you clone this project and push it to GitHub, your vault files are not included. The app code is committed; your personal data is not.</p>
+                </GuideCard>
+
+                <GuideCard icon={Shield} title="Ollama privacy">
+                  <p>When you run agents using the Ollama integration, prompts are sent only to your local Ollama instance — not to any external server. No data leaves your machine.</p>
                 </GuideCard>
               </>
             )}
@@ -341,12 +455,13 @@ export function AppGuideModal({ open, onClose }: Props) {
 
                 <div className="bg-surface border border-border rounded-xl p-4 mb-4">
                   <WorkflowStep n={1} text="Delete the demo assets (Settings → Danger Zone → Clear All Assets) or keep them as reference." />
-                  <WorkflowStep n={2} text="Create your first real asset — an agent you use often, or a prompt you keep retyping." />
+                  <WorkflowStep n={2} text="Create your first real asset — an agent you use often, or a prompt you keep retyping. Press N anywhere in the app to open the new asset modal." />
                   <WorkflowStep n={3} text="Add tags and tools to your assets so you can filter them quickly later." />
                   <WorkflowStep n={4} text="Enable Vault Storage (Settings → Vault Storage → Initialize → Sync) to save your assets as real files on disk." />
-                  <WorkflowStep n={5} text="Use the copy button on any asset to instantly copy it to your clipboard for use in ChatGPT, Claude, Midjourney, or any other tool." />
-                  <WorkflowStep n={6} text="If you have Ollama installed, enable it in Settings → Local AI to run agents locally." />
-                  <WorkflowStep n={7} text="Back up your vault/ folder periodically to a private Git repo or cloud drive." />
+                  <WorkflowStep n={5} text="Use the Copy button on any asset to instantly copy it to your clipboard for use in ChatGPT, Claude, Midjourney, or any other tool." />
+                  <WorkflowStep n={6} text="If you have Ollama installed, enable it in Settings → Local AI to run agents locally with no API cost." />
+                  <WorkflowStep n={7} text="Export a vault backup regularly (Settings → Vault Storage → Export Vault Backup). Keep it on an external disk or a private cloud folder." />
+                  <WorkflowStep n={8} text="Check for app updates in Settings → App Updates to get the latest features." />
                 </div>
 
                 <GuideCard icon={Lightbulb} title="Future possibilities">
@@ -361,7 +476,7 @@ export function AppGuideModal({ open, onClose }: Props) {
 
         {/* Footer */}
         <div className="flex items-center justify-between px-5 py-3 border-t border-border flex-shrink-0">
-          <span className="text-[10px] text-text-dim">PromptVault — Local-first AI Workspace</span>
+          <span className="text-[10px] text-text-dim">PromptVault — Created by Jimmy Eliasson · Copyright © Jimmy Eliasson</span>
           <button
             onClick={onClose}
             className="px-4 py-1.5 rounded-lg bg-surface-soft border border-border text-xs text-text-muted hover:text-text-main hover:border-border transition-colors"

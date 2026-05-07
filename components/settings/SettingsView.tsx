@@ -328,6 +328,9 @@ export function SettingsView() {
     setBackupLoading(true)
     setBackupMessage(null)
     const result = await exportVaultBackup()
+    if (result.ok) {
+      updateVault({ lastVaultBackupAt: new Date().toISOString() })
+    }
     setBackupMessage(
       result.ok
         ? { ok: true, text: 'Vault backup downloaded successfully.' }
@@ -1109,6 +1112,48 @@ export function SettingsView() {
               )
             })()}
 
+            {/* Backup reminder card */}
+            {(() => {
+              const lastBackup = vault.lastVaultBackupAt ?? null
+              const daysAgo = lastBackup
+                ? Math.floor((Date.now() - new Date(lastBackup).getTime()) / (1000 * 60 * 60 * 24))
+                : null
+              const isCurrent = daysAgo !== null && daysAgo < 7
+              return (
+                <div className={cn(
+                  'flex items-center justify-between px-4 py-3 rounded-xl border',
+                  isCurrent
+                    ? 'bg-green-500/5 border-green-500/20'
+                    : 'bg-amber-500/5 border-amber-500/25'
+                )}>
+                  <div className="space-y-0.5 min-w-0">
+                    <div className="text-xs font-medium text-text-muted">Vault Backup</div>
+                    <div className="text-[11px] text-text-dim">
+                      {lastBackup ? `Last backup ${formatRelativeTime(lastBackup)}` : 'No backup on record'}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 flex-shrink-0 ml-3">
+                    <span className={cn(
+                      'text-[10px] font-medium px-2 py-0.5 rounded-full border',
+                      isCurrent
+                        ? 'text-green-400 bg-green-500/10 border-green-500/20'
+                        : 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                    )}>
+                      {isCurrent ? 'Backup current' : 'Backup recommended'}
+                    </span>
+                    <button
+                      onClick={handleExportVault}
+                      disabled={backupLoading || importLoading}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface border border-border text-[11px] text-text-muted hover:text-text-main hover:border-border-soft transition-all disabled:opacity-50"
+                    >
+                      {backupLoading ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
+                      Export backup
+                    </button>
+                  </div>
+                </div>
+              )
+            })()}
+
             {/* Vault Backup & Transfer */}
             <div className="rounded-xl border border-border overflow-hidden">
               <div className="px-4 py-3 bg-surface-soft border-b border-border">
@@ -1272,7 +1317,7 @@ export function SettingsView() {
 
         {/* Footer */}
         <div className="mt-8 pt-4 border-t border-border text-center">
-          <p className="text-[10px] text-text-dim">PromptVault — Local-first AI Workspace</p>
+          <p className="text-[10px] text-text-dim">PromptVault — Local-first AI Workspace · Copyright © Jimmy Eliasson</p>
         </div>
       </div>
 

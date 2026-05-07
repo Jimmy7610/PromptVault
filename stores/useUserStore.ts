@@ -18,6 +18,7 @@ const DEFAULT_VAULT: VaultSettings = {
   vaultInitialized: false,
   vaultLastSyncedAt: null,
   vaultStatus: 'not_initialized',
+  lastVaultBackupAt: null,
 }
 
 const DEFAULT_OLLAMA: OllamaSettings = {
