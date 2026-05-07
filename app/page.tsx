@@ -10,6 +10,7 @@ import { AssetGrid } from '@/components/assets/AssetGrid'
 import { AssetDetailPanel } from '@/components/inspector/AssetDetailPanel'
 import { Toast } from '@/components/ui/Toast'
 import { NewAssetModal } from '@/components/forms/NewAssetModal'
+import { CreateFromClipboardModal } from '@/components/forms/CreateFromClipboardModal'
 import { LandingPage } from '@/components/landing/LandingPage'
 
 function LoadingSplash() {
@@ -97,6 +98,7 @@ export default function PromptVaultApp() {
       {/* Global overlays */}
       <Toast />
       <NewAssetModal />
+      <CreateFromClipboardModal />
     </div>
   )
 }

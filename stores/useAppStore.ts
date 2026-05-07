@@ -52,6 +52,9 @@ interface AppState {
   hideToast: () => void
   openNewAssetModal: (type?: AssetType) => void
   closeNewAssetModal: () => void
+  isClipboardModalOpen: boolean
+  openClipboardModal: () => void
+  closeClipboardModal: () => void
 
   // Advanced filter actions
   setFilterFavoriteOnly: (v: boolean) => void
@@ -76,6 +79,7 @@ export const useAppStore = create<AppState>()(
       toast: null,
       isNewAssetModalOpen: false,
       newAssetType: null,
+      isClipboardModalOpen: false,
       filterFavoriteOnly: false,
       filterTags: [],
       filterTools: [],
@@ -238,6 +242,9 @@ export const useAppStore = create<AppState>()(
 
       closeNewAssetModal: () =>
         set({ isNewAssetModalOpen: false, newAssetType: null }),
+
+      openClipboardModal: () => set({ isClipboardModalOpen: true }),
+      closeClipboardModal: () => set({ isClipboardModalOpen: false }),
 
       setFilterFavoriteOnly: (v) => set({ filterFavoriteOnly: v }),
       setFilterTags: (tags) => set({ filterTags: tags }),

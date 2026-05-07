@@ -16,6 +16,7 @@ import {
   Settings,
   Layers,
   Plus,
+  ClipboardPaste,
   ChevronDown,
   LogOut,
   User,
@@ -53,7 +54,7 @@ function VaultIcon() {
 }
 
 export function Sidebar() {
-  const { activeSection, setActiveSection, openNewAssetModal } = useAppStore()
+  const { activeSection, setActiveSection, openNewAssetModal, openClipboardModal } = useAppStore()
   const { user, logout } = useUserStore()
   const counts = useAssetCounts()
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
@@ -115,14 +116,21 @@ export function Sidebar() {
           </div>
         </div>
 
-        {/* New Asset Button */}
-        <div className="px-3 mb-4">
+        {/* New Asset + From Clipboard */}
+        <div className="px-3 mb-4 space-y-1.5">
           <button
             onClick={() => openNewAssetModal()}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-accent-blue hover:bg-blue-500 text-white text-sm font-medium transition-colors"
           >
             <Plus size={15} />
             New Asset
+          </button>
+          <button
+            onClick={() => openClipboardModal()}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-text-muted hover:text-text-main hover:border-accent-blue/40 hover:bg-surface-hover text-xs transition-all"
+          >
+            <ClipboardPaste size={12} />
+            From Clipboard
           </button>
         </div>
 

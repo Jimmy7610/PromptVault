@@ -52,6 +52,7 @@ PromptVault gives you a **real library** — searchable, filterable, taggable �
 | **Notifications** | In-app notification bell for asset events (created, trashed, restored, deleted) |
 | **Keyboard Shortcuts** | `N` — new asset · `F` — toggle favorite · `Esc` — close panel |
 | **Dark Premium UI** | Custom dark theme with accent color picker (blue, purple, green, orange) |
+| **Create from Clipboard** | Quickly turn copied text into a saved asset — auto-detects type (prompt, agent, code, markdown) |
 | **Invite System** | Save team invites locally (ready for future Supabase backend) |
 | **Optional Ollama** | Proxy API routes for local LLM generation — no data leaves your machine |
 
@@ -317,6 +318,14 @@ npm run start
 - Choose an asset type (agent, prompt, image, markdown, code, workflow, template…)
 - Fill in the title, content, tags, and tools
 - The asset appears in your library immediately
+
+### Create from Clipboard
+
+- Copy any text (prompt, code, instructions, notes) from anywhere
+- Click **From Clipboard** in the left sidebar
+- The modal opens with the text pre-filled and the asset type auto-detected
+- Edit the title, type, and tags if needed, then click **Save Asset**
+- Works with Vault Storage — if vault is enabled, the asset is written to disk automatically
 
 ### Running an agent
 
