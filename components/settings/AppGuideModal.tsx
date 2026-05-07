@@ -261,6 +261,12 @@ export function AppGuideModal({ open, onClose }: Props) {
                   <p><strong className="text-text-main">Copied Today</strong> is tracked locally as metadata only — the copy event log stores asset ID, label, and timestamp. It does not save the copied prompt content.</p>
                 </GuideCard>
 
+                <GuideCard icon={Sparkles} title="Editing assets">
+                  <p>Click the <strong className="text-text-main">pencil (✏)</strong> icon in the top-right corner of the detail panel (next to the × close button) to open the <strong className="text-text-main">Edit Asset</strong> modal.</p>
+                  <p>You can edit: title, description, tools, tags, notes, version, all type-specific content fields (system prompt, instructions, generation prompt, code, negative prompt, etc.), and variables. Asset type is locked after creation for safety — to change type, create a new asset.</p>
+                  <p>The footer shows <strong className="text-amber-400">Unsaved changes</strong> when the form is dirty. Closing with unsaved changes prompts you to confirm before discarding. Saving also syncs to your vault on disk if Vault Storage is enabled.</p>
+                </GuideCard>
+
                 <GuideCard icon={Sparkles} title="Demo assets">
                   <p>The assets on first launch are demo assets — examples only. Delete them individually (trash icon in detail panel) or all at once via <strong className="text-text-main">Settings → Danger Zone → Clear All Assets</strong>.</p>
                 </GuideCard>
