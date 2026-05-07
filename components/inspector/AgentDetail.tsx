@@ -16,8 +16,10 @@ import {
 } from 'lucide-react'
 import { Asset } from '@/types'
 import { CopyButton } from '@/components/ui/CopyButton'
+import { AssetStatusRow } from './AssetStatusRow'
 import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { assetToMarkdown } from '@/lib/export'
 import { RunAgentModal } from '@/components/agent/RunAgentModal'
 import { TestAgentModal } from '@/components/agent/TestAgentModal'
@@ -73,12 +75,13 @@ export function AgentDetail({ asset }: AgentDetailProps) {
   const [runModalOpen, setRunModalOpen] = useState(false)
   const [testModalOpen, setTestModalOpen] = useState(false)
   const { showToast, toggleFavorite } = useAppStore()
+  const { t } = useI18n()
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'activity', label: 'Activity' },
-    { id: 'versions', label: 'Versions' },
-    { id: 'notes', label: 'Notes' },
+    { id: 'overview', label: t('inspector.tabOverview') },
+    { id: 'activity', label: t('inspector.tabActivity') },
+    { id: 'versions', label: t('inspector.tabVersions') },
+    { id: 'notes', label: t('inspector.tabNotes') },
   ]
 
   return (
@@ -105,7 +108,8 @@ export function AgentDetail({ asset }: AgentDetailProps) {
 
         {/* Title */}
         <h2 className="text-base font-bold text-text-main mb-1 leading-tight">{asset.title}</h2>
-        <p className="text-xs text-text-muted leading-relaxed mb-3">{asset.description}</p>
+        <p className="text-xs text-text-muted leading-relaxed mb-1">{asset.description}</p>
+        <AssetStatusRow asset={asset} />
 
         {/* Tabs */}
         <div className="flex border-b border-border -mx-4 px-4">
@@ -133,7 +137,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
             {/* System Prompt */}
             {asset.systemPrompt && (
               <Section
-                title="System Prompt"
+                title={t('inspector.systemPrompt')}
                 action={
                   <CopyButton
                     text={asset.systemPrompt}
@@ -153,7 +157,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
             {/* Instructions */}
             {asset.instructions && (
               <Section
-                title="Instructions"
+                title={t('inspector.instructions')}
                 action={
                   <CopyButton
                     text={asset.instructions}
@@ -185,7 +189,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
 
             {/* Linked Files */}
             {asset.linkedFiles && asset.linkedFiles.length > 0 && (
-              <Section title="Linked Files">
+              <Section title={t('inspector.linkedFiles')}>
                 <div className="space-y-1.5">
                   {asset.linkedFiles.map((file) => {
                     const FileIcon = FILE_ICONS[file.type] ?? FileText
@@ -209,7 +213,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
             {/* Example Output */}
             {asset.exampleOutput && (
               <Section
-                title="Example Output"
+                title={t('inspector.exampleOutput')}
                 action={
                   <CopyButton
                     text={asset.exampleOutput}
@@ -227,7 +231,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
 
             {/* Variables */}
             {asset.variables && asset.variables.length > 0 && (
-              <Section title="Variables">
+              <Section title={t('inspector.variables')}>
                 <div className="space-y-1.5">
                   {asset.variables.map((v) => (
                     <div
@@ -245,7 +249,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
             )}
 
             {/* Metadata */}
-            <Section title="Metadata" defaultOpen={false}>
+            <Section title={t('inspector.metadata')} defaultOpen={false}>
               <div className="space-y-2">
                 {[
                   {
@@ -354,26 +358,26 @@ export function AgentDetail({ asset }: AgentDetailProps) {
       {/* Quick Actions Footer */}
       <div className="px-4 py-3 border-t border-border flex-shrink-0 bg-surface">
         <div className="text-[10px] text-text-dim uppercase tracking-wider font-semibold mb-2">
-          Quick Actions
+          {t('inspector.quickActions')}
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setRunModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-blue text-white text-xs font-medium hover:bg-blue-500 transition-colors"
           >
-            <Play size={11} /> Run Agent
+            <Play size={11} /> {t('inspector.runAgent')}
           </button>
           <button
             onClick={() => setTestModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-text-muted hover:text-text-main text-xs transition-colors"
           >
-            <FlaskConical size={11} /> Test
+            <FlaskConical size={11} /> {t('inspector.testAgent')}
           </button>
           <CopyButton
             text={assetToMarkdown(asset)}
-            label="Copy All"
+            label={t('inspector.copyAllAsset')}
             assetId={asset.id}
-            toastMessage="Full asset copied!"
+            toastMessage={t('inspector.fullAssetCopied')}
           />
         </div>
       </div>

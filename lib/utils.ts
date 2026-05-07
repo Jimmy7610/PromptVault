@@ -114,3 +114,16 @@ export const assetTypeConfig: Record<
 export function generateId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
 }
+
+/** Returns a friendly "Edited today/yesterday/N days ago" string via translation keys. */
+export function formatEditedLabel(
+  updatedAt: string,
+  t: (key: string) => string
+): string {
+  const diffMs = Date.now() - new Date(updatedAt).getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  if (diffDays === 0) return t('status.editedToday')
+  if (diffDays === 1) return t('status.editedYesterday')
+  if (diffDays < 60) return t('status.editedDaysAgo').replace('{n}', String(diffDays))
+  return `${t('status.editedPrefix')} ${formatDate(updatedAt)}`
+}

@@ -20,12 +20,18 @@ import {
   Link2,
   Layers,
   RotateCcw,
+  History,
+  HardDrive,
+  Monitor,
 } from 'lucide-react'
 import { Asset, AssetType } from '@/types'
 import { AssetBadge } from './AssetBadge'
-import { cn, formatRelativeTime, assetTypeConfig } from '@/lib/utils'
+import { cn, formatRelativeTime, formatEditedLabel, assetTypeConfig } from '@/lib/utils'
 import { copyToClipboard } from '@/lib/clipboard'
 import { useAppStore } from '@/stores/useAppStore'
+import { useVersionStore } from '@/stores/useVersionStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
 
 const typeIcons: Record<AssetType, React.ElementType> = {
@@ -49,9 +55,20 @@ interface AssetCardProps {
 export function AssetCard({ asset }: AssetCardProps) {
   const { selectedAssetId, setSelectedAsset, toggleFavorite, deleteAsset, restoreAsset, permanentDeleteAsset, showToast, incrementCopyCount, activeSection } =
     useAppStore()
+  const { getVersions } = useVersionStore()
+  const vault = useUserStore((s) => s.vault)
+  const { t } = useI18n()
   const [menuOpen, setMenuOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+
+  const versionCount = getVersions(asset.id).length
+  const isVaultSynced = !!(
+    vault.vaultEnabled &&
+    vault.vaultInitialized &&
+    (asset.imagePath || (vault.vaultLastSyncedAt && new Date(asset.updatedAt) <= new Date(vault.vaultLastSyncedAt)))
+  )
+  const editedLabel = formatEditedLabel(asset.updatedAt, t)
 
   const isSelected = selectedAssetId === asset.id
   const isTrash = activeSection === 'trash'
@@ -118,14 +135,14 @@ export function AssetCard({ asset }: AssetCardProps) {
               aria-label="Restore"
               className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-accent-blue bg-accent-blue/10 hover:bg-accent-blue/20 transition-colors"
             >
-              <RotateCcw size={11} /> Restore
+              <RotateCcw size={11} /> {t('card.restore')}
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); setConfirmDeleteOpen(true) }}
               aria-label="Delete permanently"
               className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-danger bg-danger/10 hover:bg-danger/20 transition-colors"
             >
-              <Trash2 size={11} /> Delete
+              <Trash2 size={11} /> {t('card.deletePerm')}
             </button>
           </div>
         ) : (
@@ -156,20 +173,20 @@ export function AssetCard({ asset }: AssetCardProps) {
                       className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-muted hover:text-text-main hover:bg-surface-hover transition-colors"
                       onClick={(e) => { e.stopPropagation(); setMenuOpen(false); setSelectedAsset(asset.id) }}
                     >
-                      <ExternalLink size={12} /> Open Detail
+                      <ExternalLink size={12} /> {t('card.openDetail')}
                     </button>
                     <button
                       className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-muted hover:text-text-main hover:bg-surface-hover transition-colors"
                       onClick={(e) => { e.stopPropagation(); setMenuOpen(false) }}
                     >
-                      <Edit2 size={12} /> Edit
+                      <Edit2 size={12} /> {t('card.edit')}
                     </button>
                     <div className="my-1 border-t border-border" />
                     <button
                       className="w-full flex items-center gap-2 px-3 py-2 text-xs text-danger hover:bg-danger/10 transition-colors"
                       onClick={handleDelete}
                     >
-                      <Trash2 size={12} /> Move to Trash
+                      <Trash2 size={12} /> {t('card.moveToTrash')}
                     </button>
                   </div>
                 </>
@@ -247,7 +264,7 @@ export function AssetCard({ asset }: AssetCardProps) {
         </span>
         <div className="flex items-center gap-1">
           {asset.usageCount > 0 && (
-            <span className="text-[10px] text-text-dim">{asset.usageCount} uses</span>
+            <span className="text-[10px] text-text-dim">{asset.usageCount} {t('card.uses')}</span>
           )}
           {!isTrash && (
             <button
@@ -263,6 +280,26 @@ export function AssetCard({ asset }: AssetCardProps) {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Status row */}
+      <div className="flex items-center gap-2.5 mt-1.5">
+        <span className="text-[10px] text-text-dim truncate">{editedLabel}</span>
+        {versionCount > 0 && (
+          <span className="flex items-center gap-0.5 text-[10px] text-text-dim flex-shrink-0">
+            <History size={9} />
+            {versionCount}
+          </span>
+        )}
+        <span className={cn(
+          'flex items-center gap-0.5 text-[10px] flex-shrink-0 ml-auto',
+          isVaultSynced ? 'text-green-400/70' : 'text-text-dim'
+        )}>
+          {isVaultSynced
+            ? <><HardDrive size={9} /><span className="hidden sm:inline">{t('status.savedToVault')}</span></>
+            : <><Monitor size={9} /><span className="hidden sm:inline">{t('status.localOnly')}</span></>
+          }
+        </span>
       </div>
     </div>
 

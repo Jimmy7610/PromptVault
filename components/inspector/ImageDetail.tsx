@@ -15,6 +15,8 @@ import { formatDate, formatRelativeTime, cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { updateVaultAsset } from '@/lib/vaultClient'
+import { AssetStatusRow } from './AssetStatusRow'
+import { useI18n } from '@/lib/i18n/useI18n'
 
 interface ImageDetailProps {
   asset: Asset
@@ -32,6 +34,7 @@ function formatBytes(bytes: number): string {
 export function ImageDetail({ asset }: ImageDetailProps) {
   const { updateAsset, showToast } = useAppStore()
   const { vault } = useUserStore()
+  const { t } = useI18n()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -153,7 +156,8 @@ export function ImageDetail({ asset }: ImageDetailProps) {
           </span>
         </div>
         <h2 className="text-base font-bold text-text-main mb-1">{asset.title}</h2>
-        <p className="text-xs text-text-muted leading-relaxed">{asset.description}</p>
+        <p className="text-xs text-text-muted leading-relaxed mb-1">{asset.description}</p>
+        <AssetStatusRow asset={asset} />
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -176,25 +180,25 @@ export function ImageDetail({ asset }: ImageDetailProps) {
               <div className="bg-surface-soft rounded-xl border border-border px-3 py-2.5 mb-3 space-y-1.5">
                 {asset.imageFileName && (
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-text-dim flex-shrink-0">File</span>
+                    <span className="text-text-dim flex-shrink-0">{t('inspector.imageFile')}</span>
                     <span className="text-text-muted font-mono truncate max-w-[160px] text-right">{asset.imageFileName}</span>
                   </div>
                 )}
                 {asset.imageMimeType && (
                   <div className="flex justify-between text-xs">
-                    <span className="text-text-dim">Type</span>
+                    <span className="text-text-dim">{t('inspector.imageType')}</span>
                     <span className="text-text-muted">{asset.imageMimeType}</span>
                   </div>
                 )}
                 {asset.imageSize != null && (
                   <div className="flex justify-between text-xs">
-                    <span className="text-text-dim">Size</span>
+                    <span className="text-text-dim">{t('inspector.imageSize')}</span>
                     <span className="text-text-muted">{formatBytes(asset.imageSize)}</span>
                   </div>
                 )}
                 {asset.imageUploadedAt && (
                   <div className="flex justify-between text-xs">
-                    <span className="text-text-dim">Attached</span>
+                    <span className="text-text-dim">{t('inspector.imageAttached')}</span>
                     <span className="text-text-muted">{formatRelativeTime(asset.imageUploadedAt)}</span>
                   </div>
                 )}
@@ -208,19 +212,19 @@ export function ImageDetail({ asset }: ImageDetailProps) {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-xs text-text-muted hover:text-text-main hover:border-border-soft transition-colors disabled:opacity-50"
                 >
                   {uploading ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
-                  Replace
+                  {t('inspector.imageReplace')}
                 </button>
                 <button
                   onClick={handleDownload}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-xs text-text-muted hover:text-text-main hover:border-border-soft transition-colors"
                 >
-                  <Download size={11} /> Download
+                  <Download size={11} /> {t('inspector.imageDownload')}
                 </button>
                 <button
                   onClick={handleRemove}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-xs text-text-muted hover:text-danger hover:border-danger/30 transition-colors"
                 >
-                  <X size={11} /> Remove
+                  <X size={11} /> {t('inspector.imageRemove')}
                 </button>
               </div>
             </div>
@@ -236,7 +240,7 @@ export function ImageDetail({ asset }: ImageDetailProps) {
                 }}
               >
                 <ImageIcon size={28} className="text-white/20 mb-2" />
-                <div className="text-[11px] text-white/30 mb-3">No image attached</div>
+                <div className="text-[11px] text-white/30 mb-3">{t('inspector.imageNoImage')}</div>
                 <button
                   onClick={triggerFilePicker}
                   disabled={uploading}
@@ -247,7 +251,7 @@ export function ImageDetail({ asset }: ImageDetailProps) {
                   )}
                 >
                   {uploading ? <Loader2 size={11} className="animate-spin" /> : <Upload size={11} />}
-                  {uploading ? 'Uploading…' : 'Add Image'}
+                  {uploading ? t('inspector.imageUploading') : t('inspector.imageAdd')}
                 </button>
               </div>
               <p className="text-[10px] text-text-dim text-center">
@@ -278,7 +282,7 @@ export function ImageDetail({ asset }: ImageDetailProps) {
         {asset.content && (
           <div className="px-4 mb-4">
             <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-              Generation Prompt
+              {t('inspector.generationPrompt')}
             </div>
             <div className="text-xs text-text-muted bg-background rounded-lg p-3 border border-border leading-relaxed font-mono">
               {asset.content}
@@ -290,7 +294,7 @@ export function ImageDetail({ asset }: ImageDetailProps) {
         {asset.negativePrompt && (
           <div className="px-4 mb-4">
             <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-              Negative Prompt
+              {t('inspector.negativePrompt')}
             </div>
             <div className="text-xs text-text-muted bg-background rounded-lg p-3 border border-danger/15 leading-relaxed font-mono">
               {asset.negativePrompt}
@@ -303,7 +307,7 @@ export function ImageDetail({ asset }: ImageDetailProps) {
           {asset.tools.length > 0 && (
             <div className="mb-3">
               <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-                Tools
+                {t('inspector.tools')}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {asset.tools.map((tool) => (
@@ -320,7 +324,7 @@ export function ImageDetail({ asset }: ImageDetailProps) {
           {asset.tags.length > 0 && (
             <div>
               <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-                Tags
+                {t('inspector.tags')}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {asset.tags.map((tag) => (
@@ -339,15 +343,15 @@ export function ImageDetail({ asset }: ImageDetailProps) {
         {/* Metadata */}
         <div className="px-4 pb-4">
           <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-            Metadata
+            {t('inspector.metadata')}
           </div>
           <div className="space-y-1.5 text-xs">
             <div className="flex justify-between">
-              <span className="text-text-dim">Created</span>
+              <span className="text-text-dim">{t('inspector.created')}</span>
               <span className="text-text-muted">{formatDate(asset.createdAt)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-text-dim">Updated</span>
+              <span className="text-text-dim">{t('inspector.updated')}</span>
               <span className="text-text-muted">{formatRelativeTime(asset.updatedAt)}</span>
             </div>
           </div>
@@ -357,13 +361,13 @@ export function ImageDetail({ asset }: ImageDetailProps) {
       {/* Quick Actions */}
       <div className="px-4 py-3 border-t border-border flex-shrink-0 bg-surface">
         <div className="flex flex-wrap gap-2">
-          {asset.content && <CopyButton text={asset.content} label="Copy Prompt" assetId={asset.id} />}
+          {asset.content && <CopyButton text={asset.content} label={t('inspector.imageCopyPrompt')} assetId={asset.id} />}
           {hasImage ? (
             <button
               onClick={handleDownload}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-text-muted hover:text-text-main text-xs transition-colors"
             >
-              <Download size={11} /> Download Image
+              <Download size={11} /> {t('inspector.imageDownloadFull')}
             </button>
           ) : (
             <button
@@ -372,7 +376,7 @@ export function ImageDetail({ asset }: ImageDetailProps) {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-text-muted hover:text-text-main text-xs transition-colors disabled:opacity-50"
             >
               {uploading ? <Loader2 size={11} className="animate-spin" /> : <Upload size={11} />}
-              Add Image
+              {t('inspector.imageAdd')}
             </button>
           )}
         </div>

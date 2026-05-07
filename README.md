@@ -50,6 +50,9 @@ PromptVault gives you a **real library** — searchable, filterable, taggable �
 | **Local Vault** | Save every asset as a real `.md` or `.json` file on disk |
 | **Image Attachments** | Attach a real PNG/JPG/WebP file to any Image asset — stored locally in `vault/images/`, included in backups |
 | **Import / Export** | Export all assets as JSON or Markdown; import from JSON backup |
+| **Version History** | Automatic version snapshots on every save — view, copy, or restore any prior version (up to 25 per asset) |
+| **Asset Status Indicators** | Every card and inspector shows last-edited date, version count, and vault/local storage status |
+| **EN / SV Language Support** | UI language switch between English and Swedish in Settings → Appearance (asset content is never translated) |
 | **Notifications** | In-app notification bell for asset events (created, trashed, restored, deleted) |
 | **Keyboard Shortcuts** | `N` — new asset · `F` — toggle favorite · `Esc` — close panel |
 | **Live Dashboard Stats** | Total Assets, Agents, Prompts, Files, Templates, Copied Today — all calculated from real library data |
@@ -507,14 +510,15 @@ promptvault/
 
 ## Roadmap / Future Ideas
 
+- [x] Version history for assets (up to 25 versions, view / restore / copy)
+- [x] Edit asset modal (full in-place editing with vault sync)
+- [x] Image upload and inline preview (vault-based, PNG/JPG/WebP, max 20 MB)
+- [x] EN / SV UI language support (Settings → Appearance)
 - [ ] Supabase backend for optional cross-device sync
 - [ ] Markdown editor with live preview (CodeMirror or Monaco)
 - [ ] Syntax highlighting in code assets (highlight.js or Prism)
-- [ ] Image upload and inline preview
-- [ ] Version history for assets
 - [ ] Collections (group related assets)
 - [ ] Command palette (`Ctrl+K` full palette)
-- [ ] Edit asset modal (full in-place editing)
 - [ ] Asset sharing / export link
 - [ ] CLI for vault operations
 

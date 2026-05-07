@@ -3,7 +3,9 @@ import { useState } from 'react'
 import { ChevronDown, ChevronUp, Settings2, Variable } from 'lucide-react'
 import { Asset } from '@/types'
 import { CopyButton } from '@/components/ui/CopyButton'
+import { AssetStatusRow } from './AssetStatusRow'
 import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/useI18n'
 
 interface SectionProps {
   title: string
@@ -40,6 +42,7 @@ interface PromptDetailProps {
 }
 
 export function PromptDetail({ asset }: PromptDetailProps) {
+  const { t } = useI18n()
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -62,15 +65,16 @@ export function PromptDetail({ asset }: PromptDetailProps) {
         </div>
         <h2 className="text-base font-bold text-text-main mb-1">{asset.title}</h2>
         <p className="text-xs text-text-muted leading-relaxed">{asset.description}</p>
+        <AssetStatusRow asset={asset} />
       </div>
 
       {/* Content sections */}
       <div className="flex-1 overflow-y-auto">
         {/* Prompt */}
         <Section
-          title="Prompt"
+          title={t('inspector.prompt')}
           action={
-            <CopyButton text={asset.content} label="Prompt" assetId={asset.id} size="sm" variant="icon" />
+            <CopyButton text={asset.content} label={t('inspector.prompt')} assetId={asset.id} size="sm" variant="icon" />
           }
         >
           <div className="text-xs text-text-muted leading-relaxed bg-background rounded-lg p-3 border border-border font-mono whitespace-pre-wrap">
@@ -81,11 +85,11 @@ export function PromptDetail({ asset }: PromptDetailProps) {
         {/* Negative Prompt */}
         {asset.negativePrompt && (
           <Section
-            title="Negative Prompt"
+            title={t('inspector.negativePrompt')}
             action={
               <CopyButton
                 text={asset.negativePrompt}
-                label="Negative Prompt"
+                label={t('inspector.negativePrompt')}
                 size="sm"
                 variant="icon"
               />
@@ -99,7 +103,7 @@ export function PromptDetail({ asset }: PromptDetailProps) {
 
         {/* Settings */}
         {asset.settings && Object.keys(asset.settings).length > 0 && (
-          <Section title="Settings" action={<Settings2 size={12} className="text-text-dim" />}>
+          <Section title={t('inspector.settings')} action={<Settings2 size={12} className="text-text-dim" />}>
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(asset.settings).map(([key, value]) => (
                 <div
@@ -118,7 +122,7 @@ export function PromptDetail({ asset }: PromptDetailProps) {
 
         {/* Variables */}
         {asset.variables && asset.variables.length > 0 && (
-          <Section title="Variables">
+          <Section title={t('inspector.variables')}>
             <div className="space-y-1.5">
               {asset.variables.map((v) => (
                 <div
@@ -137,7 +141,7 @@ export function PromptDetail({ asset }: PromptDetailProps) {
 
         {/* Notes */}
         {asset.notes && (
-          <Section title="Notes" defaultOpen={false}>
+          <Section title={t('inspector.notes')} defaultOpen={false}>
             <div className="text-xs text-text-muted leading-relaxed whitespace-pre-wrap">
               {asset.notes}
             </div>
@@ -145,22 +149,22 @@ export function PromptDetail({ asset }: PromptDetailProps) {
         )}
 
         {/* Metadata */}
-        <Section title="Metadata" defaultOpen={false}>
+        <Section title={t('inspector.metadata')} defaultOpen={false}>
           <div className="space-y-1.5 text-xs">
             <div className="flex justify-between">
-              <span className="text-text-dim">Created</span>
+              <span className="text-text-dim">{t('inspector.created')}</span>
               <span className="text-text-muted">{formatDate(asset.createdAt)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-text-dim">Updated</span>
+              <span className="text-text-dim">{t('inspector.updated')}</span>
               <span className="text-text-muted">{formatRelativeTime(asset.updatedAt)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-text-dim">Copies</span>
+              <span className="text-text-dim">{t('inspector.copies')}</span>
               <span className="text-text-muted">{asset.copyCount}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-text-dim">Usage</span>
+              <span className="text-text-dim">{t('inspector.usage')}</span>
               <span className="text-text-muted">{asset.usageCount}</span>
             </div>
           </div>
@@ -170,17 +174,16 @@ export function PromptDetail({ asset }: PromptDetailProps) {
       {/* Quick Actions */}
       <div className="px-4 py-3 border-t border-border flex-shrink-0 bg-surface">
         <div className="text-[10px] text-text-dim uppercase tracking-wider font-semibold mb-2">
-          Quick Actions
+          {t('inspector.quickActions')}
         </div>
         <div className="flex flex-wrap gap-2">
-          <CopyButton text={asset.content} label="Copy Prompt" assetId={asset.id} />
+          <CopyButton text={asset.content} label={t('inspector.copyPrompt')} assetId={asset.id} />
           {asset.negativePrompt && (
-            <CopyButton text={asset.negativePrompt} label="Copy Negative" />
+            <CopyButton text={asset.negativePrompt} label={t('inspector.copyNegative')} />
           )}
           <CopyButton
             text={[asset.content, asset.negativePrompt && `\n\nNegative: ${asset.negativePrompt}`].filter(Boolean).join('')}
-            label="Copy All"
-            toastMessage="Everything copied!"
+            label={t('inspector.copyAll')}
           />
         </div>
       </div>

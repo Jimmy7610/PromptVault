@@ -1,7 +1,9 @@
 'use client'
 import { Asset } from '@/types'
 import { CopyButton } from '@/components/ui/CopyButton'
+import { AssetStatusRow } from './AssetStatusRow'
 import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/useI18n'
 
 interface CodeDetailProps {
   asset: Asset
@@ -30,6 +32,7 @@ function highlightCode(code: string, lang?: string): React.ReactNode {
 }
 
 export function CodeDetail({ asset }: CodeDetailProps) {
+  const { t } = useI18n()
   const lang = asset.language?.toLowerCase() ?? 'other'
   const langColor = LANG_COLORS[lang] ?? 'text-gray-400 bg-gray-500/10 border-gray-500/20'
   const lineCount = asset.content.split('\n').length
@@ -51,6 +54,7 @@ export function CodeDetail({ asset }: CodeDetailProps) {
         </div>
         <h2 className="text-base font-bold text-text-main mb-1">{asset.title}</h2>
         <p className="text-xs text-text-muted leading-relaxed">{asset.description}</p>
+        <AssetStatusRow asset={asset} />
       </div>
 
       {/* Code block */}
@@ -93,7 +97,7 @@ export function CodeDetail({ asset }: CodeDetailProps) {
           {asset.tools.length > 0 && (
             <div className="mb-3">
               <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-                Tools
+                {t('inspector.tools')}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {asset.tools.map((tool) => (
@@ -110,7 +114,7 @@ export function CodeDetail({ asset }: CodeDetailProps) {
           {asset.tags.length > 0 && (
             <div>
               <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-                Tags
+                {t('inspector.tags')}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {asset.tags.map((tag) => (
@@ -130,7 +134,7 @@ export function CodeDetail({ asset }: CodeDetailProps) {
         {asset.notes && (
           <div className="px-4 mb-4">
             <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-              Notes
+              {t('inspector.notes')}
             </div>
             <div className="text-xs text-text-muted leading-relaxed">{asset.notes}</div>
           </div>
@@ -140,15 +144,15 @@ export function CodeDetail({ asset }: CodeDetailProps) {
         <div className="px-4 pb-4">
           <div className="space-y-1.5 text-xs">
             <div className="flex justify-between">
-              <span className="text-text-dim">Created</span>
+              <span className="text-text-dim">{t('inspector.created')}</span>
               <span className="text-text-muted">{formatDate(asset.createdAt)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-text-dim">Updated</span>
+              <span className="text-text-dim">{t('inspector.updated')}</span>
               <span className="text-text-muted">{formatRelativeTime(asset.updatedAt)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-text-dim">Copies</span>
+              <span className="text-text-dim">{t('inspector.copies')}</span>
               <span className="text-text-muted">{asset.copyCount}</span>
             </div>
           </div>
@@ -158,7 +162,7 @@ export function CodeDetail({ asset }: CodeDetailProps) {
       {/* Quick Actions */}
       <div className="px-4 py-3 border-t border-border flex-shrink-0 bg-surface">
         <div className="flex flex-wrap gap-2">
-          <CopyButton text={asset.content} label="Copy Code" assetId={asset.id} />
+          <CopyButton text={asset.content} label={t('inspector.code')} assetId={asset.id} />
         </div>
       </div>
     </div>

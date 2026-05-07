@@ -269,6 +269,20 @@ export function AppGuideModal({ open, onClose }: Props) {
                   <p>The footer shows <strong className="text-amber-400">Unsaved changes</strong> when the form is dirty. Closing with unsaved changes prompts you to confirm before discarding. Saving also syncs to your vault on disk if Vault Storage is enabled.</p>
                 </GuideCard>
 
+                <GuideCard icon={Activity} title="Asset status indicators">
+                  <p>Every asset card and detail panel shows a compact status row beneath the description:</p>
+                  <ul className="space-y-1 mt-1 ml-2">
+                    <li className="flex items-start gap-1.5"><ChevronRight size={10} className="text-accent-blue flex-shrink-0 mt-1" /><span><strong className="text-text-main">Last edited</strong> — "Edited today / yesterday / 3 days ago" or a full date for older assets.</span></li>
+                    <li className="flex items-start gap-1.5"><ChevronRight size={10} className="text-accent-blue flex-shrink-0 mt-1" /><span><strong className="text-text-main">Version count</strong> — shows how many saved versions exist in history (e.g. "3 versions").</span></li>
+                    <li className="flex items-start gap-1.5"><ChevronRight size={10} className="text-accent-blue flex-shrink-0 mt-1" /><span><strong className="text-text-main">Vault status</strong> — <span className="text-green-400">Saved to Vault</span> if the asset is on disk, or <span className="text-text-dim">Local only</span> if Vault is not enabled.</span></li>
+                  </ul>
+                </GuideCard>
+
+                <GuideCard icon={GitBranch} title="Version history">
+                  <p>Every time you save an edit to an asset, a new version is created automatically and stored in the version history. Up to 25 versions are kept per asset.</p>
+                  <p>Click the <strong className="text-text-main">history icon (⟳)</strong> next to the edit button in the detail panel header to open Version History. From there you can view, copy, or restore any previous version. Restoring saves the current state to history first, so you never lose work.</p>
+                </GuideCard>
+
                 <GuideCard icon={Sparkles} title="Demo assets">
                   <p>The assets on first launch are demo assets — examples only. Delete them individually (trash icon in detail panel) or all at once via <strong className="text-text-main">Settings → Danger Zone → Clear All Assets</strong>.</p>
                 </GuideCard>
@@ -487,9 +501,14 @@ export function AppGuideModal({ open, onClose }: Props) {
                   <WorkflowStep n={8} text="Check for app updates in Settings → App Updates to get the latest features." />
                 </div>
 
+                <GuideCard icon={Lightbulb} title="Interface language">
+                  <p>Go to <strong className="text-text-main">Settings → Appearance → Language</strong> to switch the interface between <strong className="text-text-main">English</strong> and <strong className="text-text-main">Swedish</strong>. The language setting affects all UI labels, buttons, section headings, and status messages.</p>
+                  <p className="text-text-dim">Your asset content — titles, descriptions, prompts, instructions — is never translated. Only the interface labels change.</p>
+                </GuideCard>
+
                 <GuideCard icon={Lightbulb} title="Future possibilities">
-                  <p>PromptVault is designed to grow. Future ideas include: Supabase backend for cross-device sync, team sharing, Markdown editor with live preview, version history for assets, command palette, and image upload support.</p>
-                  <p className="text-text-dim">For now, it is intentionally local-first and simple — a solid foundation to build on.</p>
+                  <p>PromptVault is designed to grow. Future ideas include: Supabase backend for cross-device sync, team sharing, Markdown editor with live preview, command palette, and expanded AI tool integrations.</p>
+                  <p className="text-text-dim">It is intentionally local-first — a solid foundation to build on.</p>
                 </GuideCard>
               </>
             )}

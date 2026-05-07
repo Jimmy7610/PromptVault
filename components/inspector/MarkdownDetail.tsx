@@ -3,7 +3,9 @@ import { useState } from 'react'
 import { Eye, Code2, Download } from 'lucide-react'
 import { Asset } from '@/types'
 import { CopyButton } from '@/components/ui/CopyButton'
+import { AssetStatusRow } from './AssetStatusRow'
 import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { downloadAssetMarkdown } from '@/lib/export'
 
 interface MarkdownDetailProps {
@@ -34,6 +36,7 @@ function renderMarkdown(text: string): string {
 
 export function MarkdownDetail({ asset }: MarkdownDetailProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('preview')
+  const { t } = useI18n()
 
   const wordCount = asset.content.split(/\s+/).filter(Boolean).length
   const lineCount = asset.content.split('\n').length
@@ -50,6 +53,7 @@ export function MarkdownDetail({ asset }: MarkdownDetailProps) {
         </div>
         <h2 className="text-base font-bold text-text-main mb-1">{asset.title}</h2>
         <p className="text-xs text-text-muted leading-relaxed">{asset.description}</p>
+        <AssetStatusRow asset={asset} />
 
         {/* View toggle */}
         <div className="flex items-center gap-1 mt-3 bg-surface-soft rounded-lg p-0.5 w-fit border border-border">
@@ -97,15 +101,15 @@ export function MarkdownDetail({ asset }: MarkdownDetailProps) {
       {/* Quick Actions */}
       <div className="px-4 py-3 border-t border-border flex-shrink-0 bg-surface">
         <div className="text-[10px] text-text-dim uppercase tracking-wider font-semibold mb-2">
-          Quick Actions
+          {t('inspector.quickActions')}
         </div>
         <div className="flex flex-wrap gap-2">
-          <CopyButton text={asset.content} label="Copy Markdown" assetId={asset.id} />
+          <CopyButton text={asset.content} label={t('inspector.copyContent')} assetId={asset.id} />
           <button
             onClick={() => downloadAssetMarkdown(asset)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-text-muted hover:text-text-main text-xs transition-colors"
           >
-            <Download size={11} /> Export .md
+            <Download size={11} /> {t('common.export')} .md
           </button>
         </div>
         <div className="mt-2 text-[10px] text-text-dim">
