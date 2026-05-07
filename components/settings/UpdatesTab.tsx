@@ -18,6 +18,10 @@ import {
   ArrowRight,
   Info,
   Wrench,
+  PackageCheck,
+  Hammer,
+  RotateCcw,
+  GitPullRequest,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { UpdateCheckResult, UpdateInstallResult } from '@/types'
@@ -90,6 +94,55 @@ function StatusRow({
   )
 }
 
+function StepRow({
+  icon: Icon,
+  label,
+  state,
+}: {
+  icon: React.ElementType
+  label: string
+  state: 'ok' | 'failed' | 'skipped' | 'pending'
+}) {
+  const badge =
+    state === 'ok' ? (
+      <StatusBadge variant="ok"><Check size={9} /> Completed</StatusBadge>
+    ) : state === 'failed' ? (
+      <StatusBadge variant="error"><XCircle size={9} /> Failed</StatusBadge>
+    ) : state === 'skipped' ? (
+      <StatusBadge variant="neutral">Skipped</StatusBadge>
+    ) : (
+      <StatusBadge variant="neutral">—</StatusBadge>
+    )
+
+  return (
+    <div className="flex items-center gap-3 py-2.5 border-b border-border last:border-0">
+      <div
+        className={cn(
+          'w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0',
+          state === 'ok'
+            ? 'bg-green-500/10'
+            : state === 'failed'
+            ? 'bg-danger/10'
+            : 'bg-surface-soft'
+        )}
+      >
+        <Icon
+          size={11}
+          className={cn(
+            state === 'ok'
+              ? 'text-green-400'
+              : state === 'failed'
+              ? 'text-danger'
+              : 'text-text-dim'
+          )}
+        />
+      </div>
+      <span className="text-xs text-text-muted flex-1">{label}</span>
+      <div className="flex-shrink-0">{badge}</div>
+    </div>
+  )
+}
+
 function ConsolePanel({ logs }: { logs: string[] }) {
   const [open, setOpen] = useState(true)
 
@@ -152,6 +205,8 @@ export function UpdatesTab() {
 
   const restartCmd = 'npm run dev'
   const restartCmdFull = 'cd "C:\\Projects\\_Active\\PromptVault" && npm run dev'
+  const manualFixCmd =
+    'cd "C:\\Projects\\_Active\\PromptVault"\nnpm install\nnpm run build\nnpm run dev'
 
   // ── handlers ────────────────────────────────────────────────────────────────
 
@@ -182,7 +237,6 @@ export function UpdatesTab() {
     const result = await cleanGeneratedChanges()
     setCleanLogs(result.logs ?? [])
     setIsCleaning(false)
-    // Automatically re-run check so the UI reflects the cleaned state
     await handleCheck()
   }
 
@@ -200,7 +254,16 @@ export function UpdatesTab() {
     (checkResult?.errors?.length ?? 0) === 0
 
   const installSucceeded = installResult?.success === true
+  const partialSuccess = installResult?.partialSuccess === true
   const restartRequired = installResult?.restartRequired === true
+
+  // Step states for the step breakdown grid
+  function stepState(flag: boolean | undefined, preceding: boolean | undefined): 'ok' | 'failed' | 'skipped' | 'pending' {
+    if (preceding === false) return 'skipped'
+    if (flag === true) return 'ok'
+    if (flag === false) return 'failed'
+    return 'pending'
+  }
 
   // ── summary badge ────────────────────────────────────────────────────────────
 
@@ -208,8 +271,9 @@ export function UpdatesTab() {
     if (phase === 'idle') return null
     if (phase === 'checking') return <StatusBadge variant="info"><Loader2 size={9} className="animate-spin" /> Checking…</StatusBadge>
     if (phase === 'installing') return <StatusBadge variant="info"><Loader2 size={9} className="animate-spin" /> Installing…</StatusBadge>
-    if (restartRequired) return <StatusBadge variant="warn"><CheckCircle2 size={9} /> Installed — restart required</StatusBadge>
-    if (installResult && !installSucceeded) return <StatusBadge variant="error"><XCircle size={9} /> Install failed</StatusBadge>
+    if (installSucceeded && restartRequired) return <StatusBadge variant="ok"><CheckCircle2 size={9} /> Installed — restart required</StatusBadge>
+    if (partialSuccess) return <StatusBadge variant="warn"><AlertTriangle size={9} /> Downloaded — needs attention</StatusBadge>
+    if (installResult && !installSucceeded && !partialSuccess) return <StatusBadge variant="error"><XCircle size={9} /> Download failed</StatusBadge>
     if (alreadyUpToDate) return <StatusBadge variant="ok"><CheckCircle2 size={9} /> Up to date</StatusBadge>
     if (updateAvailable && checkResult?.canInstall) return <StatusBadge variant="info"><ArrowRight size={9} /> Update available</StatusBadge>
     if (updateAvailable && !checkResult?.canInstall) return <StatusBadge variant="warn"><AlertTriangle size={9} /> Update available — blocked</StatusBadge>
@@ -372,7 +436,7 @@ export function UpdatesTab() {
         </div>
       )}
 
-      {/* Blocking dirty files — uncommitted code changes */}
+      {/* Blocking dirty files */}
       {(checkResult?.blockingDirtyFiles?.length ?? 0) > 0 && (
         <div className="rounded-xl border border-danger/25 bg-danger/5 p-4 space-y-2">
           <div className="flex items-start gap-2.5">
@@ -397,7 +461,7 @@ export function UpdatesTab() {
         </div>
       )}
 
-      {/* Other errors (remote mismatch, vault not ignored, etc.) */}
+      {/* Other check errors */}
       {checkResult && checkResult.errors.length > 0 && (checkResult.blockingDirtyFiles?.length ?? 0) === 0 && (
         <div className="space-y-1.5">
           {checkResult.errors.map((e, i) => (
@@ -412,7 +476,7 @@ export function UpdatesTab() {
         </div>
       )}
 
-      {/* General warnings (already up to date, vault/index.json, etc.) */}
+      {/* General warnings */}
       {checkResult && !checkResult.onlyAutoFixableChanges && checkResult.warnings.length > 0 && (
         <div className="space-y-1.5">
           {checkResult.warnings.map((w, i) => (
@@ -434,11 +498,15 @@ export function UpdatesTab() {
             'flex items-start gap-3 px-4 py-3.5 rounded-xl border',
             installSucceeded
               ? 'bg-green-500/5 border-green-500/20'
+              : partialSuccess
+              ? 'bg-amber-500/5 border-amber-500/20'
               : 'bg-danger/5 border-danger/20'
           )}
         >
           {installSucceeded ? (
             <CheckCircle2 size={15} className="text-green-400 flex-shrink-0 mt-0.5" />
+          ) : partialSuccess ? (
+            <AlertTriangle size={15} className="text-amber-400 flex-shrink-0 mt-0.5" />
           ) : (
             <XCircle size={15} className="text-danger flex-shrink-0 mt-0.5" />
           )}
@@ -452,10 +520,20 @@ export function UpdatesTab() {
                   Restart PromptVault to use the new version.
                 </p>
               </>
+            ) : partialSuccess ? (
+              <>
+                <p className="text-sm font-semibold text-amber-300 leading-tight">
+                  Update downloaded, but verification needs attention.
+                </p>
+                <p className="text-xs text-amber-400/80 mt-1">
+                  {installResult.message ??
+                    'App code was updated from GitHub, but npm install or build did not complete. Restart PromptVault or run the manual fix command below.'}
+                </p>
+              </>
             ) : (
               <>
                 <p className="text-sm font-semibold text-danger leading-tight">
-                  Install did not complete.
+                  Update could not be downloaded.
                 </p>
                 {installResult.errors.map((e, i) => (
                   <p key={i} className="text-xs text-danger/80 mt-1">{e}</p>
@@ -466,8 +544,64 @@ export function UpdatesTab() {
         </div>
       )}
 
+      {/* Step-by-step breakdown (shown after any install attempt) */}
+      {installResult && (installSucceeded || partialSuccess || installResult.gitUpdated !== undefined) && (
+        <div className="rounded-xl border border-border overflow-hidden bg-surface/50">
+          <div className="px-4 py-2.5 bg-surface-soft border-b border-border">
+            <span className="text-[10px] font-semibold text-text-dim uppercase tracking-wider">
+              Update steps
+            </span>
+          </div>
+          <div className="px-4">
+            <StepRow
+              icon={GitPullRequest}
+              label="Download from GitHub"
+              state={stepState(installResult.gitUpdated, true)}
+            />
+            <StepRow
+              icon={PackageCheck}
+              label="Install dependencies (npm install)"
+              state={stepState(installResult.npmInstallOk, installResult.gitUpdated)}
+            />
+            <StepRow
+              icon={Hammer}
+              label="Build verification (npm run build)"
+              state={stepState(installResult.buildOk, installResult.npmInstallOk)}
+            />
+            <StepRow
+              icon={RotateCcw}
+              label="Restart required"
+              state={restartRequired ? 'ok' : 'pending'}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Console output */}
       <ConsolePanel logs={installLogs} />
+
+      {/* Partial success — manual fix panel */}
+      {partialSuccess && (
+        <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-4 space-y-3">
+          <div className="flex items-start gap-2.5">
+            <Wrench size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-amber-300">
+                Manual fix commands
+              </p>
+              <p className="text-[11px] text-amber-400/70 leading-snug">
+                Run these in your terminal to complete the update. Your vault/ data is not affected.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-lg bg-[#0d0d0f] px-4 py-3 border border-amber-500/15">
+            <pre className="text-[11px] font-mono text-amber-300/90 whitespace-pre leading-relaxed">
+              {`cd "C:\\Projects\\_Active\\PromptVault"\nnpm install\nnpm run build\nnpm run dev`}
+            </pre>
+          </div>
+          <CopyButton text={manualFixCmd} label="Copy commands" />
+        </div>
+      )}
 
       {/* Restart section */}
       {(restartRequired || phase === 'done') && (
@@ -503,7 +637,7 @@ export function UpdatesTab() {
         <div className="space-y-1.5">
           {[
             { label: 'App',           value: 'PromptVault' },
-            { label: 'Build',         value: 'Update test build 002' },
+            { label: 'Build',         value: 'Partial success build 003' },
             { label: 'Mode',          value: 'Local-first' },
             { label: 'Update source', value: 'GitHub main branch' },
             { label: 'Vault safety',  value: 'vault/ ignored — never uploaded' },
@@ -526,8 +660,11 @@ export function UpdatesTab() {
             'Verifies the remote is the official PromptVault repository.',
             'Blocks install if the working tree has uncommitted code changes.',
             'Blocks install if vault/ is not git-ignored (your data is never at risk).',
-            'Runs: git pull --ff-only origin main → npm install → npm run build.',
-            'Never force-pulls, force-pushes, hard-resets, or deletes local files.',
+            'Phase 1: Download — git pull --ff-only origin main.',
+            'Phase 2: Dependencies — npm install.',
+            'Phase 3: Verify — npm run build.',
+            'If download succeeds but npm/build fail, a partial-success warning is shown with manual fix commands.',
+            'Never force-pulls, hard-resets, or deletes local files.',
             'Requires a manual restart — nothing is killed automatically.',
           ].map((line) => (
             <li key={line} className="flex items-start gap-2 text-[11px] text-text-dim">

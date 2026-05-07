@@ -210,11 +210,26 @@ PromptVault includes a built-in updater in **Settings → App Updates**.
 
 1. Click **Check for updates** — the updater fetches the latest commit from the GitHub `main` branch and displays the current vs. latest commit, working tree status, and vault safety check.
 2. If an update is available and all safety checks pass, click **Install update**.
-3. The updater runs:
-   - `git pull --ff-only origin main`
-   - `npm install`
-   - `npm run build`
+3. The updater runs three phases in order:
+   - **Phase 1 — Download:** `git pull --ff-only origin main`
+   - **Phase 2 — Dependencies:** `npm install`
+   - **Phase 3 — Verify:** `npm run build`
 4. After the build completes, restart the app manually — the updater never kills the running process.
+
+### Partial update
+
+If the GitHub download (Phase 1) succeeds but `npm install` or `npm run build` fails, the updater shows a **yellow warning** instead of a red failure. The app code on disk may already be updated.
+
+In that case, restart PromptVault or run the fix commands manually:
+
+```bash
+cd C:\Projects\_Active\PromptVault
+npm install
+npm run build
+npm run dev
+```
+
+Your `vault/` data is not affected by any of these steps.
 
 ### Safety guarantees
 

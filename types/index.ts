@@ -255,6 +255,12 @@ export interface UpdateCheckResult {
 export interface UpdateInstallResult {
   ok: boolean
   success: boolean
+  gitUpdated?: boolean
+  npmInstallOk?: boolean
+  buildOk?: boolean
+  partialSuccess?: boolean
+  status?: 'not_started' | 'pulled' | 'installed' | 'built' | 'partial' | 'failed'
+  message?: string
   logs: string[]
   restartRequired?: boolean
   errors: string[]

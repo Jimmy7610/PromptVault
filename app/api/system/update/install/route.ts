@@ -38,17 +38,31 @@ function lastLines(text: string, n: number): string {
     .join('\n')
 }
 
+// Base shape for all responses so callers always get the step flags
+function baseResult(overrides: object) {
+  return {
+    gitUpdated: false,
+    npmInstallOk: false,
+    buildOk: false,
+    partialSuccess: false,
+    restartRequired: false,
+    status: 'not_started' as const,
+    message: '',
+    ...overrides,
+  }
+}
+
 export async function POST() {
   const logs: string[] = []
   const errors: string[] = []
 
-  const abort = (reason: string, extra: string[] = []) =>
+  const abortEarly = (reason: string, extra: string[] = []) =>
     NextResponse.json({
       ok: false,
       success: false,
+      ...baseResult({ status: 'failed', message: reason }),
       errors: [reason, ...extra],
       logs: [...logs, `ABORT: ${reason}`],
-      restartRequired: false,
     })
 
   try {
@@ -58,7 +72,7 @@ export async function POST() {
     try {
       await git(['rev-parse', '--git-dir'])
     } catch {
-      return abort('Not a git repository.')
+      return abortEarly('Not a git repository.')
     }
 
     // ── 2. Remote matches expected ─────────────────────────────────────────────
@@ -67,11 +81,11 @@ export async function POST() {
       const { stdout } = await git(['remote', 'get-url', 'origin'])
       remoteUrl = stdout.trim()
     } catch {
-      return abort(`No remote origin found. Expected: ${EXPECTED_REMOTE}`)
+      return abortEarly(`No remote origin found. Expected: ${EXPECTED_REMOTE}`)
     }
 
     if (remoteUrl !== EXPECTED_REMOTE) {
-      return abort(
+      return abortEarly(
         `Remote origin is "${remoteUrl}", expected "${EXPECTED_REMOTE}". ` +
           'Refusing to update from an unexpected remote.'
       )
@@ -84,7 +98,7 @@ export async function POST() {
       logs.push('✓ Fetched origin/main')
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      return abort(`Could not fetch from origin: ${msg}`)
+      return abortEarly(`Could not fetch from origin: ${msg}`)
     }
 
     // ── 4. Check update is actually needed ─────────────────────────────────────
@@ -102,9 +116,9 @@ export async function POST() {
       return NextResponse.json({
         ok: true,
         success: false,
+        ...baseResult({ status: 'not_started', message: 'Already up to date.' }),
         errors: [],
         logs,
-        restartRequired: false,
       })
     }
     if (currentCommit && latestCommit) {
@@ -121,7 +135,7 @@ export async function POST() {
     }
 
     if (!workingTreeClean) {
-      return abort(
+      return abortEarly(
         'Working tree has uncommitted changes. ' +
           'Commit, stash, or discard local code changes before updating.'
       )
@@ -150,7 +164,7 @@ export async function POST() {
     }
 
     if (!vaultIgnored) {
-      return abort(
+      return abortEarly(
         'vault/ is not git-ignored. Ensure "vault/" is in .gitignore before updating.'
       )
     }
@@ -163,49 +177,91 @@ export async function POST() {
 
     // ── Step 1: git pull --ff-only origin main ─────────────────────────────────
     logs.push('Step 1 / 3: git pull --ff-only origin main')
+    let gitUpdated = false
     try {
       const { stdout, stderr } = await git(['pull', '--ff-only', 'origin', 'main'])
       const out = (stdout + stderr).trim()
       logs.push(out || '(no output)')
       logs.push('✓ git pull completed')
+      gitUpdated = true
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       logs.push(`✗ git pull failed: ${msg}`)
       errors.push(`git pull --ff-only failed: ${msg}`)
-      return NextResponse.json({ ok: false, success: false, errors, logs, restartRequired: false })
+      return NextResponse.json({
+        ok: false,
+        success: false,
+        ...baseResult({
+          gitUpdated: false,
+          status: 'failed',
+          message: 'Update could not be downloaded.',
+        }),
+        errors,
+        logs,
+      })
     }
 
     // ── Step 2: npm install ────────────────────────────────────────────────────
     logs.push('─'.repeat(48))
     logs.push('Step 2 / 3: npm install')
+    let npmInstallOk = false
     try {
       const { stdout, stderr } = await npm(['install'])
       const preview = lastLines(stdout + stderr, 12)
       logs.push(preview || '(no output)')
       logs.push('✓ npm install completed')
+      npmInstallOk = true
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       logs.push(`✗ npm install failed: ${lastLines(msg, 8)}`)
-      errors.push(`npm install failed: ${msg}`)
-      return NextResponse.json({ ok: false, success: false, errors, logs, restartRequired: false })
+      errors.push(`npm install failed — see logs for details`)
+      return NextResponse.json({
+        ok: false,
+        success: false,
+        ...baseResult({
+          gitUpdated: true,
+          npmInstallOk: false,
+          partialSuccess: true,
+          restartRequired: true,
+          status: 'partial',
+          message:
+            'Update downloaded, but npm install failed. Restart PromptVault or run npm install manually.',
+        }),
+        errors,
+        logs,
+      })
     }
 
     // ── Step 3: npm run build ──────────────────────────────────────────────────
     logs.push('─'.repeat(48))
     logs.push('Step 3 / 3: npm run build')
+    let buildOk = false
     try {
       const { stdout, stderr } = await npm(['run', 'build'], 360_000)
       const preview = lastLines(stdout + stderr, 20)
       logs.push(preview || '(no output)')
       logs.push('✓ Build completed')
+      buildOk = true
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       logs.push(`✗ Build failed:\n${lastLines(msg, 20)}`)
-      errors.push(
-        'Build failed after update. App code was updated but the build did not complete. ' +
-          'See logs for details. Restart the app (npm run dev) to apply changes and investigate.'
-      )
-      return NextResponse.json({ ok: false, success: false, errors, logs, restartRequired: false })
+      errors.push(`Build failed — see logs for details`)
+      return NextResponse.json({
+        ok: false,
+        success: false,
+        ...baseResult({
+          gitUpdated: true,
+          npmInstallOk: true,
+          buildOk: false,
+          partialSuccess: true,
+          restartRequired: true,
+          status: 'partial',
+          message:
+            'Update downloaded, but build verification failed. Restart PromptVault or run npm run build manually.',
+        }),
+        errors,
+        logs,
+      })
     }
 
     // ── Success ────────────────────────────────────────────────────────────────
@@ -213,12 +269,23 @@ export async function POST() {
     logs.push('✓ Update installed successfully.')
     logs.push('Please restart PromptVault to use the new version.')
 
+    // Satisfy TypeScript: both flags are true here
+    void gitUpdated
+    void npmInstallOk
+    void buildOk
+
     return NextResponse.json({
       ok: true,
       success: true,
+      gitUpdated: true,
+      npmInstallOk: true,
+      buildOk: true,
+      partialSuccess: false,
+      restartRequired: true,
+      status: 'built',
+      message: 'Update installed successfully. Restart PromptVault.',
       errors: [],
       logs,
-      restartRequired: true,
     })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
@@ -226,9 +293,12 @@ export async function POST() {
       {
         ok: false,
         success: false,
+        ...baseResult({
+          status: 'failed',
+          message: `Unexpected error: ${msg}`,
+        }),
         errors: [`Unexpected error: ${msg}`],
         logs: [...logs, `ABORT: Unexpected error — ${msg}`],
-        restartRequired: false,
       },
       { status: 500 }
     )
