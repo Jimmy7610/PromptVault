@@ -231,3 +231,27 @@ export interface OllamaSettings {
   models: OllamaModel[]
   lastCheckedAt: string | null
 }
+
+// ── App updater ───────────────────────────────────────────────────────────────
+
+export interface UpdateCheckResult {
+  ok: boolean
+  currentCommit?: string
+  latestCommit?: string
+  branch?: string
+  remoteUrl?: string
+  updateAvailable?: boolean
+  workingTreeClean?: boolean
+  vaultIgnored?: boolean
+  canInstall?: boolean
+  warnings: string[]
+  errors: string[]
+}
+
+export interface UpdateInstallResult {
+  ok: boolean
+  success: boolean
+  logs: string[]
+  restartRequired?: boolean
+  errors: string[]
+}

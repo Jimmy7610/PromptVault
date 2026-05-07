@@ -201,6 +201,54 @@ Ollama is entirely optional. Everything except agent execution works without it.
 
 ---
 
+## Updating PromptVault
+
+PromptVault includes a built-in updater in **Settings → App Updates**.
+
+### How it works
+
+1. Click **Check for updates** — the updater fetches the latest commit from the GitHub `main` branch and displays the current vs. latest commit, working tree status, and vault safety check.
+2. If an update is available and all safety checks pass, click **Install update**.
+3. The updater runs:
+   - `git pull --ff-only origin main`
+   - `npm install`
+   - `npm run build`
+4. After the build completes, restart the app manually — the updater never kills the running process.
+
+### Safety guarantees
+
+- Only pulls from the official repo: `https://github.com/Jimmy7610/PromptVault.git`
+- Refuses to install if the working tree has uncommitted code changes
+- Refuses to install if `vault/` is not git-ignored (your local data is always safe)
+- Uses `--ff-only` — never force-pulls or hard-resets
+- Never pushes, auto-commits, or deletes local files
+- All commands are hardcoded server-side — no arbitrary shell execution
+
+### After update
+
+Restart the dev server manually:
+
+```bash
+cd C:\Projects\_Active\PromptVault
+npm run dev
+```
+
+Your vault data, localStorage, and local settings are unaffected.
+
+### Manual update (fallback)
+
+If you prefer to update without the in-app updater:
+
+```bash
+cd C:\Projects\_Active\PromptVault
+git pull --ff-only origin main
+npm install
+npm run build
+npm run dev
+```
+
+---
+
 ## Tech Stack
 
 | Technology | Version | Purpose |

@@ -37,6 +37,7 @@ import { InviteTeamModal } from '@/components/team/InviteTeamModal'
 import { testOllamaConnection, fetchOllamaModels } from '@/lib/ollama'
 import { initVault, syncAssetsToVault, getVaultAssets, rebuildVaultIndex } from '@/lib/vaultClient'
 import { AppGuideModal } from '@/components/settings/AppGuideModal'
+import { UpdatesTab } from '@/components/settings/UpdatesTab'
 
 const ACCENT_OPTIONS: { value: AccentColor; label: string; color: string }[] = [
   { value: 'blue', label: 'Blue', color: '#3b82f6' },
@@ -54,7 +55,7 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'mostCopied', label: 'Most Copied' },
 ]
 
-type SettingsTab = 'profile' | 'appearance' | 'library' | 'export' | 'team' | 'ollama' | 'vault' | 'danger'
+type SettingsTab = 'profile' | 'appearance' | 'library' | 'export' | 'team' | 'ollama' | 'vault' | 'updates' | 'danger'
 
 const TABS: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -64,6 +65,7 @@ const TABS: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'team', label: 'Team', icon: Users },
   { id: 'ollama', label: 'Local AI', icon: Cpu },
   { id: 'vault', label: 'Vault Storage', icon: HardDrive },
+  { id: 'updates', label: 'App Updates', icon: RefreshCw },
   { id: 'danger', label: 'Danger Zone', icon: AlertTriangle },
 ]
 
@@ -935,6 +937,9 @@ export function SettingsView() {
             </div>
           </div>
         )}
+
+        {/* App Updates */}
+        {activeTab === 'updates' && <UpdatesTab />}
 
         {/* Danger Zone */}
         {activeTab === 'danger' && (
