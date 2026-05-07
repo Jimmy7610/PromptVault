@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
   User,
   Palette,
@@ -30,13 +30,13 @@ import {
 import { useUserStore, getUserInitials } from '@/stores/useUserStore'
 import { useAppStore } from '@/stores/useAppStore'
 import { useNotificationStore } from '@/stores/useNotificationStore'
-import { AccentColor, Asset, InviteRole, PendingInvite, SortOption, ViewMode, VaultHealthResult } from '@/types'
+import { AccentColor, Asset, InviteRole, PendingInvite, SortOption, ViewMode, VaultHealthResult, VaultImportResult } from '@/types'
 import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
 import { downloadAllJSON, downloadAllMarkdown, parseImportJSON } from '@/lib/export'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { InviteTeamModal } from '@/components/team/InviteTeamModal'
 import { testOllamaConnection, fetchOllamaModels } from '@/lib/ollama'
-import { initVault, syncAssetsToVault, getVaultAssets, rebuildVaultIndex, healthCheckVault } from '@/lib/vaultClient'
+import { initVault, syncAssetsToVault, getVaultAssets, rebuildVaultIndex, healthCheckVault, exportVaultBackup, importVaultBackup } from '@/lib/vaultClient'
 import { AppGuideModal } from '@/components/settings/AppGuideModal'
 import { UpdatesTab } from '@/components/settings/UpdatesTab'
 
@@ -139,6 +139,13 @@ export function SettingsView() {
   const [guideOpen, setGuideOpen] = useState(false)
   const [healthLoading, setHealthLoading] = useState(false)
   const [healthResult, setHealthResult] = useState<VaultHealthResult | null>(null)
+  const importFileInputRef = useRef<HTMLInputElement>(null)
+  const [backupLoading, setBackupLoading] = useState(false)
+  const [importLoading, setImportLoading] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importConfirmOpen, setImportConfirmOpen] = useState(false)
+  const [backupMessage, setBackupMessage] = useState<{ text: string; ok: boolean } | null>(null)
+  const [importResult, setImportResult] = useState<VaultImportResult | null>(null)
 
   const initials = user ? getUserInitials(user.name) : '?'
   const trashCount = assets.filter((a) => a.status === 'trash').length
@@ -315,6 +322,46 @@ export function SettingsView() {
     const result = await healthCheckVault()
     setHealthResult(result)
     setHealthLoading(false)
+  }
+
+  const handleExportVault = async () => {
+    setBackupLoading(true)
+    setBackupMessage(null)
+    const result = await exportVaultBackup()
+    setBackupMessage(
+      result.ok
+        ? { ok: true, text: 'Vault backup downloaded successfully.' }
+        : { ok: false, text: result.error ?? 'Export failed.' }
+    )
+    setBackupLoading(false)
+  }
+
+  const handleImportFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null
+    e.target.value = '' // reset so same file can be re-selected
+    if (file) {
+      setImportFile(file)
+      setImportConfirmOpen(true)
+    }
+  }
+
+  const handleConfirmImport = async () => {
+    if (!importFile) return
+    setImportLoading(true)
+    setBackupMessage(null)
+    setImportResult(null)
+    const result = await importVaultBackup(importFile)
+    setImportFile(null)
+    setImportResult(result)
+    if (result.ok) {
+      updateVault({ vaultInitialized: true, vaultStatus: 'ready' })
+      setBackupMessage({ ok: true, text: result.message })
+      // Automatically verify the imported vault
+      await handleHealthCheck()
+    } else {
+      setBackupMessage({ ok: false, text: result.message || 'Import failed.' })
+    }
+    setImportLoading(false)
   }
 
   return (
@@ -1062,6 +1109,94 @@ export function SettingsView() {
               )
             })()}
 
+            {/* Vault Backup & Transfer */}
+            <div className="rounded-xl border border-border overflow-hidden">
+              <div className="px-4 py-3 bg-surface-soft border-b border-border">
+                <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider">
+                  Vault Backup &amp; Transfer
+                </div>
+              </div>
+              <div className="p-4 space-y-3">
+                <p className="text-[11px] text-text-dim leading-relaxed">
+                  Export your entire local vault as a <code className="text-text-muted">.zip</code> file,
+                  or import a backup on another computer. Useful for USB drives, external disks, or
+                  private cloud backup folders.{' '}
+                  <span className="text-text-muted font-medium">Nothing is uploaded by PromptVault.</span>
+                </p>
+
+                {/* Result banners */}
+                {backupMessage && (
+                  <div className={cn(
+                    'flex items-start gap-2 px-3 py-2.5 rounded-lg border text-xs',
+                    backupMessage.ok
+                      ? 'bg-green-500/5 border-green-500/20 text-green-400'
+                      : 'bg-danger/5 border-danger/20 text-danger'
+                  )}>
+                    {backupMessage.ok
+                      ? <CheckCircle2 size={12} className="flex-shrink-0 mt-0.5" />
+                      : <XCircle size={12} className="flex-shrink-0 mt-0.5" />}
+                    <span>{backupMessage.text}</span>
+                  </div>
+                )}
+
+                {/* Import result detail */}
+                {importResult?.ok && importResult.backupPath && (
+                  <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-surface-soft border border-border text-[11px] text-text-dim leading-snug">
+                    <Check size={11} className="text-green-400 flex-shrink-0 mt-0.5" />
+                    Previous vault backed up to:{' '}
+                    <code className="font-mono text-text-muted ml-1 break-all">{importResult.backupPath}</code>
+                  </div>
+                )}
+
+                {importResult?.ok && (
+                  <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-teal-500/5 border border-teal-500/20 text-[11px] text-teal-400/90 leading-snug">
+                    <Activity size={11} className="flex-shrink-0 mt-0.5" />
+                    Vault Health Check ran automatically after import — see results above.
+                  </div>
+                )}
+
+                {/* Buttons */}
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={handleExportVault}
+                    disabled={backupLoading || importLoading}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface border border-border text-xs text-text-muted hover:text-text-main hover:border-border-soft hover:bg-surface-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {backupLoading
+                      ? <Loader2 size={12} className="animate-spin" />
+                      : <Download size={12} />}
+                    {backupLoading ? 'Exporting…' : 'Export Vault Backup'}
+                  </button>
+
+                  <button
+                    onClick={() => importFileInputRef.current?.click()}
+                    disabled={backupLoading || importLoading}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface border border-border text-xs text-text-muted hover:text-text-main hover:border-border-soft hover:bg-surface-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {importLoading
+                      ? <Loader2 size={12} className="animate-spin" />
+                      : <Upload size={12} />}
+                    {importLoading ? 'Importing…' : 'Import Vault Backup'}
+                  </button>
+                </div>
+
+                <p className="text-[10px] text-text-dim leading-snug">
+                  Import replaces the vault folder and auto-backs up the existing one first.
+                  Use <span className="text-text-muted font-medium">Load Assets from Vault</span> afterwards
+                  to bring imported assets into the app library.
+                </p>
+              </div>
+            </div>
+
+            {/* Hidden file input for import */}
+            <input
+              ref={importFileInputRef}
+              type="file"
+              accept=".zip"
+              onChange={handleImportFileSelect}
+              className="hidden"
+            />
+
             {/* Explanation */}
             <div className="p-4 rounded-xl bg-surface-soft border border-border space-y-2">
               <div className="text-xs font-medium text-text-muted">About Vault Storage</div>
@@ -1185,6 +1320,17 @@ export function SettingsView() {
         message={`This will merge ${pendingLoadAssets.length} asset${pendingLoadAssets.length !== 1 ? 's' : ''} from the vault into your library. For any conflicting IDs, the vault version will overwrite the current one. Your existing assets that are not in the vault will be kept.`}
         confirmLabel="Load from Vault"
         danger={false}
+      />
+
+      {/* Import Vault Backup confirmation */}
+      <ConfirmModal
+        open={importConfirmOpen}
+        onClose={() => { setImportConfirmOpen(false); setImportFile(null) }}
+        onConfirm={handleConfirmImport}
+        title="Import Vault Backup"
+        message={`This will replace your current local vault with "${importFile?.name ?? 'the selected backup'}". Your existing vault will be backed up automatically before the import. This does not affect your app code or localStorage assets.`}
+        confirmLabel="Import vault"
+        requireWord="IMPORT"
       />
     </div>
   )

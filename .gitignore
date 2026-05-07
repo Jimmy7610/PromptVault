@@ -39,6 +39,10 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Vault import/export — local only, never committed
+/vault-import-backups/
+/.tmp-vault-imports/
+
 # Optional local backups
 *.local
 *.bak

@@ -1,4 +1,4 @@
-import { Asset, VaultIndex, VaultIndexAsset, VaultHealthResult } from '@/types'
+import { Asset, VaultIndex, VaultIndexAsset, VaultHealthResult, VaultImportResult } from '@/types'
 
 // ── Generic fetch helper ──────────────────────────────────────────────────────
 
@@ -137,6 +137,58 @@ export async function rebuildVaultIndex(): Promise<{ ok: boolean; count?: number
     return await vaultFetch('/api/vault/rebuild-index', { method: 'POST' })
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// ── Backup / transfer ─────────────────────────────────────────────────────────
+
+/**
+ * Request a zip of the vault from the server and trigger a browser download.
+ * No data leaves the local machine.
+ */
+export async function exportVaultBackup(): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch('/api/vault/backup/export')
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({})) as { error?: string }
+      return { ok: false, error: data.error ?? `HTTP ${res.status}` }
+    }
+    const cd = res.headers.get('Content-Disposition') ?? ''
+    const match = cd.match(/filename="([^"]+)"/)
+    const filename = match?.[1] ?? 'promptvault-vault-backup.zip'
+
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Export failed.' }
+  }
+}
+
+/**
+ * Upload a zip file to the server for import.
+ * The server validates, backs up the current vault, then replaces it.
+ */
+export async function importVaultBackup(file: File): Promise<VaultImportResult> {
+  try {
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch('/api/vault/backup/import', { method: 'POST', body: form })
+    return (await res.json()) as VaultImportResult
+  } catch (err) {
+    return {
+      ok: false,
+      message: 'Import request failed.',
+      errors: [err instanceof Error ? err.message : 'Unknown error'],
+      warnings: [],
+    }
   }
 }
 

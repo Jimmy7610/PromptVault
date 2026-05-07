@@ -154,6 +154,21 @@ You are an expert SEO content writer...
 3. **Sync to Vault** — writes all current assets to disk
 4. From now on, every create/update/trash/restore/delete is mirrored to disk automatically
 
+### Moving your Vault between computers
+
+PromptVault app code is synced through GitHub, but your personal vault is intentionally local and never committed. To move your vault to another computer:
+
+1. **Export** — go to **Settings → Vault Storage → Export Vault Backup**. A `.zip` file downloads to your computer.
+2. **Transfer** — copy the zip via USB drive, an external disk, a private cloud folder, or any method you prefer.
+3. **Import** — on the target computer, go to **Settings → Vault Storage → Import Vault Backup**, select the zip, type `IMPORT` to confirm.
+4. **Load** — click **Load Assets from Vault** to pull the imported files into the app library.
+
+> Your existing vault is automatically backed up to `vault-import-backups/` before import. Nothing is uploaded by PromptVault — the zip stays on your local machine.
+
+**Manual alternative:** You can also copy the `vault/` folder directly between computers (the project must be running on both). Export/Import is the recommended approach.
+
+**Cloud-sync caution:** Avoid placing the active `vault/` folder inside a live-syncing cloud folder (OneDrive, Google Drive, iCloud). Sync tools can lock files or create conflicts mid-write. Instead, export a backup zip and place _that_ in the cloud folder for transfer.
+
 ### Vault Health Check
 
 **Settings → Vault Storage → Run Vault Health Check** runs a read-only inspection of the local vault and shows the result in-panel immediately.

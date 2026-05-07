@@ -266,6 +266,14 @@ export interface UpdateInstallResult {
   errors: string[]
 }
 
+export interface VaultImportResult {
+  ok: boolean
+  message: string
+  backupPath?: string
+  errors: string[]
+  warnings: string[]
+}
+
 export interface VaultFolderStatus {
   name: string
   exists: boolean
