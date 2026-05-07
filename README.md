@@ -52,6 +52,7 @@ PromptVault gives you a **real library** — searchable, filterable, taggable �
 | **Import / Export** | Export all assets as JSON or Markdown; import from JSON backup |
 | **Notifications** | In-app notification bell for asset events (created, trashed, restored, deleted) |
 | **Keyboard Shortcuts** | `N` — new asset · `F` — toggle favorite · `Esc` — close panel |
+| **Live Dashboard Stats** | Total Assets, Agents, Prompts, Files, Templates, Copied Today — all calculated from real library data |
 | **Dark Premium UI** | Custom dark theme with accent color picker (blue, purple, green, orange) |
 | **Create from Clipboard** | Quickly turn copied text into a saved asset — auto-detects type (prompt, agent, code, markdown) |
 | **Invite System** | Save team invites locally (ready for future Supabase backend) |

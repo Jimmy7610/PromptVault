@@ -1,6 +1,9 @@
 'use client'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAppStore } from '@/stores/useAppStore'
+import { useCopyStore } from '@/stores/useCopyStore'
+import { AssetType } from '@/types'
 
 interface StatsCardProps {
   label: string
@@ -38,12 +41,35 @@ export function StatsCard({ label, value, trend, trendUp, icon, iconBg }: StatsC
   )
 }
 
+// Asset types counted under "Files"
+const FILE_LIKE_TYPES: AssetType[] = ['markdown', 'code', 'workflow', 'image', 'json', 'note', 'link', 'other']
+
+function isSameLocalDay(iso: string): boolean {
+  const d = new Date(iso)
+  const t = new Date()
+  return d.getFullYear() === t.getFullYear() &&
+    d.getMonth() === t.getMonth() &&
+    d.getDate() === t.getDate()
+}
+
 export function StatsRow() {
+  const assets = useAppStore((s) => s.assets)
+  const copiedToday = useCopyStore((s) =>
+    s.copyEvents.filter((e) => isSameLocalDay(e.copiedAt)).length
+  )
+
+  const active = assets.filter((a) => a.status !== 'trash')
+  const total     = active.length
+  const agents    = active.filter((a) => a.type === 'agent').length
+  const prompts   = active.filter((a) => a.type === 'prompt').length
+  const files     = active.filter((a) => FILE_LIKE_TYPES.includes(a.type as AssetType)).length
+  const templates = active.filter((a) => a.type === 'template').length
+
   const stats = [
     {
       label: 'Total Assets',
-      value: 1248,
-      trend: '↑ 18% this week',
+      value: total,
+      trend: 'active assets',
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-blue-400">
@@ -57,8 +83,8 @@ export function StatsRow() {
     },
     {
       label: 'Agents',
-      value: 24,
-      trend: '+3 this week',
+      value: agents,
+      trend: 'saved agents',
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-violet-400">
@@ -70,8 +96,8 @@ export function StatsRow() {
     },
     {
       label: 'Prompts',
-      value: 432,
-      trend: '↑ 24% this month',
+      value: prompts,
+      trend: 'saved prompts',
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-blue-400">
@@ -83,8 +109,8 @@ export function StatsRow() {
     },
     {
       label: 'Files',
-      value: 562,
-      trend: '↑ 8% this week',
+      value: files,
+      trend: 'file-like assets',
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-yellow-400">
@@ -96,8 +122,8 @@ export function StatsRow() {
     },
     {
       label: 'Copied Today',
-      value: 32,
-      trend: '+12 vs yesterday',
+      value: copiedToday,
+      trend: 'copy actions today',
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-green-400">
@@ -109,8 +135,8 @@ export function StatsRow() {
     },
     {
       label: 'Templates',
-      value: 16,
-      trend: '3 new this week',
+      value: templates,
+      trend: 'saved templates',
       trendUp: true,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-indigo-400">

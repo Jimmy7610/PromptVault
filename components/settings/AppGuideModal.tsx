@@ -256,6 +256,11 @@ export function AppGuideModal({ open, onClose }: Props) {
                   <p>Attached images are saved to <code className="bg-surface-soft px-1 rounded text-text-main">vault/images/[assetId]/</code> and are included automatically in Vault Backup exports. Nothing is uploaded — files stay entirely local. Vault Storage must be enabled first.</p>
                 </GuideCard>
 
+                <GuideCard icon={Sparkles} title="Dashboard stats">
+                  <p>The stat cards on the dashboard (Total Assets, Agents, Prompts, Files, Templates, Copied Today) are calculated live from your actual library — not demo placeholders. They update instantly when you create, trash, restore, or copy assets.</p>
+                  <p><strong className="text-text-main">Copied Today</strong> is tracked locally as metadata only — the copy event log stores asset ID, label, and timestamp. It does not save the copied prompt content.</p>
+                </GuideCard>
+
                 <GuideCard icon={Sparkles} title="Demo assets">
                   <p>The assets on first launch are demo assets — examples only. Delete them individually (trash icon in detail panel) or all at once via <strong className="text-text-main">Settings → Danger Zone → Clear All Assets</strong>.</p>
                 </GuideCard>

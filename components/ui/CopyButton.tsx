@@ -4,6 +4,7 @@ import { Copy, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { copyToClipboard } from '@/lib/clipboard'
 import { useAppStore } from '@/stores/useAppStore'
+import { useCopyStore } from '@/stores/useCopyStore'
 
 interface CopyButtonProps {
   text: string
@@ -26,6 +27,7 @@ export function CopyButton({
 }: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
   const { showToast, incrementCopyCount } = useAppStore()
+  const { recordCopy } = useCopyStore()
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -34,6 +36,7 @@ export function CopyButton({
     if (success) {
       setCopied(true)
       if (assetId) incrementCopyCount(assetId)
+      recordCopy(assetId, label)
       showToast(toastMessage ?? (label ? `${label} copied` : 'Copied!'))
       setTimeout(() => setCopied(false), 2000)
     }
