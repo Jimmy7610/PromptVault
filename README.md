@@ -51,6 +51,7 @@ PromptVault gives you a **real library** — searchable, filterable, taggable �
 | **Image Attachments** | Attach a real PNG/JPG/WebP file to any Image asset — stored locally in `vault/images/`, included in backups |
 | **Import / Export** | Export all assets as JSON or Markdown; import from JSON backup |
 | **Version History** | Automatic version snapshots on every save — view, copy, or restore any prior version (up to 25 per asset) |
+| **Prompt Variables / Builder** | Write prompts with `{variable}` placeholders — PromptVault detects them, shows fill-in fields, and generates the finished prompt; copy or save as new asset |
 | **Asset Status Indicators** | Every card and inspector shows last-edited date, version count, and vault/local storage status |
 | **EN / SV Language Support** | UI language switch between English and Swedish in Settings → Appearance (asset content is never translated) |
 | **Notifications** | In-app notification bell for asset events (created, trashed, restored, deleted) |
@@ -514,6 +515,7 @@ promptvault/
 - [x] Edit asset modal (full in-place editing with vault sync)
 - [x] Image upload and inline preview (vault-based, PNG/JPG/WebP, max 20 MB)
 - [x] EN / SV UI language support (Settings → Appearance)
+- [x] Prompt Variables / Prompt Builder (`{variable}` syntax, live preview, copy or save generated result)
 - [ ] Supabase backend for optional cross-device sync
 - [ ] Markdown editor with live preview (CodeMirror or Monaco)
 - [ ] Syntax highlighting in code assets (highlight.js or Prism)

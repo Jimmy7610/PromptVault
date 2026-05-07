@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   RefreshCw,
   Loader2,
+  Wand2,
 } from 'lucide-react'
 import { Asset } from '@/types'
 import { CopyButton } from '@/components/ui/CopyButton'
@@ -17,6 +18,8 @@ import { useUserStore } from '@/stores/useUserStore'
 import { updateVaultAsset } from '@/lib/vaultClient'
 import { AssetStatusRow } from './AssetStatusRow'
 import { useI18n } from '@/lib/i18n/useI18n'
+import { hasPromptVariables } from '@/lib/promptVariables'
+import { PromptBuilderModal } from '@/components/forms/PromptBuilderModal'
 
 interface ImageDetailProps {
   asset: Asset
@@ -38,9 +41,11 @@ export function ImageDetail({ asset }: ImageDetailProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [builderOpen, setBuilderOpen] = useState(false)
 
   const hasImage = !!asset.imagePath
   const vaultReady = vault.vaultEnabled && vault.vaultInitialized
+  const showBuilder = !!(asset.content && hasPromptVariables(asset.content))
 
   const triggerFilePicker = () => {
     if (!vaultReady) {
@@ -361,6 +366,14 @@ export function ImageDetail({ asset }: ImageDetailProps) {
       {/* Quick Actions */}
       <div className="px-4 py-3 border-t border-border flex-shrink-0 bg-surface">
         <div className="flex flex-wrap gap-2">
+          {showBuilder && (
+            <button
+              onClick={() => setBuilderOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-blue text-white text-xs font-medium hover:bg-blue-500 transition-colors"
+            >
+              <Wand2 size={11} /> {t('promptBuilder.buildPrompt')}
+            </button>
+          )}
           {asset.content && <CopyButton text={asset.content} label={t('inspector.imageCopyPrompt')} assetId={asset.id} />}
           {hasImage ? (
             <button
@@ -381,6 +394,14 @@ export function ImageDetail({ asset }: ImageDetailProps) {
           )}
         </div>
       </div>
+
+      {builderOpen && asset.content && (
+        <PromptBuilderModal
+          asset={asset}
+          promptText={asset.content}
+          onClose={() => setBuilderOpen(false)}
+        />
+      )}
     </div>
   )
 }

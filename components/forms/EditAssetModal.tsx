@@ -1,11 +1,12 @@
 'use client'
 import { useState, useRef } from 'react'
-import { X, Plus, Trash2 } from 'lucide-react'
+import { X, Plus, Trash2, Wand2 } from 'lucide-react'
 import { Asset, Variable } from '@/types'
 import { useAppStore } from '@/stores/useAppStore'
 import { useVersionStore } from '@/stores/useVersionStore'
 import { useI18n } from '@/lib/i18n/useI18n'
 import { cn, assetTypeConfig } from '@/lib/utils'
+import { hasPromptVariables } from '@/lib/promptVariables'
 
 interface FormState {
   title: string
@@ -297,6 +298,19 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
                   }
                   className={cn(MONO_CLS, 'resize-none')}
                 />
+              </div>
+            )}
+
+            {/* Variable hint */}
+            {['prompt', 'image', 'agent'].includes(asset.type) &&
+              hasPromptVariables(
+                asset.type === 'agent'
+                  ? (form.systemPrompt || form.instructions)
+                  : form.content
+              ) && (
+              <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-accent-blue/5 border border-accent-blue/15 -mt-1">
+                <Wand2 size={11} className="text-accent-blue flex-shrink-0 mt-0.5" />
+                <p className="text-[11px] text-text-dim leading-snug">{t('editModal.variableHint')}</p>
               </div>
             )}
 

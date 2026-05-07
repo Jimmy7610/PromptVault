@@ -129,6 +129,7 @@ const en: NestedStrings = {
   editModal: {
     title:          'Edit Asset',
     typeLockedHint: 'Type is locked for existing assets',
+    variableHint:   'Variables like {subject} can be filled with Build Prompt from the inspector.',
     basicInfo:      'Basic Info',
     content:        'Content',
     advanced:       'Advanced',
@@ -240,24 +241,6 @@ const en: NestedStrings = {
     emailRequired:  'A valid email is required.',
   },
 
-  // ── App Guide ────────────────────────────────────────────────────────────────
-  guide: {
-    title:    'App Guide',
-    subtitle: 'Everything you need to know about PromptVault',
-    sections: {
-      what:     'What is PromptVault?',
-      login:    'Login & Profile',
-      assets:   'Asset Library',
-      agents:   'Agents & Local AI',
-      vault:    'Vault Storage',
-      backup:   'Backup & Transfer',
-      trash:    'Trash & Delete',
-      updates:  'App Updates',
-      privacy:  'Privacy & Local-first',
-      workflow: 'Recommended Workflow',
-    },
-  },
-
   // ── Asset status indicators ─────────────────────────────────────────────────
   status: {
     editedToday:     'Edited today',
@@ -285,6 +268,45 @@ const en: NestedStrings = {
   toast: {
     addedFavorites:   'Added to favorites',
     removedFavorites: 'Removed from favorites',
+  },
+
+  // ── Prompt Builder ───────────────────────────────────────────────────────────
+  promptBuilder: {
+    title:             'Build Prompt',
+    description:       'Fill in variables to generate a finished prompt.',
+    originalPrompt:    'Original Prompt',
+    generatedPrompt:   'Generated Prompt',
+    detectedVariables: 'Detected Variables',
+    noVariables:       'No variables found in this prompt.',
+    copyGenerated:     'Copy Generated Prompt',
+    saveAsNew:         'Save as New Asset',
+    close:             'Close',
+    valuePlaceholder:  'Enter value for {name}',
+    generatedSaved:    'Generated prompt saved',
+    generatedCopied:   'Generated prompt copied!',
+    buildPrompt:       'Build Prompt',
+    unfilledVariables: 'Unfilled variables will remain as {name}.',
+    savedTitle:        '— Generated',
+    savedDescription:  'Generated from {title}',
+  },
+
+  // ── Guide sections ────────────────────────────────────────────────────────────
+  guide: {
+    title:    'App Guide',
+    subtitle: 'Everything you need to know about PromptVault',
+    sections: {
+      what:          'What is PromptVault?',
+      login:         'Login & Profile',
+      assets:        'Asset Library',
+      agents:        'Agents & Local AI',
+      vault:         'Vault Storage',
+      backup:        'Backup & Transfer',
+      trash:         'Trash & Delete',
+      updates:       'App Updates',
+      privacy:       'Privacy & Local-first',
+      workflow:      'Recommended Workflow',
+      promptBuilder: 'Prompt Builder',
+    },
   },
 }
 
@@ -406,6 +428,7 @@ const sv: NestedStrings = {
   editModal: {
     title:          'Redigera asset',
     typeLockedHint: 'Typen är låst för befintliga assets',
+    variableHint:   'Variabler som {subject} kan fyllas i via Bygg prompt i detaljpanelen.',
     basicInfo:      'Grundinformation',
     content:        'Innehåll',
     advanced:       'Avancerat',
@@ -512,16 +535,17 @@ const sv: NestedStrings = {
     title:    'App-guide',
     subtitle: 'Allt du behöver veta om PromptVault',
     sections: {
-      what:     'Vad är PromptVault?',
-      login:    'Inloggning & profil',
-      assets:   'Asset-bibliotek',
-      agents:   'Agenter & lokal AI',
-      vault:    'Vault-lagring',
-      backup:   'Backup & överföring',
-      trash:    'Papperskorg & radering',
-      updates:  'Appuppdateringar',
-      privacy:  'Integritet & lokal-first',
-      workflow: 'Rekommenderat arbetsflöde',
+      what:          'Vad är PromptVault?',
+      login:         'Inloggning & profil',
+      assets:        'Asset-bibliotek',
+      agents:        'Agenter & lokal AI',
+      vault:         'Vault-lagring',
+      backup:        'Backup & överföring',
+      trash:         'Papperskorg & radering',
+      updates:       'Appuppdateringar',
+      privacy:       'Integritet & lokal-first',
+      workflow:      'Rekommenderat arbetsflöde',
+      promptBuilder: 'Prompt-byggaren',
     },
   },
   status: {
@@ -546,6 +570,25 @@ const sv: NestedStrings = {
   toast: {
     addedFavorites:   'Tillagd i favoriter',
     removedFavorites: 'Borttagen från favoriter',
+  },
+
+  promptBuilder: {
+    title:             'Bygg prompt',
+    description:       'Fyll i variabler för att generera en färdig prompt.',
+    originalPrompt:    'Originalprompt',
+    generatedPrompt:   'Genererad prompt',
+    detectedVariables: 'Identifierade variabler',
+    noVariables:       'Inga variabler hittades i den här prompten.',
+    copyGenerated:     'Kopiera färdig prompt',
+    saveAsNew:         'Spara som ny asset',
+    close:             'Stäng',
+    valuePlaceholder:  'Ange värde för {name}',
+    generatedSaved:    'Genererad prompt sparad',
+    generatedCopied:   'Genererad prompt kopierad!',
+    buildPrompt:       'Bygg prompt',
+    unfilledVariables: 'Ofyllda variabler förblir som {name}.',
+    savedTitle:        '— Genererad',
+    savedDescription:  'Genererad från {title}',
   },
 }
 

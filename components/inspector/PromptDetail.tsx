@@ -1,11 +1,13 @@
 'use client'
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Settings2, Variable } from 'lucide-react'
+import { ChevronDown, ChevronUp, Settings2, Variable, Wand2 } from 'lucide-react'
 import { Asset } from '@/types'
 import { CopyButton } from '@/components/ui/CopyButton'
 import { AssetStatusRow } from './AssetStatusRow'
 import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n/useI18n'
+import { hasPromptVariables } from '@/lib/promptVariables'
+import { PromptBuilderModal } from '@/components/forms/PromptBuilderModal'
 
 interface SectionProps {
   title: string
@@ -43,6 +45,9 @@ interface PromptDetailProps {
 
 export function PromptDetail({ asset }: PromptDetailProps) {
   const { t } = useI18n()
+  const [builderOpen, setBuilderOpen] = useState(false)
+  const showBuilder = hasPromptVariables(asset.content)
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -177,6 +182,14 @@ export function PromptDetail({ asset }: PromptDetailProps) {
           {t('inspector.quickActions')}
         </div>
         <div className="flex flex-wrap gap-2">
+          {showBuilder && (
+            <button
+              onClick={() => setBuilderOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-blue text-white text-xs font-medium hover:bg-blue-500 transition-colors"
+            >
+              <Wand2 size={11} /> {t('promptBuilder.buildPrompt')}
+            </button>
+          )}
           <CopyButton text={asset.content} label={t('inspector.copyPrompt')} assetId={asset.id} />
           {asset.negativePrompt && (
             <CopyButton text={asset.negativePrompt} label={t('inspector.copyNegative')} />
@@ -187,6 +200,14 @@ export function PromptDetail({ asset }: PromptDetailProps) {
           />
         </div>
       </div>
+
+      {builderOpen && (
+        <PromptBuilderModal
+          asset={asset}
+          promptText={asset.content}
+          onClose={() => setBuilderOpen(false)}
+        />
+      )}
     </div>
   )
 }

@@ -13,6 +13,7 @@ import {
   Clock,
   Hash,
   Calendar,
+  Wand2,
 } from 'lucide-react'
 import { Asset } from '@/types'
 import { CopyButton } from '@/components/ui/CopyButton'
@@ -23,6 +24,8 @@ import { useI18n } from '@/lib/i18n/useI18n'
 import { assetToMarkdown } from '@/lib/export'
 import { RunAgentModal } from '@/components/agent/RunAgentModal'
 import { TestAgentModal } from '@/components/agent/TestAgentModal'
+import { hasPromptVariables } from '@/lib/promptVariables'
+import { PromptBuilderModal } from '@/components/forms/PromptBuilderModal'
 
 type Tab = 'overview' | 'activity' | 'versions' | 'notes'
 
@@ -74,8 +77,12 @@ export function AgentDetail({ asset }: AgentDetailProps) {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [runModalOpen, setRunModalOpen] = useState(false)
   const [testModalOpen, setTestModalOpen] = useState(false)
+  const [builderOpen, setBuilderOpen] = useState(false)
   const { showToast, toggleFavorite } = useAppStore()
   const { t } = useI18n()
+
+  const builderText = asset.systemPrompt || asset.instructions || ''
+  const showBuilder = hasPromptVariables(builderText)
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'overview', label: t('inspector.tabOverview') },
@@ -373,6 +380,14 @@ export function AgentDetail({ asset }: AgentDetailProps) {
           >
             <FlaskConical size={11} /> {t('inspector.testAgent')}
           </button>
+          {showBuilder && (
+            <button
+              onClick={() => setBuilderOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-soft border border-border text-text-muted hover:text-text-main text-xs transition-colors"
+            >
+              <Wand2 size={11} /> {t('promptBuilder.buildPrompt')}
+            </button>
+          )}
           <CopyButton
             text={assetToMarkdown(asset)}
             label={t('inspector.copyAllAsset')}
@@ -392,6 +407,13 @@ export function AgentDetail({ asset }: AgentDetailProps) {
         onClose={() => setTestModalOpen(false)}
         asset={asset}
       />
+      {builderOpen && builderText && (
+        <PromptBuilderModal
+          asset={asset}
+          promptText={builderText}
+          onClose={() => setBuilderOpen(false)}
+        />
+      )}
     </div>
   )
 }

@@ -21,6 +21,7 @@ import {
   Upload,
   RefreshCw,
   Activity,
+  Wand2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n/useI18n'
@@ -41,18 +42,20 @@ type GuideSection =
   | 'updates'
   | 'privacy'
   | 'workflow'
+  | 'promptBuilder'
 
 const SECTION_DEFS: { id: GuideSection; key: string; icon: React.ElementType }[] = [
-  { id: 'what',     key: 'guide.sections.what',     icon: Lightbulb },
-  { id: 'login',    key: 'guide.sections.login',    icon: User },
-  { id: 'assets',   key: 'guide.sections.assets',   icon: Library },
-  { id: 'agents',   key: 'guide.sections.agents',   icon: Bot },
-  { id: 'vault',    key: 'guide.sections.vault',    icon: HardDrive },
-  { id: 'backup',   key: 'guide.sections.backup',   icon: Download },
-  { id: 'trash',    key: 'guide.sections.trash',    icon: Trash2 },
-  { id: 'updates',  key: 'guide.sections.updates',  icon: RefreshCw },
-  { id: 'privacy',  key: 'guide.sections.privacy',  icon: Shield },
-  { id: 'workflow', key: 'guide.sections.workflow', icon: GitBranch },
+  { id: 'what',          key: 'guide.sections.what',          icon: Lightbulb },
+  { id: 'login',         key: 'guide.sections.login',         icon: User },
+  { id: 'assets',        key: 'guide.sections.assets',        icon: Library },
+  { id: 'agents',        key: 'guide.sections.agents',        icon: Bot },
+  { id: 'vault',         key: 'guide.sections.vault',         icon: HardDrive },
+  { id: 'backup',        key: 'guide.sections.backup',        icon: Download },
+  { id: 'trash',         key: 'guide.sections.trash',         icon: Trash2 },
+  { id: 'updates',       key: 'guide.sections.updates',       icon: RefreshCw },
+  { id: 'privacy',       key: 'guide.sections.privacy',       icon: Shield },
+  { id: 'workflow',      key: 'guide.sections.workflow',      icon: GitBranch },
+  { id: 'promptBuilder', key: 'guide.sections.promptBuilder', icon: Wand2 },
 ]
 
 function GuideCard({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) {
@@ -509,6 +512,47 @@ export function AppGuideModal({ open, onClose }: Props) {
                 <GuideCard icon={Lightbulb} title="Future possibilities">
                   <p>PromptVault is designed to grow. Future ideas include: Supabase backend for cross-device sync, team sharing, Markdown editor with live preview, command palette, and expanded AI tool integrations.</p>
                   <p className="text-text-dim">It is intentionally local-first — a solid foundation to build on.</p>
+                </GuideCard>
+              </>
+            )}
+
+            {section === 'promptBuilder' && (
+              <>
+                <h2 className="text-base font-bold text-text-main mb-1">Prompt Builder / Variables</h2>
+                <p className="text-xs text-text-dim mb-4">Fill in variables to generate a finished prompt — without changing the original.</p>
+
+                <GuideCard icon={Wand2} title="What are prompt variables?">
+                  <p>You can write prompts and agent instructions that contain named placeholders wrapped in curly braces, like <code className="bg-surface-soft px-1 rounded text-text-main">{"{"}</code><code className="bg-surface-soft px-1 rounded text-text-main">{"subject}"}</code> or <code className="bg-surface-soft px-1 rounded text-text-main">{"{lighting}"}</code>. PromptVault automatically detects any <code className="bg-surface-soft px-1 rounded text-text-main">{"{variablename}"}</code> patterns in your prompt or generation prompt.</p>
+                  <p>Example prompt with variables:</p>
+                  <div className="bg-background rounded-lg px-3 py-2 mt-1 font-mono text-[11px] text-text-muted leading-relaxed">
+                    A cinematic portrait of <span className="text-accent-blue">{'{subject}'}</span> in <span className="text-accent-blue">{'{location}'}</span>, wearing <span className="text-accent-blue">{'{outfit}'}</span>, with <span className="text-accent-blue">{'{lighting}'}</span>, hyperrealistic, cinematic
+                  </div>
+                </GuideCard>
+
+                <GuideCard icon={Wand2} title="How to use Build Prompt">
+                  <ol className="space-y-1 mt-1 ml-2 list-decimal list-inside">
+                    <li>Open a Prompt or Image asset that contains <code className="bg-surface-soft px-1 rounded text-text-main">{'{variable}'}</code> placeholders.</li>
+                    <li>Click <strong className="text-text-main">Build Prompt</strong> in the Quick Actions footer.</li>
+                    <li>A modal opens showing all detected variables as input fields.</li>
+                    <li>Type values into each field — the Generated Prompt updates live.</li>
+                    <li>Click <strong className="text-text-main">Copy Generated Prompt</strong> to copy the finished result.</li>
+                    <li>Or click <strong className="text-text-main">Save as New Asset</strong> to save the result as a new prompt asset in your library.</li>
+                  </ol>
+                  <p className="text-text-dim mt-2">The Build Prompt button also appears in Agent details when the system prompt or instructions contain variables.</p>
+                </GuideCard>
+
+                <GuideCard icon={Wand2} title="Original asset is never changed">
+                  <p>Filling values in the Prompt Builder does <strong className="text-text-main">not</strong> modify your original prompt. The builder is a temporary workspace — your original template stays intact for reuse.</p>
+                  <p>Any generated prompt you save becomes a new independent asset. Editing it later uses normal version history — the original is not affected.</p>
+                </GuideCard>
+
+                <GuideCard icon={Wand2} title="Variable rules">
+                  <ul className="space-y-1 mt-1 ml-2">
+                    <li className="flex items-start gap-1.5"><ChevronRight size={10} className="text-accent-blue flex-shrink-0 mt-1" /><span>Variable names must start with a letter and may contain letters, numbers, underscores, and dashes.</span></li>
+                    <li className="flex items-start gap-1.5"><ChevronRight size={10} className="text-accent-blue flex-shrink-0 mt-1" /><span>Variables are detected in order of first appearance and deduplicated.</span></li>
+                    <li className="flex items-start gap-1.5"><ChevronRight size={10} className="text-accent-blue flex-shrink-0 mt-1" /><span>Unfilled variables remain as <code className="bg-surface-soft px-1 rounded text-text-main">{'{variablename}'}</code> in the output — they are highlighted amber so you can spot them.</span></li>
+                    <li className="flex items-start gap-1.5"><ChevronRight size={10} className="text-accent-blue flex-shrink-0 mt-1" /><span>Variables are only detected in prompt and image assets, and in agent system prompts and instructions. Code and JSON assets do not trigger the builder automatically.</span></li>
+                  </ul>
                 </GuideCard>
               </>
             )}
