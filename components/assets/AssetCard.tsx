@@ -83,7 +83,7 @@ export function AssetCard({ asset }: AssetCardProps) {
     if (success) {
       setCopied(true)
       incrementCopyCount(asset.id)
-      showToast(`"${asset.title}" copied`)
+      showToast(`"${asset.title}" ${t('cardToast.copied')}`)
       setTimeout(() => setCopied(false), 2000)
     }
   }
@@ -91,14 +91,14 @@ export function AssetCard({ asset }: AssetCardProps) {
   const handleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation()
     toggleFavorite(asset.id)
-    showToast(asset.isFavorite ? 'Removed from favorites' : 'Added to favorites')
+    showToast(asset.isFavorite ? t('toast.removedFavorites') : t('toast.addedFavorites'))
   }
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
     setMenuOpen(false)
     deleteAsset(asset.id)
-    showToast(`"${asset.title}" moved to trash`)
+    showToast(`"${asset.title}" ${t('cardToast.movedToTrash')}`)
   }
 
   return (
@@ -131,7 +131,7 @@ export function AssetCard({ asset }: AssetCardProps) {
         {isTrash ? (
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              onClick={(e) => { e.stopPropagation(); restoreAsset(asset.id); showToast(`"${asset.title}" restored`) }}
+              onClick={(e) => { e.stopPropagation(); restoreAsset(asset.id); showToast(`"${asset.title}" ${t('cardToast.restored')}`) }}
               aria-label="Restore"
               className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-accent-blue bg-accent-blue/10 hover:bg-accent-blue/20 transition-colors"
             >
@@ -306,10 +306,10 @@ export function AssetCard({ asset }: AssetCardProps) {
     <ConfirmModal
       open={confirmDeleteOpen}
       onClose={() => setConfirmDeleteOpen(false)}
-      onConfirm={() => { permanentDeleteAsset(asset.id); showToast(`"${asset.title}" permanently deleted`) }}
-      title="Permanently delete asset?"
-      message={`"${asset.title}" will be deleted forever. This cannot be undone.`}
-      confirmLabel="Delete Forever"
+      onConfirm={() => { permanentDeleteAsset(asset.id); showToast(`"${asset.title}" ${t('cardToast.permDeleted')}`) }}
+      title={t('grid.deleteAssetConfirm')}
+      message={`"${asset.title}" ${t('grid.deleteAssetMessage')}`}
+      confirmLabel={t('grid.deleteForever')}
       requireWord="DELETE"
     />
     </>

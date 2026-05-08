@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { AlertTriangle, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/useI18n'
 
 interface ConfirmModalProps {
   open: boolean
@@ -26,6 +27,7 @@ export function ConfirmModal({
   danger = true,
 }: ConfirmModalProps) {
   const [typed, setTyped] = useState('')
+  const { t } = useI18n()
 
   useEffect(() => {
     if (!open) setTyped('')
@@ -62,7 +64,9 @@ export function ConfirmModal({
           {requireWord && (
             <div className="mb-4">
               <label className="block text-xs text-text-muted mb-1.5">
-                Type <span className="font-mono font-bold text-danger">{requireWord}</span> to confirm
+                {t('confirm.typeToConfirm').split('{word}')[0]}
+                <span className="font-mono font-bold text-danger">{requireWord}</span>
+                {t('confirm.typeToConfirm').split('{word}')[1]}
               </label>
               <input
                 type="text"
@@ -80,7 +84,7 @@ export function ConfirmModal({
               onClick={onClose}
               className="px-4 py-2 text-sm text-text-muted hover:text-text-main transition-colors"
             >
-              Cancel
+              {t('confirm.cancel')}
             </button>
             <button
               onClick={() => { if (canConfirm) { onConfirm(); onClose() } }}

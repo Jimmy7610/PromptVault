@@ -98,7 +98,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
         {/* Type + version badges */}
         <div className="flex items-center gap-2 mb-2 flex-wrap">
           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-violet-500/15 text-violet-300 border border-violet-500/25">
-            Agent
+            {t('typeLabel.agent')}
           </span>
           <span className="px-2 py-0.5 rounded-full text-[10px] bg-surface-soft text-text-dim border border-border">
             v{asset.version}
@@ -148,7 +148,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
                 action={
                   <CopyButton
                     text={asset.systemPrompt}
-                    label="System Prompt"
+                    label={t('inspector.systemPrompt')}
                     assetId={asset.id}
                     size="sm"
                     variant="icon"
@@ -168,7 +168,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
                 action={
                   <CopyButton
                     text={asset.instructions}
-                    label="Instructions"
+                    label={t('inspector.instructions')}
                     assetId={asset.id}
                     size="sm"
                     variant="icon"
@@ -224,7 +224,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
                 action={
                   <CopyButton
                     text={asset.exampleOutput}
-                    label="Example Output"
+                    label={t('inspector.exampleOutput')}
                     size="sm"
                     variant="icon"
                   />
@@ -261,21 +261,21 @@ export function AgentDetail({ asset }: AgentDetailProps) {
                 {[
                   {
                     icon: Calendar,
-                    label: 'Created',
+                    label: t('inspector.created'),
                     value: formatDate(asset.createdAt),
                   },
                   {
                     icon: Clock,
-                    label: 'Updated',
+                    label: t('inspector.updated'),
                     value: formatRelativeTime(asset.updatedAt),
                   },
                   {
                     icon: Clock,
-                    label: 'Last Used',
-                    value: asset.lastUsedAt ? formatRelativeTime(asset.lastUsedAt) : 'Never',
+                    label: t('agentView.lastUsed'),
+                    value: asset.lastUsedAt ? formatRelativeTime(asset.lastUsedAt) : t('agentView.never'),
                   },
-                  { icon: Hash, label: 'Usage Count', value: asset.usageCount.toString() },
-                  { icon: Copy, label: 'Copy Count', value: asset.copyCount.toString() },
+                  { icon: Hash, label: t('agentView.usageCount'), value: asset.usageCount.toString() },
+                  { icon: Copy, label: t('agentView.copyCount'), value: asset.copyCount.toString() },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-[11px] text-text-dim">
@@ -297,7 +297,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
                 {asset.notes}
               </div>
             ) : (
-              <div className="text-xs text-text-dim text-center py-8">No notes yet</div>
+              <div className="text-xs text-text-dim text-center py-8">{t('agentView.noNotes')}</div>
             )}
           </div>
         )}
@@ -350,7 +350,7 @@ export function AgentDetail({ asset }: AgentDetailProps) {
                     </span>
                     {v.current && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent-blue/15 text-accent-blue font-medium">
-                        current
+                        {t('agentView.current')}
                       </span>
                     )}
                   </div>

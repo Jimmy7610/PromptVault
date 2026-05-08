@@ -2,15 +2,9 @@
 import { useEffect } from 'react'
 import { X, Star, Eye, EyeOff, Users, Globe } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { cn } from '@/lib/utils'
 import { FilterVisibility } from '@/types'
-
-const VISIBILITY_OPTIONS: { value: FilterVisibility; label: string; icon: React.ElementType }[] = [
-  { value: 'all', label: 'All', icon: Globe },
-  { value: 'private', label: 'Private', icon: EyeOff },
-  { value: 'public', label: 'Public', icon: Eye },
-  { value: 'team', label: 'Team', icon: Users },
-]
 
 interface AdvancedFilterPopoverProps {
   onClose: () => void
@@ -29,6 +23,24 @@ export function AdvancedFilterPopover({ onClose }: AdvancedFilterPopoverProps) {
     setFilterVisibility,
     clearAdvancedFilters,
   } = useAppStore()
+  const { t } = useI18n()
+
+  const VISIBILITY_OPTIONS: { value: FilterVisibility; icon: React.ElementType }[] = [
+    { value: 'all',     icon: Globe },
+    { value: 'private', icon: EyeOff },
+    { value: 'public',  icon: Eye },
+    { value: 'team',    icon: Users },
+  ]
+
+  const visLabel = (v: FilterVisibility) => {
+    const map: Record<FilterVisibility, string> = {
+      all:     t('filter.visAll'),
+      private: t('filter.visPrivate'),
+      public:  t('filter.visPublic'),
+      team:    t('filter.visTeam'),
+    }
+    return map[v]
+  }
 
   // Derive available tags and tools from non-trash assets
   const activeAssets = assets.filter((a) => a.status !== 'trash')
@@ -71,7 +83,7 @@ export function AdvancedFilterPopover({ onClose }: AdvancedFilterPopoverProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-text-main">Advanced Filters</span>
+            <span className="text-sm font-semibold text-text-main">{t('filter.advanced')}</span>
             {activeCount > 0 && (
               <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-accent-blue/20 text-accent-blue">
                 {activeCount}
@@ -84,7 +96,7 @@ export function AdvancedFilterPopover({ onClose }: AdvancedFilterPopoverProps) {
                 onClick={clearAdvancedFilters}
                 className="text-xs text-accent-blue hover:text-blue-400 transition-colors"
               >
-                Clear all
+                {t('filter.clearAll')}
               </button>
             )}
             <button
@@ -111,13 +123,13 @@ export function AdvancedFilterPopover({ onClose }: AdvancedFilterPopoverProps) {
               size={14}
               className={filterFavoriteOnly ? 'fill-yellow-400 text-yellow-400' : 'text-text-dim'}
             />
-            Favorites only
+            {t('filter.favoritesOnly')}
           </button>
 
           {/* Visibility */}
           <div>
             <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-              Visibility
+              {t('filter.visibility')}
             </div>
             <div className="grid grid-cols-4 gap-1.5">
               {VISIBILITY_OPTIONS.map((opt) => {
@@ -134,7 +146,7 @@ export function AdvancedFilterPopover({ onClose }: AdvancedFilterPopoverProps) {
                     )}
                   >
                     <Icon size={13} />
-                    {opt.label}
+                    {visLabel(opt.value)}
                   </button>
                 )
               })}
@@ -145,7 +157,7 @@ export function AdvancedFilterPopover({ onClose }: AdvancedFilterPopoverProps) {
           {allTools.length > 0 && (
             <div>
               <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-                Tools{filterTools.length > 0 && <span className="ml-1 text-accent-blue">({filterTools.length})</span>}
+                {t('filter.tools')}{filterTools.length > 0 && <span className="ml-1 text-accent-blue">({filterTools.length})</span>}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {allTools.map((tool) => (
@@ -170,7 +182,7 @@ export function AdvancedFilterPopover({ onClose }: AdvancedFilterPopoverProps) {
           {allTags.length > 0 && (
             <div>
               <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-                Tags{filterTags.length > 0 && <span className="ml-1 text-accent-blue">({filterTags.length})</span>}
+                {t('filter.tags')}{filterTags.length > 0 && <span className="ml-1 text-accent-blue">({filterTags.length})</span>}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {allTags.map((tag) => (
@@ -193,7 +205,7 @@ export function AdvancedFilterPopover({ onClose }: AdvancedFilterPopoverProps) {
 
           {allTags.length === 0 && allTools.length === 0 && (
             <p className="text-xs text-text-dim text-center py-2">
-              No tags or tools found in your assets.
+              {t('filter.noTagsOrTools')}
             </p>
           )}
         </div>

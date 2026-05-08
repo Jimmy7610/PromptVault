@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
 import { useNotificationStore } from '@/stores/useNotificationStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { generateWithOllama } from '@/lib/ollama'
 import { buildOllamaPrompt } from '@/lib/promptBuilder'
 import { detectTaskType, selectBestModel } from '@/lib/modelSelector'
@@ -86,6 +87,7 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
 
   const { showToast } = useAppStore()
   const { ollama } = useUserStore()
+  const { t } = useI18n()
 
   const ollamaReady = ollama.enabled && ollama.models.length > 0
 
@@ -130,7 +132,7 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
 
   const handleTest = () => {
     if (!testInput.trim()) {
-      setError('Please enter a test input.')
+      setError(t('testAgent.enterTestInput'))
       return
     }
     setError('')
@@ -189,8 +191,8 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
               <FlaskConical size={13} className="text-orange-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-text-main">Test Agent Input</h2>
-              <p className="text-[10px] text-text-dim mt-0.5">{asset.title} · local validation</p>
+              <h2 className="text-sm font-semibold text-text-main">{t('testAgent.title')}</h2>
+              <p className="text-[10px] text-text-dim mt-0.5">{asset.title} · {t('testAgent.localValidation')}</p>
             </div>
           </div>
           <button onClick={onClose} className="text-text-dim hover:text-text-muted p-1 transition-colors rounded">
@@ -203,14 +205,13 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
             <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg bg-orange-500/5 border border-orange-500/15">
               <Info size={13} className="text-orange-400 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-text-muted leading-relaxed">
-                Runs a local validation check against this agent&apos;s configuration. No external
-                API is called. Validates input, variables, tools, and structure.
+                {t('testAgent.infoText')}
               </p>
             </div>
 
             <div>
               <label className="block text-xs font-medium text-text-muted mb-1.5">
-                Test input <span className="text-danger">*</span>
+                {t('testAgent.testInputLabel')} <span className="text-danger">*</span>
               </label>
               <textarea
                 value={testInput}
@@ -229,7 +230,7 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
             {asset.variables && asset.variables.length > 0 && (
               <div>
                 <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-                  Variables in scope
+                  {t('testAgent.variablesInScope')}
                 </div>
                 <div className="space-y-1">
                   {asset.variables.map((v) => (
@@ -247,7 +248,7 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
             {asset.tools.length > 0 && (
               <div>
                 <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-                  Tools configured
+                  {t('testAgent.toolsConfigured')}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {asset.tools.map((tool) => (
@@ -267,13 +268,13 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
                 onClick={handleTest}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-orange-500/80 text-white text-sm font-medium hover:bg-orange-500 transition-colors"
               >
-                <FlaskConical size={13} /> Run Test
+                <FlaskConical size={13} /> {t('testAgent.runTest')}
               </button>
               <button
                 onClick={onClose}
                 className="px-4 py-2 text-sm text-text-muted hover:text-text-main transition-colors"
               >
-                Cancel
+                {t('testAgent.cancel')}
               </button>
             </div>
           </div>
@@ -290,13 +291,13 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
             >
               <div className={cn('flex items-center gap-1.5 text-xs font-medium', overallPassed ? 'text-green-400' : 'text-danger')}>
                 {overallPassed ? <Check size={13} /> : <AlertCircle size={13} />}
-                {overallPassed ? 'Local test passed' : 'Test completed with issues'}
+                {overallPassed ? t('testAgent.localTestPassed') : t('testAgent.testWithIssues')}
               </div>
               <button
                 onClick={() => setStep('input')}
                 className="text-[11px] text-text-dim hover:text-text-muted transition-colors"
               >
-                ← Edit input
+                {t('testAgent.editInput')}
               </button>
             </div>
 
@@ -305,7 +306,7 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
               <div className="rounded-xl border border-border overflow-hidden">
                 <div className="px-4 py-2.5 bg-surface-soft border-b border-border">
                   <span className="text-[10px] font-semibold text-text-dim uppercase tracking-wider">
-                    Validation Results
+                    {t('testAgent.validationResults')}
                   </span>
                 </div>
                 <div className="divide-y divide-border">
@@ -341,19 +342,19 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
               {/* Summary */}
               <div className="px-4 py-3 rounded-xl bg-surface-soft border border-border text-xs text-text-muted space-y-1">
                 <div className="flex justify-between">
-                  <span>Passed</span>
+                  <span>{t('testAgent.passed')}</span>
                   <span className="text-green-400 font-medium">{checklist.filter((c) => c.pass).length} / {checklist.length}</span>
                 </div>
                 {warnings > 0 && (
                   <div className="flex justify-between">
-                    <span>Warnings (optional)</span>
+                    <span>{t('testAgent.warnings')}</span>
                     <span className="text-yellow-400 font-medium">{warnings}</span>
                   </div>
                 )}
                 <div className="flex justify-between border-t border-border pt-1 mt-1">
-                  <span className="font-medium text-text-main">Status</span>
+                  <span className="font-medium text-text-main">{t('testAgent.statusLabel')}</span>
                   <span className={cn('font-semibold', overallPassed ? 'text-green-400' : 'text-danger')}>
-                    {overallPassed ? 'LOCAL TEST PASSED' : 'NEEDS ATTENTION'}
+                    {overallPassed ? t('testAgent.passedStatus') : t('testAgent.needsAttention')}
                   </span>
                 </div>
               </div>
@@ -363,9 +364,9 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
                 <div className="rounded-xl border border-border overflow-hidden">
                   <div className="px-4 py-2.5 bg-surface-soft border-b border-border flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-text-dim uppercase tracking-wider">
-                      Test with Ollama
+                      {t('testAgent.testWithOllama')}
                     </span>
-                    <span className="text-[10px] text-green-400">● Connected</span>
+                    <span className="text-[10px] text-green-400">{t('testAgent.connected')}</span>
                   </div>
                   <div className="p-4 space-y-3">
                     {/* Model selector */}
@@ -390,7 +391,7 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
                         {ollamaTestLoading
                           ? <Loader2 size={11} className="animate-spin" />
                           : <Play size={11} />}
-                        {ollamaTestLoading ? 'Running…' : 'Run with Ollama'}
+                        {ollamaTestLoading ? t('testAgent.runningOllama') : t('testAgent.runWithOllama')}
                       </button>
                     </div>
 
@@ -400,8 +401,8 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[10px] text-text-dim">
                             {ollamaTestError
-                              ? 'Error'
-                              : `Response from ${ollamaTestModel}${ollamaTestTime ? ` · ${(ollamaTestTime / 1000).toFixed(1)}s` : ''}`}
+                              ? t('testAgent.errorLabel')
+                              : `${t('runAgent.responseFrom').replace('{model}', ollamaTestModel)}${ollamaTestTime ? ` · ${(ollamaTestTime / 1000).toFixed(1)}s` : ''}`}
                           </span>
                         </div>
                         <div className={cn(
@@ -417,7 +418,7 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
 
                     {!ollamaTestResult && !ollamaTestError && !ollamaTestLoading && (
                       <p className="text-[10px] text-text-dim">
-                        Send the test input to Ollama to verify real model output.
+                        {t('testAgent.ollamaInfo')}
                       </p>
                     )}
                   </div>
@@ -426,8 +427,7 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
 
               {!ollamaReady && (
                 <p className="text-[10px] text-text-dim text-center leading-relaxed">
-                  This is a local configuration check only.
-                  Enable Ollama in Settings → Local AI for real model testing.
+                  {t('testAgent.localCheckOnly')}
                 </p>
               )}
             </div>
@@ -437,7 +437,7 @@ export function TestAgentModal({ open, onClose, asset }: TestAgentModalProps) {
                 onClick={onClose}
                 className="px-4 py-2 rounded-lg bg-surface-soft border border-border text-sm text-text-muted hover:text-text-main transition-colors"
               >
-                Close
+                {t('testAgent.close')}
               </button>
             </div>
           </div>

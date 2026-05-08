@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import { useAppStore } from '@/stores/useAppStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { translate } from '@/lib/i18n/translations'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Topbar } from '@/components/layout/Topbar'
 import { FilterBar } from '@/components/dashboard/FilterBar'
@@ -54,9 +55,10 @@ export default function PromptVaultApp() {
             const asset = assets.find((a) => a.id === selectedAssetId)
             if (asset) {
               toggleFavorite(selectedAssetId)
+              const lang = useUserStore.getState().settings?.language ?? 'en'
               useAppStore
                 .getState()
-                .showToast(asset.isFavorite ? 'Removed from favorites' : 'Added to favorites')
+                .showToast(asset.isFavorite ? translate(lang, 'toast.removedFavorites') : translate(lang, 'toast.addedFavorites'))
             }
           }
           break

@@ -1,68 +1,71 @@
 'use client'
 import { ChevronDown } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { cn } from '@/lib/utils'
 import { AssetType, SortOption } from '@/types'
 
-const TYPE_OPTIONS: { value: AssetType | 'all'; label: string }[] = [
-  { value: 'all', label: 'All Types' },
-  { value: 'agent', label: 'Agents' },
-  { value: 'prompt', label: 'Prompts' },
-  { value: 'image', label: 'Images' },
-  { value: 'markdown', label: 'Markdown' },
-  { value: 'code', label: 'Code' },
-  { value: 'workflow', label: 'Workflows' },
-  { value: 'template', label: 'Templates' },
-  { value: 'json', label: 'JSON' },
-  { value: 'note', label: 'Notes' },
+const TYPE_VALUES: (AssetType | 'all')[] = [
+  'all', 'agent', 'prompt', 'image', 'markdown', 'code', 'workflow', 'template',
 ]
 
-const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: 'lastUsed', label: 'Last Used' },
-  { value: 'newest', label: 'Newest' },
-  { value: 'updated', label: 'Last Updated' },
-  { value: 'mostCopied', label: 'Most Copied' },
-  { value: 'mostUsed', label: 'Most Used' },
-  { value: 'alphabetical', label: 'A – Z' },
+const SORT_VALUES: SortOption[] = [
+  'lastUsed', 'newest', 'updated', 'mostCopied', 'mostUsed', 'alphabetical',
 ]
 
 const TYPE_BADGE_COLORS: Partial<Record<AssetType, string>> = {
-  agent: 'text-violet-300 bg-violet-500/15 border-violet-500/25',
-  prompt: 'text-blue-300 bg-blue-500/15 border-blue-500/25',
-  image: 'text-green-300 bg-green-500/15 border-green-500/25',
+  agent:    'text-violet-300 bg-violet-500/15 border-violet-500/25',
+  prompt:   'text-blue-300 bg-blue-500/15 border-blue-500/25',
+  image:    'text-green-300 bg-green-500/15 border-green-500/25',
   markdown: 'text-yellow-300 bg-yellow-500/15 border-yellow-500/25',
-  code: 'text-orange-300 bg-orange-500/15 border-orange-500/25',
+  code:     'text-orange-300 bg-orange-500/15 border-orange-500/25',
   workflow: 'text-cyan-300 bg-cyan-500/15 border-cyan-500/25',
   template: 'text-indigo-300 bg-indigo-500/15 border-indigo-500/25',
 }
 
 export function FilterBar() {
   const { activeTypeFilter, setTypeFilter, activeSortBy, setSortBy } = useAppStore()
+  const { t } = useI18n()
+
+  const typeLabel = (v: AssetType | 'all') =>
+    v === 'all' ? t('filter.allTypes') : t(`typeLabel.${v}`)
+
+  const sortLabel = (v: SortOption) => {
+    const map: Record<SortOption, string> = {
+      lastUsed:     t('filter.sortLastUsed'),
+      newest:       t('filter.sortNewest'),
+      updated:      t('filter.sortUpdated'),
+      mostCopied:   t('filter.sortMostCopied'),
+      mostUsed:     t('filter.sortMostUsed'),
+      alphabetical: t('filter.sortAlphabetical'),
+    }
+    return map[v]
+  }
 
   return (
     <div className="flex items-center gap-2 px-6 py-2.5 border-b border-border bg-surface flex-shrink-0 flex-wrap">
       {/* Type filters */}
       <div className="flex items-center gap-1.5 flex-wrap">
-        {TYPE_OPTIONS.slice(0, 8).map((opt) => {
-          const isActive = activeTypeFilter === opt.value
+        {TYPE_VALUES.map((value) => {
+          const isActive = activeTypeFilter === value
           const colorClass =
-            opt.value !== 'all' && isActive
-              ? (TYPE_BADGE_COLORS[opt.value as AssetType] ?? 'text-accent-blue bg-accent-blue/15 border-accent-blue/25')
+            value !== 'all' && isActive
+              ? (TYPE_BADGE_COLORS[value as AssetType] ?? 'text-accent-blue bg-accent-blue/15 border-accent-blue/25')
               : ''
           return (
             <button
-              key={opt.value}
-              onClick={() => setTypeFilter(opt.value)}
+              key={value}
+              onClick={() => setTypeFilter(value)}
               className={cn(
                 'px-2.5 py-1 rounded-lg text-xs font-medium border transition-all',
-                isActive && opt.value === 'all'
+                isActive && value === 'all'
                   ? 'bg-accent-blue/15 text-accent-blue border-accent-blue/25'
                   : isActive
                   ? `border ${colorClass}`
                   : 'text-text-muted border-transparent hover:text-text-main hover:bg-surface-hover'
               )}
             >
-              {opt.label}
+              {typeLabel(value)}
             </button>
           )
         })}
@@ -84,9 +87,9 @@ export function FilterBar() {
             'transition-all cursor-pointer'
           )}
         >
-          {SORT_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-surface">
-              {opt.label}
+          {SORT_VALUES.map((v) => (
+            <option key={v} value={v} className="bg-surface">
+              {sortLabel(v)}
             </option>
           ))}
         </select>

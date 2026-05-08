@@ -47,9 +47,9 @@ export function MarkdownDetail({ asset }: MarkdownDetailProps) {
       <div className="px-4 pt-4 pb-3 border-b border-border flex-shrink-0">
         <div className="flex items-center gap-2 mb-2">
           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-500/15 text-yellow-300 border border-yellow-500/25">
-            Markdown
+            {t('typeLabel.markdown')}
           </span>
-          <span className="text-[10px] text-text-dim">{wordCount} words · {lineCount} lines</span>
+          <span className="text-[10px] text-text-dim">{wordCount} {t('markdownView.words')} · {lineCount} {t('markdownView.lines')}</span>
         </div>
         <h2 className="text-base font-bold text-text-main mb-1">{asset.title}</h2>
         <p className="text-xs text-text-muted leading-relaxed">{asset.description}</p>
@@ -66,7 +66,7 @@ export function MarkdownDetail({ asset }: MarkdownDetailProps) {
                 : 'text-text-dim hover:text-text-muted'
             )}
           >
-            <Eye size={11} /> Preview
+            <Eye size={11} /> {t('markdownView.preview')}
           </button>
           <button
             onClick={() => setViewMode('raw')}
@@ -77,7 +77,7 @@ export function MarkdownDetail({ asset }: MarkdownDetailProps) {
                 : 'text-text-dim hover:text-text-muted'
             )}
           >
-            <Code2 size={11} /> Raw
+            <Code2 size={11} /> {t('markdownView.raw')}
           </button>
         </div>
       </div>
@@ -113,7 +113,7 @@ export function MarkdownDetail({ asset }: MarkdownDetailProps) {
           </button>
         </div>
         <div className="mt-2 text-[10px] text-text-dim">
-          Updated {formatRelativeTime(asset.updatedAt)} · Created {formatDate(asset.createdAt)}
+          {t('markdownView.updatedAt')} {formatRelativeTime(asset.updatedAt)} · {t('markdownView.createdAt')} {formatDate(asset.createdAt)}
         </div>
       </div>
     </div>

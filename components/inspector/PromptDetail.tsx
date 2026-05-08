@@ -54,7 +54,7 @@ export function PromptDetail({ asset }: PromptDetailProps) {
       <div className="px-4 pt-4 pb-3 border-b border-border flex-shrink-0">
         <div className="flex items-center gap-2 mb-2 flex-wrap">
           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/25">
-            Prompt
+            {t('typeLabel.prompt')}
           </span>
           <span className="px-2 py-0.5 rounded-full text-[10px] bg-surface-soft text-text-dim border border-border">
             v{asset.version}

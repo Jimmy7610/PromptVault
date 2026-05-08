@@ -16,6 +16,7 @@ import {
 import { useNotificationStore } from '@/stores/useNotificationStore'
 import { AppNotification, NotificationType } from '@/types'
 import { cn, formatRelativeTime } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/useI18n'
 
 const TYPE_CONFIG: Record<
   NotificationType,
@@ -74,6 +75,7 @@ function NotificationItem({ notification }: { notification: AppNotification }) {
 export function NotificationsPopover({ onClose }: NotificationsPopoverProps) {
   const { notifications, markAllRead, clearAll } = useNotificationStore()
   const unreadCount = notifications.filter((n) => !n.read).length
+  const { t } = useI18n()
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -92,7 +94,7 @@ export function NotificationsPopover({ onClose }: NotificationsPopoverProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-text-main">Notifications</span>
+            <span className="text-sm font-semibold text-text-main">{t('notifications.title')}</span>
             {unreadCount > 0 && (
               <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-accent-blue text-white">
                 {unreadCount}
@@ -103,7 +105,7 @@ export function NotificationsPopover({ onClose }: NotificationsPopoverProps) {
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                title="Mark all as read"
+                title={t('notifications.markAllRead')}
                 className="p-1.5 rounded text-text-dim hover:text-text-muted hover:bg-surface-hover transition-colors"
               >
                 <CheckCheck size={13} />
@@ -112,7 +114,7 @@ export function NotificationsPopover({ onClose }: NotificationsPopoverProps) {
             {notifications.length > 0 && (
               <button
                 onClick={clearAll}
-                title="Clear all notifications"
+                title={t('notifications.clearAll')}
                 className="p-1.5 rounded text-text-dim hover:text-danger hover:bg-danger/10 transition-colors"
               >
                 <Trash2 size={13} />
@@ -134,9 +136,9 @@ export function NotificationsPopover({ onClose }: NotificationsPopoverProps) {
               <div className="w-10 h-10 rounded-full bg-surface-soft flex items-center justify-center mb-3">
                 <BellOff size={18} className="text-text-dim" />
               </div>
-              <div className="text-sm text-text-muted">No notifications yet</div>
+              <div className="text-sm text-text-muted">{t('notifications.noNotifications')}</div>
               <div className="text-xs text-text-dim mt-1">
-                Activity like asset creation, exports, and invites will appear here.
+                {t('notifications.noNotificationsDesc')}
               </div>
             </div>
           ) : (
@@ -147,7 +149,9 @@ export function NotificationsPopover({ onClose }: NotificationsPopoverProps) {
         {notifications.length > 0 && (
           <div className="px-4 py-2 border-t border-border">
             <p className="text-[10px] text-text-dim text-center">
-              {notifications.length} notification{notifications.length !== 1 ? 's' : ''} · stored locally
+              {notifications.length === 1
+                ? t('notifications.footer').replace('{n}', '1')
+                : t('notifications.footerPlural').replace('{n}', String(notifications.length))}
             </p>
           </div>
         )}

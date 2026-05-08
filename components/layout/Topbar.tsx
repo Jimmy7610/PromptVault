@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Search, Bell, Grid3X3, List, Filter, Command } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 import { useNotificationStore } from '@/stores/useNotificationStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { cn } from '@/lib/utils'
 import { AdvancedFilterPopover } from '@/components/filters/AdvancedFilterPopover'
 import { NotificationsPopover } from '@/components/notifications/NotificationsPopover'
@@ -10,6 +11,7 @@ import { NotificationsPopover } from '@/components/notifications/NotificationsPo
 export function Topbar() {
   const { searchQuery, setSearchQuery, viewMode, setViewMode, filterFavoriteOnly, filterTags, filterTools, filterVisibility } = useAppStore()
   const unreadCount = useNotificationStore((s) => s.notifications.filter((n) => !n.read).length)
+  const { t } = useI18n()
   const inputRef = useRef<HTMLInputElement>(null)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
@@ -53,7 +55,7 @@ export function Topbar() {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search assets, agents, prompts, files, notes..."
+          placeholder={t('topbar.searchPlaceholder')}
           className={cn(
             'w-full pl-9 pr-20 py-2 text-sm rounded-lg',
             'bg-surface-soft border border-border',
@@ -75,7 +77,7 @@ export function Topbar() {
         <div className="flex items-center bg-surface-soft rounded-lg p-0.5 border border-border">
           <button
             onClick={() => setViewMode('grid')}
-            aria-label="Grid view"
+            aria-label={t('topbar.gridView')}
             className={cn(
               'p-1.5 rounded transition-all',
               viewMode === 'grid'
@@ -87,7 +89,7 @@ export function Topbar() {
           </button>
           <button
             onClick={() => setViewMode('list')}
-            aria-label="List view"
+            aria-label={t('topbar.listView')}
             className={cn(
               'p-1.5 rounded transition-all',
               viewMode === 'list'
@@ -103,7 +105,7 @@ export function Topbar() {
         <div className="relative">
           <button
             onClick={() => { setFiltersOpen(!filtersOpen); setNotificationsOpen(false) }}
-            aria-label="Filters"
+            aria-label={t('filter.title')}
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition-all',
               activeFilterCount > 0
@@ -112,7 +114,7 @@ export function Topbar() {
             )}
           >
             <Filter size={13} />
-            Filters
+            {t('filter.title')}
             {activeFilterCount > 0 && (
               <span className="w-4 h-4 rounded-full bg-accent-blue text-white text-[10px] flex items-center justify-center font-medium">
                 {activeFilterCount}

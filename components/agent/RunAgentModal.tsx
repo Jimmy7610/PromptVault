@@ -7,6 +7,7 @@ import { copyToClipboard } from '@/lib/clipboard'
 import { useAppStore } from '@/stores/useAppStore'
 import { useNotificationStore } from '@/stores/useNotificationStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { generateWithOllama } from '@/lib/ollama'
 import { buildOllamaPrompt } from '@/lib/promptBuilder'
 import { detectTaskType, selectBestModel } from '@/lib/modelSelector'
@@ -94,6 +95,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
 
   const { showToast } = useAppStore()
   const { ollama } = useUserStore()
+  const { t } = useI18n()
 
   const ollamaReady = ollama.enabled && ollama.models.length > 0
   const models = ollama.models
@@ -195,7 +197,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
     const ok = await copyToClipboard(result)
     if (ok) {
       setCopied(true)
-      showToast('Result copied')
+      showToast(t('runAgent.resultCopied'))
       setTimeout(() => setCopied(false), 2000)
     }
   }
@@ -206,7 +208,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
     const ok = await copyToClipboard(text)
     if (ok) {
       setPromptCopied(true)
-      showToast('Prompt copied')
+      showToast(t('runAgent.promptCopied'))
       setTimeout(() => setPromptCopied(false), 2000)
     }
   }
@@ -228,9 +230,11 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
               <Play size={13} className="text-violet-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-text-main">Run {asset.title}</h2>
+              <h2 className="text-sm font-semibold text-text-main">{t('runAgent.titlePrefix')} {asset.title}</h2>
               <p className="text-[10px] text-text-dim mt-0.5">
-                {ollamaReady ? `Ollama · ${selectedModel || '—'}` : 'Local mock preview · no API call'}
+                {ollamaReady
+                  ? t('runAgent.ollamaSubtitle').replace('{model}', selectedModel || '—')
+                  : t('runAgent.mockSubtitle')}
               </p>
             </div>
           </div>
@@ -251,15 +255,15 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
               <Zap size={13} className={cn('flex-shrink-0 mt-0.5', ollamaReady ? 'text-green-400' : 'text-violet-400')} />
               <p className="text-xs text-text-muted leading-relaxed">
                 {ollamaReady
-                  ? `Running with Ollama using ${selectedModel}. Real output will be generated.`
-                  : 'Ollama is not enabled. This will generate a local mock preview. Enable Ollama in Settings → Local AI.'}
+                  ? t('runAgent.ollamaInfo').replace('{model}', selectedModel)
+                  : t('runAgent.mockInfo')}
               </p>
             </div>
 
             {/* Ollama model selector */}
             {ollamaReady && (
               <div>
-                <label className="block text-xs font-medium text-text-muted mb-1.5">Model</label>
+                <label className="block text-xs font-medium text-text-muted mb-1.5">{t('runAgent.modelLabel')}</label>
                 <div className="relative">
                   <select
                     value={selectedModel}
@@ -268,7 +272,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
                   >
                     {models.map((m) => (
                       <option key={m.name} value={m.name}>
-                        {m.name}{autoSelectedModel === m.name ? ' (auto-selected)' : ''}
+                        {m.name}{autoSelectedModel === m.name ? ` ${t('runAgent.autoSelected')}` : ''}
                       </option>
                     ))}
                   </select>
@@ -276,7 +280,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
                 </div>
                 {ollama.autoSelect && autoSelectedModel && (
                   <p className="text-[10px] text-text-dim mt-1">
-                    Auto-selected for this task type. Change in Settings → Local AI to override.
+                    {t('runAgent.autoSelectedNote')}
                   </p>
                 )}
               </div>
@@ -284,7 +288,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
 
             <div>
               <label className="block text-xs font-medium text-text-muted mb-1.5">
-                What should this agent work on? <span className="text-danger">*</span>
+                {t('runAgent.inputLabel')} <span className="text-danger">*</span>
               </label>
               <textarea
                 value={input}
@@ -298,7 +302,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
 
             <div>
               <label className="block text-xs font-medium text-text-muted mb-1.5">
-                Additional context <span className="text-text-dim font-normal">(optional)</span>
+                {t('runAgent.contextLabel')} <span className="text-text-dim font-normal">{t('runAgent.optional')}</span>
               </label>
               <textarea
                 value={context}
@@ -313,7 +317,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
             {asset.variables && asset.variables.length > 0 && (
               <div>
                 <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-1.5">
-                  Variables in scope
+                  {t('runAgent.variablesInScope')}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {asset.variables.map((v) => (
@@ -335,13 +339,13 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent-blue text-white text-sm font-medium hover:bg-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {loading ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
-                {loading ? 'Running…' : ollamaReady ? 'Run with Ollama' : 'Run Preview'}
+                {loading ? t('runAgent.running') : ollamaReady ? t('runAgent.runWithOllama') : t('runAgent.runPreview')}
               </button>
               <button
                 onClick={onClose}
                 className="px-4 py-2 text-sm text-text-muted hover:text-text-main transition-colors"
               >
-                Cancel
+                {t('runAgent.cancel')}
               </button>
             </div>
           </div>
@@ -362,16 +366,16 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
               )}>
                 {error ? <AlertCircle size={13} /> : <Check size={13} />}
                 {resultMode === 'ollama'
-                  ? `Response from ${selectedModel}`
+                  ? t('runAgent.responseFrom').replace('{model}', selectedModel)
                   : error
-                  ? 'Fallback: mock preview'
-                  : 'Preview generated'}
+                  ? t('runAgent.fallbackPreview')
+                  : t('runAgent.previewGenerated')}
               </div>
               <button
                 onClick={handleRetry}
                 className="text-[11px] text-text-dim hover:text-text-muted transition-colors flex items-center gap-1"
               >
-                <RefreshCw size={10} /> Edit input
+                <RefreshCw size={10} /> {t('runAgent.editInput')}
               </button>
             </div>
 
@@ -398,7 +402,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
                 )}
               >
                 {copied ? <Check size={12} /> : <Copy size={12} />}
-                {copied ? 'Copied!' : 'Copy Result'}
+                {copied ? t('runAgent.copied') : t('runAgent.copyResult')}
               </button>
 
               {builtPrompt && (
@@ -412,7 +416,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
                   )}
                 >
                   {promptCopied ? <Check size={12} /> : <Copy size={12} />}
-                  {promptCopied ? 'Copied!' : 'Copy Prompt Sent'}
+                  {promptCopied ? t('runAgent.copied') : t('runAgent.copyPromptSent')}
                 </button>
               )}
 
@@ -420,7 +424,7 @@ export function RunAgentModal({ open, onClose, asset }: RunAgentModalProps) {
                 onClick={onClose}
                 className="px-3 py-1.5 text-sm text-text-muted hover:text-text-main transition-colors ml-auto"
               >
-                Close
+                {t('runAgent.close')}
               </button>
             </div>
           </div>

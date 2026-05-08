@@ -43,14 +43,14 @@ export function CodeDetail({ asset }: CodeDetailProps) {
       <div className="px-4 pt-4 pb-3 border-b border-border flex-shrink-0">
         <div className="flex items-center gap-2 mb-2 flex-wrap">
           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-500/15 text-orange-300 border border-orange-500/25">
-            Code
+            {t('typeLabel.code')}
           </span>
           {asset.language && (
             <span className={cn('px-2 py-0.5 rounded-full text-[10px] border font-mono', langColor)}>
               {asset.language}
             </span>
           )}
-          <span className="text-[10px] text-text-dim">{lineCount} lines</span>
+          <span className="text-[10px] text-text-dim">{lineCount} {t('codeView.lines')}</span>
         </div>
         <h2 className="text-base font-bold text-text-main mb-1">{asset.title}</h2>
         <p className="text-xs text-text-muted leading-relaxed">{asset.description}</p>
@@ -67,7 +67,7 @@ export function CodeDetail({ asset }: CodeDetailProps) {
               </span>
               <CopyButton
                 text={asset.content}
-                label="Copy Code"
+                label={t('codeView.copyCode')}
                 assetId={asset.id}
                 size="sm"
                 variant="icon"
@@ -162,7 +162,7 @@ export function CodeDetail({ asset }: CodeDetailProps) {
       {/* Quick Actions */}
       <div className="px-4 py-3 border-t border-border flex-shrink-0 bg-surface">
         <div className="flex flex-wrap gap-2">
-          <CopyButton text={asset.content} label={t('inspector.code')} assetId={asset.id} />
+          <CopyButton text={asset.content} label={t('codeView.copyCode')} assetId={asset.id} />
         </div>
       </div>
     </div>

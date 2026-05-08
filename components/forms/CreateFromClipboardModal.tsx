@@ -13,6 +13,7 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
+import { useI18n } from '@/lib/i18n/useI18n'
 import { AssetType } from '@/types'
 import { cn, assetTypeConfig } from '@/lib/utils'
 
@@ -53,6 +54,7 @@ function titleFromText(text: string): string {
 export function CreateFromClipboardModal() {
   const { isClipboardModalOpen, closeClipboardModal, addAsset, showToast, setSelectedAsset } =
     useAppStore()
+  const { t } = useI18n()
 
   const [clipState, setClipState] = useState<'loading' | 'ready' | 'empty' | 'denied'>('loading')
   const [clipText, setClipText] = useState('')
@@ -74,7 +76,7 @@ export function CreateFromClipboardModal() {
       const trimmed = text.trim()
       if (!trimmed) {
         setClipState('empty')
-        showToast('Clipboard is empty', 'info')
+        showToast(t('clipboard.emptyToast'), 'info')
         return
       }
       setClipText(trimmed)
@@ -109,7 +111,7 @@ export function CreateFromClipboardModal() {
       version: '1.0.0',
     })
 
-    showToast(`Asset created from clipboard`)
+    showToast(t('clipboard.created'))
     setSelectedAsset(id)
     closeClipboardModal()
   }
@@ -128,7 +130,7 @@ export function CreateFromClipboardModal() {
             <div className="w-7 h-7 rounded-lg bg-accent-blue/10 flex items-center justify-center">
               <ClipboardPaste size={14} className="text-accent-blue" />
             </div>
-            <h2 className="text-sm font-semibold text-text-main">Create from Clipboard</h2>
+            <h2 className="text-sm font-semibold text-text-main">{t('clipboard.title')}</h2>
           </div>
           <button
             onClick={closeClipboardModal}
@@ -142,7 +144,7 @@ export function CreateFromClipboardModal() {
         {clipState === 'loading' && (
           <div className="flex flex-col items-center justify-center py-12 gap-3">
             <Loader2 size={20} className="text-accent-blue animate-spin" />
-            <p className="text-xs text-text-dim">Reading clipboard…</p>
+            <p className="text-xs text-text-dim">{t('clipboard.reading')}</p>
           </div>
         )}
 
@@ -150,13 +152,13 @@ export function CreateFromClipboardModal() {
         {clipState === 'empty' && (
           <div className="flex flex-col items-center justify-center py-12 gap-3 px-6 text-center">
             <ClipboardPaste size={28} className="text-text-dim" />
-            <p className="text-sm text-text-muted">Clipboard is empty</p>
-            <p className="text-xs text-text-dim">Copy some text, then try again.</p>
+            <p className="text-sm text-text-muted">{t('clipboard.empty')}</p>
+            <p className="text-xs text-text-dim">{t('clipboard.emptyDesc')}</p>
             <button
               onClick={closeClipboardModal}
               className="mt-2 px-4 py-2 text-sm text-text-muted border border-border rounded-lg hover:text-text-main transition-colors"
             >
-              Close
+              {t('clipboard.close')}
             </button>
           </div>
         )}
@@ -165,15 +167,15 @@ export function CreateFromClipboardModal() {
         {clipState === 'denied' && (
           <div className="flex flex-col items-center justify-center py-10 gap-3 px-6 text-center">
             <AlertTriangle size={24} className="text-amber-400" />
-            <p className="text-sm text-text-muted">Could not read clipboard</p>
+            <p className="text-sm text-text-muted">{t('clipboard.denied')}</p>
             <p className="text-xs text-text-dim leading-relaxed max-w-xs">
-              Browser clipboard access was denied. Copy your text manually into the New Asset form instead.
+              {t('clipboard.deniedDesc')}
             </p>
             <button
               onClick={closeClipboardModal}
               className="mt-2 px-4 py-2 text-sm text-text-muted border border-border rounded-lg hover:text-text-main transition-colors"
             >
-              Close
+              {t('clipboard.close')}
             </button>
           </div>
         )}
@@ -185,14 +187,14 @@ export function CreateFromClipboardModal() {
             {/* Title */}
             <div>
               <label className="block text-xs font-medium text-text-muted mb-1.5">
-                Title <span className="text-danger">*</span>
+                {t('clipboard.titleLabel')} <span className="text-danger">*</span>
               </label>
               <input
                 ref={titleRef}
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Asset title…"
+                placeholder={t('clipboard.titlePlaceholder')}
                 required
                 className="w-full px-3 py-2 text-sm rounded-lg bg-background border border-border text-text-main placeholder:text-text-dim focus:outline-none focus:border-accent-blue/50 transition-all"
               />
@@ -200,7 +202,7 @@ export function CreateFromClipboardModal() {
 
             {/* Type selector */}
             <div>
-              <label className="block text-xs font-medium text-text-muted mb-1.5">Type</label>
+              <label className="block text-xs font-medium text-text-muted mb-1.5">{t('clipboard.typeLabel')}</label>
               <div className="flex flex-wrap gap-1.5">
                 {SELECTABLE_TYPES.map(({ type, icon: Icon }) => {
                   const cfg = assetTypeConfig[type]
@@ -227,7 +229,7 @@ export function CreateFromClipboardModal() {
             {/* Tags */}
             <div>
               <label className="block text-xs font-medium text-text-muted mb-1.5">
-                Tags <span className="text-text-dim font-normal">(comma-separated)</span>
+                {t('clipboard.tagsLabel')} <span className="text-text-dim font-normal">{t('clipboard.tagsNote')}</span>
               </label>
               <input
                 type="text"
@@ -241,8 +243,8 @@ export function CreateFromClipboardModal() {
             {/* Content preview */}
             <div>
               <label className="block text-xs font-medium text-text-muted mb-1.5">
-                {selectedType === 'agent' ? 'System Prompt' : 'Content'}{' '}
-                <span className="text-text-dim font-normal">(from clipboard)</span>
+                {selectedType === 'agent' ? t('editModal.systemPrompt') : t('editModal.content')}{' '}
+                <span className="text-text-dim font-normal">{t('clipboard.fromClipboard')}</span>
               </label>
               <textarea
                 value={clipText}
@@ -259,7 +261,7 @@ export function CreateFromClipboardModal() {
                 onClick={closeClipboardModal}
                 className="px-4 py-2 text-sm text-text-muted hover:text-text-main transition-colors"
               >
-                Cancel
+                {t('clipboard.cancel')}
               </button>
               <button
                 type="submit"
@@ -267,7 +269,7 @@ export function CreateFromClipboardModal() {
                 className="flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-lg bg-accent-blue hover:bg-blue-500 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ClipboardPaste size={13} />
-                Save Asset
+                {t('clipboard.save')}
               </button>
             </div>
           </form>
