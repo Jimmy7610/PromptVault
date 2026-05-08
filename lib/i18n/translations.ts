@@ -579,6 +579,318 @@ const en: NestedStrings = {
       promptBuilder: 'Fill in variables to generate a finished prompt — without changing the original.',
     },
     assetTypesHeading: 'Asset Types',
+    cards: {
+      what: {
+        workspace: {
+          title: 'A personal AI workspace',
+          body1: 'PromptVault is a local-first app for organizing everything you use with AI tools — prompts, agents, notes, code snippets, workflows, image references, and templates.',
+          body2: 'Think of it as your personal AI library: a place to save your best work, reuse it instantly, and keep it organized so you can find exactly what you need when you need it.',
+        },
+        localFirst: {
+          title: 'Local-first by design',
+          body1: 'Everything you create lives on your own computer. PromptVault does not send your data to any cloud service, does not require an account on a third-party platform, and does not need an internet connection to work.',
+          body2a: 'Your prompts and agents are yours — stored as real files in a ',
+          body2b: ' folder on your machine (once you enable Vault Storage in Settings).',
+        },
+        whoFor: {
+          title: 'Who is it for?',
+          intro: 'PromptVault is useful for:',
+          item1: 'Prompt engineers who want to version and reuse their best prompts',
+          item2: 'AI hobbyists building a personal library of agents and instructions',
+          item3: 'Developers who want to keep code snippets and agent configs in one place',
+          item4: 'Creators who work with AI image generation and need to save reference prompts',
+          item5: 'Anyone who is tired of losing good prompts in chat history',
+        },
+      },
+      login: {
+        whatLogin: {
+          title: 'What the login screen is',
+          body1: 'When you first open PromptVault, you see a login screen that asks for a name and email. This is not creating an account on any server. Your name and email are stored only in your own browser\'s localStorage — they are used to personalize the interface and identify you locally.',
+          body2: 'There is no password, no server-side account, no email verification, and no data sent anywhere. You can enter any name and email you like.',
+        },
+        returning: {
+          title: 'Returning users',
+          body: 'If you have used PromptVault before and your browser still has the localStorage data, the app will recognize your previous session and log you in automatically. If localStorage was cleared (e.g. you cleared browser data), you will see the login screen again — just enter the same name and email and your assets will be waiting in the vault if you have Vault Storage enabled.',
+        },
+        editProfile: {
+          title: 'Editing your profile',
+          body: 'Go to Settings → Profile to update your display name, email, and optional workspace name. These changes are saved locally only.',
+        },
+        privacyNote: {
+          label: 'Privacy:',
+          body: 'Your profile data never leaves your browser. PromptVault has no user accounts, no authentication server, and no backend that stores your identity.',
+        },
+      },
+      assets: {
+        typeDescs: {
+          agents:    'full agent instructions with system prompt, variables, tools, and example output',
+          prompts:   'single prompts by category (image, text, code, video, music, general)',
+          images:    'image generation references — prompts, style notes, negative prompts',
+          markdown:  'notes, documentation, and structured text',
+          code:      'code snippets with language tag',
+          workflows: 'multi-step AI workflows stored as JSON',
+          templates: 'reusable structured templates for common tasks',
+          notes:     'quick unstructured notes',
+          json:      'raw JSON configs and data files',
+        },
+        searchFilter: {
+          title: 'Search & filter',
+          body1: 'Use the search bar to instantly search across all asset titles, content, and tags. Use the sidebar to navigate by type (Agents, Prompts, Images…) or section (Recents, Favorites, Trash). Use the Filters button to combine filters by tag, tool, visibility, and favorite status.',
+          body2: 'Sort by: last used, newest, recently updated, alphabetical, most used, most copied.',
+        },
+        copyClip: {
+          title: 'Copy to clipboard',
+          body: 'Every asset has a Copy button. Clicking it copies the asset content to your clipboard in one click — ready to paste into ChatGPT, Claude, Midjourney, or any other tool. Copy count is tracked so you can see which assets you use most.',
+        },
+        metadata: {
+          title: 'Tags, tools, and metadata',
+          body1: 'Every asset can have tags, associated AI tools, a visibility setting (private / team / public), a version number, and a description. You can filter and sort by all of these in the main library view.',
+          body2: 'Agents also support named variables — placeholders like {{topic}} that you fill in each time you run the agent.',
+        },
+        imageAttach: {
+          title: 'Image attachments',
+          body1: 'Image assets can store both a generation prompt and a real attached image file. Click Add Image in the Image detail panel to attach a PNG, JPG, or WebP file (max 20 MB).',
+          body2a: 'Attached images are saved to ',
+          body2b: ' and are included automatically in Vault Backup exports. Nothing is uploaded — files stay entirely local. Vault Storage must be enabled first.',
+        },
+        dashStats: {
+          title: 'Dashboard stats',
+          body1: 'The stat cards on the dashboard (Total Assets, Agents, Prompts, Files, Templates, Copied Today) are calculated live from your actual library — not demo placeholders. They update instantly when you create, trash, restore, or copy assets.',
+          body2: 'Copied Today is tracked locally as metadata only — the copy event log stores asset ID, label, and timestamp. It does not save the copied prompt content.',
+        },
+        editAsset: {
+          title: 'Editing assets',
+          body1: 'Click the pencil (✏) icon in the top-right corner of the detail panel (next to the × close button) to open the Edit Asset modal.',
+          body2: 'You can edit: title, description, tools, tags, notes, version, all type-specific content fields (system prompt, instructions, generation prompt, code, negative prompt, etc.), and variables. Asset type is locked after creation for safety — to change type, create a new asset.',
+          body3: 'The footer shows Unsaved changes when the form is dirty. Closing with unsaved changes prompts you to confirm before discarding. Saving also syncs to your vault on disk if Vault Storage is enabled.',
+        },
+        statusRow: {
+          title: 'Asset status indicators',
+          intro: 'Every asset card and detail panel shows a compact status row beneath the description:',
+          item1: 'Last edited — "Edited today / yesterday / 3 days ago" or a full date for older assets.',
+          item2: 'Version count — shows how many saved versions exist in history (e.g. "3 versions").',
+          item3: 'Vault status — Saved to Vault if the asset is on disk, or Local only if Vault is not enabled.',
+        },
+        versionHistory: {
+          title: 'Version history',
+          body1: 'Every time you save an edit to an asset, a new version is created automatically and stored in the version history. Up to 25 versions are kept per asset.',
+          body2: 'Click the history icon (⟳) next to the edit button in the detail panel header to open Version History. From there you can view, copy, or restore any previous version. Restoring saves the current state to history first, so you never lose work.',
+        },
+        demoAssets: {
+          title: 'Demo assets',
+          body: 'The assets on first launch are demo assets — examples only. Delete them individually (trash icon in detail panel) or all at once via Settings → Danger Zone → Clear All Assets.',
+        },
+      },
+      agents: {
+        whatAgent: {
+          title: 'What an Agent is',
+          body: 'An Agent asset contains everything you need to define an AI assistant: a system prompt, an optional instruction block, named variables, a list of tools, and an example output. Think of it as a saved AI persona or task configuration.',
+        },
+        runAgent: {
+          title: 'Run Agent (with Ollama)',
+          body1: 'Click Run in the Agent detail panel. If Ollama is connected, the agent system prompt and instructions are sent to your local model. You fill in any variable values before running. The response is streamed back in the panel.',
+          body2: 'No data leaves your machine. No API cost. The model runs 100% locally.',
+        },
+        mockPreview: {
+          title: 'Mock preview (no Ollama)',
+          body: 'If Ollama is not enabled, clicking Run opens a mock preview that shows exactly what would be sent to the model — the full constructed prompt with your variables filled in. This is useful for reviewing and refining your agent config before running it.',
+        },
+        testAgent: {
+          title: 'Test Agent',
+          body: 'The Test button validates your agent configuration: it checks that required fields are present and optionally runs a quick test prompt against Ollama with response time and model info shown.',
+        },
+        setupOllama: {
+          title: 'Setting up Ollama',
+          item1: 'Install Ollama from ollama.ai',
+          item2a: 'Pull a model: ',
+          item3: 'Go to Settings → Local AI',
+          item4: 'Enable Ollama and click Test Connection',
+          note: 'Ollama is entirely optional — everything except live agent execution works without it.',
+        },
+      },
+      vault: {
+        whatVault: {
+          title: 'What the Vault is',
+          body1a: 'By default, PromptVault stores assets in your browser\'s localStorage — which can be lost if you clear browser data. Vault Storage saves every asset as a real file in a ',
+          body1b: ' folder inside the project directory on your computer.',
+          body2a: 'Agents, prompts, notes, and templates are saved as ',
+          body2b: ' files with YAML frontmatter. Workflows and JSON assets are saved as ',
+          body2c: ' files. Each file is human-readable.',
+        },
+        setup: {
+          title: 'How to set up Vault Storage',
+          item1: 'Go to Settings → Vault Storage',
+          item2: 'Click Initialize Vault — creates the folder structure and index.json',
+          item3: 'Enable the Vault toggle',
+          item4: 'Click Sync Current Assets to Vault to write all your assets to disk',
+          note: 'After syncing, every create/update/trash/restore/delete is automatically mirrored to disk.',
+        },
+        tools: {
+          title: 'Vault tools',
+          body1: 'Auto-load on startup — when Vault Storage is enabled and initialized, PromptVault automatically loads your assets from the vault every time the app starts. You do not need to click anything.',
+          body2: 'Load Assets from Vault — manually reads vault files and merges them into your library. Still useful after importing a backup or after editing vault files outside the app.',
+          body3: 'Rebuild Vault Index — scans all vault folders and regenerates index.json. Use this after manually editing vault files outside the app.',
+        },
+        healthCheck: {
+          title: 'Vault Health Check',
+          body: 'Click Run Vault Health Check to verify your vault is intact. It checks: vault folder exists, index.json exists and is valid, all required folders are present, all file references are on disk, and no duplicate asset IDs. Results are shown immediately in the panel — green for healthy, amber for warnings, red for errors.',
+          note: 'Health Check never reads your prompt or agent content — it only inspects folder structure and index metadata.',
+        },
+        imageAttach: {
+          title: 'Image file attachments',
+          body1a: 'Image assets can have a real image file attached (PNG, JPG, WebP). The file is stored in ',
+          body1b: ' alongside a small ',
+          body1c: '.',
+          body2a: 'Attached images are automatically included in Vault Backup exports and excluded from Git via ',
+          body2b: '.',
+        },
+        privacyNote: {
+          label: 'Privacy reminder:',
+          body: 'The vault/ folder is listed in .gitignore. If you push this project to GitHub, your vault files are not included.',
+        },
+      },
+      backup: {
+        warning: {
+          label: 'Nothing is uploaded by PromptVault.',
+          body: 'Export and import work entirely locally — the zip file never leaves your machine unless you choose to move it yourself.',
+        },
+        exportVault: {
+          title: 'Export Vault Backup',
+          body1a: 'Go to Settings → Vault Storage → Export Vault Backup. A ',
+          body1b: ' file downloads to your computer containing the entire contents of your vault folder.',
+          body2: 'Use this to: back up your vault before a reinstall, transfer to another computer, or archive a specific state of your library.',
+        },
+        importVault: {
+          title: 'Import Vault Backup',
+          body1a: 'On the target computer, go to Settings → Vault Storage → Import Vault Backup. Select the zip file and type ',
+          body1b: ' to confirm. The import process:',
+          item1: 'Validates the zip contains a valid vault structure',
+          item2a: 'Backs up your current vault to ',
+          item3: 'Replaces the vault with the imported one',
+          item4: 'Runs a Health Check automatically',
+          note: 'After import, click Load Assets from Vault to bring the imported assets into the app library.',
+        },
+        backupReminder: {
+          title: 'Backup reminder',
+          body: 'The Vault Backup card in Settings → Vault Storage shows when you last exported a backup. The status is Backup current if the last backup was within 7 days, or Backup recommended if it has been longer or you have never backed up.',
+        },
+      },
+      trash: {
+        moveToTrash: {
+          title: 'Move to Trash',
+          body1: 'When you delete an asset normally (via the trash icon in the detail panel), the asset is moved to the Trash section in the sidebar. It is hidden from your main library but not permanently gone.',
+          body2: 'If Vault is enabled, the asset is marked as trashed in the vault index — the file itself stays in place.',
+        },
+        restore: {
+          title: 'Restore from Trash',
+          body: 'Open the Trash section in the sidebar to see all trashed assets. You can restore any of them back to your active library. Restored assets reappear in all filters and search results.',
+        },
+        permDelete: {
+          title: 'Permanent Delete',
+          body1a: 'In the Trash view, you can permanently delete an asset. This removes it from the app completely. If Vault is enabled, the asset file is moved to the ',
+          body1b: ' folder — it is never hard-deleted from disk, so you can still recover it manually if needed.',
+        },
+        emptyTrash: {
+          title: 'Empty Trash',
+          body1a: 'Go to Settings → Danger Zone → Empty Trash to permanently delete all trashed assets at once. This requires typing ',
+          body1b: ' to confirm.',
+        },
+      },
+      updates: {
+        howToUpdate: {
+          title: 'How to update',
+          body1: 'Go to Settings → App Updates and click Check for Updates. The updater fetches the latest commit from the GitHub main branch and shows you the current vs. latest commit.',
+          body2: 'If an update is available and all safety checks pass, click Install Update. After it finishes, restart the dev server manually.',
+        },
+        threePhase: {
+          title: 'Three-phase install',
+          intro: 'The updater runs three phases in order:',
+          item1: 'Phase 1 — Download: ',
+          item2: 'Phase 2 — Dependencies: ',
+          item3: 'Phase 3 — Verify: ',
+          note: 'After build completes, restart the dev server manually. The updater never kills the running process.',
+        },
+        partialUpdate: {
+          title: 'Partial update (amber warning)',
+          body1: 'If Phase 1 (git pull) succeeds but npm install or npm run build fails, the updater shows an amber warning instead of a red failure. The app code is already updated on disk.',
+          body2: 'In that case, run the fix commands manually in a terminal:',
+        },
+        safety: {
+          title: 'Safety guarantees',
+          body: 'The updater refuses to install if your working tree has uncommitted code changes, and refuses if vault/ is not git-ignored. Your vault data, localStorage, and personal assets are never touched by the update process.',
+        },
+      },
+      privacy: {
+        noCloud: {
+          title: 'No cloud, no tracking',
+          body1: 'PromptVault does not use any cloud service, database, or third-party API by default. Your profile, assets, settings, and vault files are stored only on your computer — in browser localStorage and in the local vault folder.',
+          body2: 'There is no telemetry, no analytics, and no data collection of any kind.',
+        },
+        storedWhere: {
+          title: 'What is stored where',
+          body1: 'Browser localStorage: your profile name/email, app settings (accent color, sort order, etc.), asset library, and notification history. Cleared if you clear your browser data.',
+          body2a: 'Vault folder (optional): assets saved as real files in ',
+          body2b: ' inside the project. Persists regardless of browser state.',
+        },
+        gitHub: {
+          title: 'Git and GitHub',
+          body: 'The vault/ folder is listed in .gitignore. If you clone this project and push it to GitHub, your vault files are not included. The app code is committed; your personal data is not.',
+        },
+        ollamaPrivacy: {
+          title: 'Ollama privacy',
+          body: 'When you run agents using the Ollama integration, prompts are sent only to your local Ollama instance — not to any external server. No data leaves your machine.',
+        },
+      },
+      workflow: {
+        step1: 'Delete the demo assets (Settings → Danger Zone → Clear All Assets) or keep them as reference.',
+        step2: 'Create your first real asset — an agent you use often, or a prompt you keep retyping. Press N anywhere in the app to open the new asset modal.',
+        step3: 'Add tags and tools to your assets so you can filter them quickly later.',
+        step4: 'Enable Vault Storage (Settings → Vault Storage → Initialize → Sync) to save your assets as real files on disk.',
+        step5: 'Use the Copy button on any asset to instantly copy it to your clipboard for use in ChatGPT, Claude, Midjourney, or any other tool.',
+        step6: 'If you have Ollama installed, enable it in Settings → Local AI to run agents locally with no API cost.',
+        step7: 'Export a vault backup regularly (Settings → Vault Storage → Export Vault Backup). Keep it on an external disk or a private cloud folder.',
+        step8: 'Check for app updates in Settings → App Updates to get the latest features.',
+        language: {
+          title: 'Interface language',
+          body: 'Go to Settings → Appearance → Language to switch the interface between English and Swedish. The language setting affects all UI labels, buttons, section headings, and status messages.',
+          note: 'Your asset content — titles, descriptions, prompts, instructions — is never translated. Only the interface labels change.',
+        },
+        future: {
+          title: 'Future possibilities',
+          body: 'PromptVault is designed to grow. Future ideas include: Supabase backend for cross-device sync, team sharing, Markdown editor with live preview, command palette, and expanded AI tool integrations.',
+          note: 'It is intentionally local-first — a solid foundation to build on.',
+        },
+      },
+      promptBuilder: {
+        whatVars: {
+          title: 'What are prompt variables?',
+          body1: 'You can write prompts and agent instructions that contain named placeholders wrapped in curly braces. PromptVault automatically detects any {variablename} patterns in your prompt or generation prompt.',
+          body2: 'Example prompt with variables:',
+        },
+        howToUse: {
+          title: 'How to use Build Prompt',
+          item1: 'Open a Prompt or Image asset that contains {variable} placeholders.',
+          item2: 'Click Build Prompt in the Quick Actions footer.',
+          item3: 'A modal opens showing all detected variables as input fields.',
+          item4: 'Type values into each field — the Generated Prompt updates live.',
+          item5: 'Click Copy Generated Prompt to copy the finished result.',
+          item6: 'Or click Save as New Asset to save the result as a new prompt asset in your library.',
+          note: 'The Build Prompt button also appears in Agent details when the system prompt or instructions contain variables.',
+        },
+        neverChanged: {
+          title: 'Original asset is never changed',
+          body1: 'Filling values in the Prompt Builder does not modify your original prompt. The builder is a temporary workspace — your original template stays intact for reuse.',
+          body2: 'Any generated prompt you save becomes a new independent asset. Editing it later uses normal version history — the original is not affected.',
+        },
+        varRules: {
+          title: 'Variable rules',
+          item1: 'Variable names must start with a letter and may contain letters, numbers, underscores, and dashes.',
+          item2: 'Variables are detected in order of first appearance and deduplicated.',
+          item3: 'Unfilled variables remain as {variablename} in the output — they are highlighted amber so you can spot them.',
+          item4: 'Variables are only detected in prompt and image assets, and in agent system prompts and instructions. Code and JSON assets do not trigger the builder automatically.',
+        },
+      },
+    },
   },
 
   // ── Filter bar ────────────────────────────────────────────────────────────────
@@ -1280,6 +1592,318 @@ const sv: NestedStrings = {
       promptBuilder: 'Fyll i variabler för att generera en färdig prompt — utan att ändra originalet.',
     },
     assetTypesHeading: 'Asset-typer',
+    cards: {
+      what: {
+        workspace: {
+          title: 'En personlig AI-arbetsyta',
+          body1: 'PromptVault är en lokal-first app för att organisera allt du använder med AI-verktyg – prompter, agenter, anteckningar, kodsnuttar, arbetsflöden, bildreferenser och mallar.',
+          body2: 'Tänk på det som ditt personliga AI-bibliotek: en plats där du sparar ditt bästa material, återanvänder det snabbt och håller det organiserat så att du hittar rätt när du behöver det.',
+        },
+        localFirst: {
+          title: 'Byggt för lokal-first',
+          body1: 'Allt du skapar ligger på din egen dator. PromptVault skickar inte din data till någon molntjänst, kräver inget konto på en tredjepartsplattform och behöver ingen internetanslutning för att fungera.',
+          body2a: 'Dina prompter och agenter är dina – sparade som riktiga filer i en ',
+          body2b: '-mapp på din dator (när du aktiverar Vault-lagring i inställningarna).',
+        },
+        whoFor: {
+          title: 'Vem är det för?',
+          intro: 'PromptVault passar för:',
+          item1: 'Prompt engineers som vill versionshantera och återanvända sina bästa prompter',
+          item2: 'AI-entusiaster som bygger ett personligt bibliotek med agenter och instruktioner',
+          item3: 'Utvecklare som vill samla kodsnuttar och agentkonfigurationer på ett ställe',
+          item4: 'Kreatörer som arbetar med AI-bildgenerering och vill spara referensprompter',
+          item5: 'Alla som är trötta på att tappa bort bra prompter i chatthistorik',
+        },
+      },
+      login: {
+        whatLogin: {
+          title: 'Vad inloggningsskärmen är',
+          body1: 'När du öppnar PromptVault för första gången visas en inloggningsskärm som ber om namn och e-post. Det skapar inget konto på någon server. Ditt namn och din e-post lagras bara i din webbläsares localStorage – de används för att anpassa gränssnittet och identifiera dig lokalt.',
+          body2: 'Det finns inget lösenord, inget serverbaserat konto, ingen e-postverifiering och ingen data som skickas någonstans. Du kan ange vilket namn och vilken e-post du vill.',
+        },
+        returning: {
+          title: 'Återvändande användare',
+          body: 'Om du har använt PromptVault tidigare och webbläsaren fortfarande har localStorage-data känner appen igen din tidigare session och loggar in dig automatiskt. Om localStorage rensades (t.ex. om du rensade webbläsarens data) visas inloggningsskärmen igen – ange samma namn och e-post, så väntar dina assets i valvet om du har Vault-lagring aktiverat.',
+        },
+        editProfile: {
+          title: 'Redigera din profil',
+          body: 'Gå till Inställningar → Profil för att uppdatera ditt visningsnamn, e-post och eventuellt arbetsytanamn. Ändringarna sparas bara lokalt.',
+        },
+        privacyNote: {
+          label: 'Integritet:',
+          body: 'Din profildata lämnar aldrig din webbläsare. PromptVault har inga användarkonton, ingen autentiseringsserver och inget backend som lagrar din identitet.',
+        },
+      },
+      assets: {
+        typeDescs: {
+          agents:    'fullständiga agentinstruktioner med systemprompt, variabler, verktyg och exempelutdata',
+          prompts:   'enskilda prompter per kategori (bild, text, kod, video, musik, allmänt)',
+          images:    'bildreferenser för AI-generering – prompter, stilanteckningar, negativa prompter',
+          markdown:  'anteckningar, dokumentation och strukturerad text',
+          code:      'kodsnuttar med språktagg',
+          workflows: 'flerstegiga AI-arbetsflöden sparade som JSON',
+          templates: 'återanvändbara strukturerade mallar för vanliga uppgifter',
+          notes:     'snabba ostrukturerade anteckningar',
+          json:      'rå JSON-konfigurationer och datafiler',
+        },
+        searchFilter: {
+          title: 'Sök & filtrera',
+          body1: 'Använd sökfältet för att direkt söka igenom alla asset-titlar, innehåll och taggar. Använd sidofältet för att navigera per typ (Agenter, Prompter, Bilder…) eller sektion (Senaste, Favoriter, Papperskorg). Använd knappen Filter för att kombinera filter på tagg, verktyg, synlighet och favoritstatus.',
+          body2: 'Sortera efter: senast använd, nyaste, senast uppdaterad, alfabetisk, mest använd, mest kopierad.',
+        },
+        copyClip: {
+          title: 'Kopiera till urklipp',
+          body: 'Varje asset har en Kopiera-knapp. Att klicka på den kopierar assetens innehåll till urklipp med ett enda klick – redo att klistra in i ChatGPT, Claude, Midjourney eller vilket annat verktyg som helst. Kopieringsantalet spåras så att du kan se vilka assets du använder mest.',
+        },
+        metadata: {
+          title: 'Taggar, verktyg och metadata',
+          body1: 'Varje asset kan ha taggar, tillhörande AI-verktyg, en synlighetsinställning (privat / team / offentlig), ett versionsnummer och en beskrivning. Du kan filtrera och sortera på alla dessa i huvudbiblioteksvyn.',
+          body2: 'Agenter stödjer även namngivna variabler – platshållare som {{topic}} som du fyller i varje gång du kör agenten.',
+        },
+        imageAttach: {
+          title: 'Bildbilagor',
+          body1: 'Bild-assets kan lagra både en genereringsprompt och en riktig bifogad bildfil. Klicka på Lägg till bild i bilddetaljpanelen för att bifoga en PNG-, JPG- eller WebP-fil (max 20 MB).',
+          body2a: 'Bifogade bilder sparas i ',
+          body2b: ' och inkluderas automatiskt i Vault Backup-exporter. Inget laddas upp – filerna stannar helt lokalt. Vault-lagring måste aktiveras först.',
+        },
+        dashStats: {
+          title: 'Instrumentpanelens statistik',
+          body1: 'Statistikkorten på instrumentpanelen (Totalt antal assets, Agenter, Prompter, Filer, Mallar, Kopierade idag) beräknas live från ditt faktiska bibliotek – inte demoplatshållare. De uppdateras direkt när du skapar, skräpar, återställer eller kopierar assets.',
+          body2: 'Kopierade idag spåras bara lokalt som metadata – kopieringsloggen lagrar asset-ID, etikett och tidsstämpel. Den sparar inte det kopierade promptinnehållet.',
+        },
+        editAsset: {
+          title: 'Redigera assets',
+          body1: 'Klicka på pennikonen (✏) i det övre högra hörnet av detaljpanelen (bredvid stängknappen ×) för att öppna modalen Redigera asset.',
+          body2: 'Du kan redigera: titel, beskrivning, verktyg, taggar, anteckningar, version, alla typspecifika innehållsfält (systemprompt, instruktioner, genereringsprompt, kod, negativ prompt osv.) och variabler. Asset-typen är låst efter skapandet av säkerhetsskäl – för att byta typ skapar du en ny asset.',
+          body3: 'Sidfoten visar Osparade ändringar när formuläret har ändringar. Om du stänger med osparade ändringar uppmanas du bekräfta innan du kastar dem. Att spara synkroniserar också till ditt valv på disk om Vault-lagring är aktiverat.',
+        },
+        statusRow: {
+          title: 'Asset-statusindikatorer',
+          intro: 'Varje asset-kort och detaljpanel visar en kompakt statusrad under beskrivningen:',
+          item1: 'Senast redigerad — "Redigerad idag / igår / för 3 dagar sedan" eller ett fullständigt datum för äldre assets.',
+          item2: 'Versionsantal — visar hur många sparade versioner som finns i historiken (t.ex. "3 versioner").',
+          item3: 'Vault-status — Sparad i Vault om filen finns på disk, eller Endast lokalt om Vault inte är aktiverat.',
+        },
+        versionHistory: {
+          title: 'Versionshistorik',
+          body1: 'Varje gång du sparar en redigering av en asset skapas en ny version automatiskt och lagras i versionshistoriken. Upp till 25 versioner sparas per asset.',
+          body2: 'Klicka på historikikonen (⟳) bredvid redigeringsknappen i detaljpanelens huvud för att öppna Versionshistorik. Därifrån kan du visa, kopiera eller återställa valfri tidigare version. Återställning sparar det aktuella tillståndet i historiken först, så du förlorar aldrig arbete.',
+        },
+        demoAssets: {
+          title: 'Demotillgångar',
+          body: 'Assets vid första start är demotillgångar – bara exempel. Ta bort dem individuellt (papperskorgikonen i detaljpanelen) eller alla på en gång via Inställningar → Riskzon → Rensa alla assets.',
+        },
+      },
+      agents: {
+        whatAgent: {
+          title: 'Vad en agent är',
+          body: 'En agent-asset innehåller allt du behöver för att definiera en AI-assistent: en systemprompt, ett valfritt instruktionsblock, namngivna variabler, en lista med verktyg och ett exempelresultat. Tänk på det som en sparad AI-persona eller uppgiftskonfiguration.',
+        },
+        runAgent: {
+          title: 'Kör agent (med Ollama)',
+          body1: 'Klicka på Kör i agentens detaljpanel. Om Ollama är anslutet skickas agentens systemprompt och instruktioner till din lokala modell. Du fyller i eventuella variabelvärden innan körning. Svaret strömmas tillbaka i panelen.',
+          body2: 'Ingen data lämnar din dator. Ingen API-kostnad. Modellen körs 100 % lokalt.',
+        },
+        mockPreview: {
+          title: 'Förhandsvisning utan Ollama',
+          body: 'Om Ollama inte är aktiverat öppnar ett klick på Kör en förhandsvisning som visar exakt vad som skulle skickas till modellen – den fullständiga konstruerade prompten med dina variabler ifyllda. Det är användbart för att granska och förfina din agentkonfiguration innan körning.',
+        },
+        testAgent: {
+          title: 'Testa agent',
+          body: 'Knappen Test validerar din agentkonfiguration: den kontrollerar att obligatoriska fält finns och kör eventuellt en snabb testprompt mot Ollama med svarstid och modellinformation visad.',
+        },
+        setupOllama: {
+          title: 'Konfigurera Ollama',
+          item1: 'Installera Ollama från ollama.ai',
+          item2a: 'Hämta en modell: ',
+          item3: 'Gå till Inställningar → Lokal AI',
+          item4: 'Aktivera Ollama och klicka på Testa anslutning',
+          note: 'Ollama är helt valfritt – allt utom live-agentkörning fungerar utan det.',
+        },
+      },
+      vault: {
+        whatVault: {
+          title: 'Vad Vault är',
+          body1a: 'Som standard lagrar PromptVault assets i webbläsarens localStorage – som kan gå förlorat om du rensar webbläsardata. Vault-lagring sparar varje asset som en riktig fil i en ',
+          body1b: '-mapp inuti projektmappen på din dator.',
+          body2a: 'Agenter, prompter, anteckningar och mallar sparas som ',
+          body2b: '-filer med YAML-frontmatter. Arbetsflöden och JSON-assets sparas som ',
+          body2c: '-filer. Varje fil är läsbar för människor.',
+        },
+        setup: {
+          title: 'Konfigurera Vault-lagring',
+          item1: 'Gå till Inställningar → Vault-lagring',
+          item2: 'Klicka på Initiera Vault – skapar mappstrukturen och index.json',
+          item3: 'Aktivera Vault-växeln',
+          item4: 'Klicka på Synkronisera alla assets till Vault för att skriva alla dina assets till disk',
+          note: 'Efter synkronisering speglas varje skapa/uppdatera/skräpa/återställa/radera automatiskt till disk.',
+        },
+        tools: {
+          title: 'Vault-verktyg',
+          body1: 'Autoladdning vid start – när Vault-lagring är aktiverat och initierat laddar PromptVault automatiskt dina assets från valvet varje gång appen startar. Du behöver inte klicka på något.',
+          body2: 'Ladda assets från Vault – läser manuellt vault-filer och sammanfogar dem med ditt bibliotek. Fortfarande användbart efter import av en säkerhetskopia eller efter redigering av vault-filer utanför appen.',
+          body3: 'Bygg om Vault-index – skannar alla vault-mappar och återskapar index.json. Använd detta efter manuell redigering av vault-filer utanför appen.',
+        },
+        healthCheck: {
+          title: 'Vault-hälsokontroll',
+          body: 'Klicka på Kör Vault-hälsokontroll för att verifiera att ditt valv är intakt. Den kontrollerar: vault-mappen finns, index.json finns och är giltig, alla nödvändiga mappar finns, alla filreferenser finns på disk och inga duplicerade asset-ID:n. Resultaten visas direkt i panelen – grönt för friskt, gult för varningar, rött för fel.',
+          note: 'Hälsokontrollen läser aldrig dina prompt- eller agentinnehåll – den inspekterar bara mappstruktur och indexmetadata.',
+        },
+        imageAttach: {
+          title: 'Bildfilsbilagor',
+          body1a: 'Bild-assets kan ha en riktig bildfil bifogad (PNG, JPG, WebP). Filen lagras i ',
+          body1b: ' tillsammans med en liten ',
+          body1c: '.',
+          body2a: 'Bifogade bilder inkluderas automatiskt i Vault Backup-exporter och utesluts från Git via ',
+          body2b: '.',
+        },
+        privacyNote: {
+          label: 'Integritetsinfo:',
+          body: 'Mappen vault/ finns listad i .gitignore. Om du pushar projektet till GitHub inkluderas inte dina vault-filer.',
+        },
+      },
+      backup: {
+        warning: {
+          label: 'Inget laddas upp av PromptVault.',
+          body: 'Export och import fungerar helt lokalt – zip-filen lämnar aldrig din dator om du inte väljer att flytta den själv.',
+        },
+        exportVault: {
+          title: 'Exportera Vault Backup',
+          body1a: 'Gå till Inställningar → Vault-lagring → Exportera Vault Backup. En ',
+          body1b: '-fil laddas ned till din dator med hela innehållet i din vault-mapp.',
+          body2: 'Använd detta för att: säkerhetskopiera valvet före en ominstallation, överföra till en annan dator eller arkivera ett specifikt tillstånd av ditt bibliotek.',
+        },
+        importVault: {
+          title: 'Importera Vault Backup',
+          body1a: 'På måldatorn, gå till Inställningar → Vault-lagring → Importera Vault Backup. Välj zip-filen och skriv ',
+          body1b: ' för att bekräfta. Importprocessen:',
+          item1: 'Validerar att zip-filen innehåller en giltig vault-struktur',
+          item2a: 'Säkerhetskopierar ditt nuvarande valv till ',
+          item3: 'Ersätter valvet med det importerade',
+          item4: 'Kör en hälsokontroll automatiskt',
+          note: 'Efter import, klicka på Ladda assets från Vault för att föra in de importerade assets i appbiblioteket.',
+        },
+        backupReminder: {
+          title: 'Säkerhetskopieringspåminnelse',
+          body: 'Kortet Vault Backup under Inställningar → Vault-lagring visar när du senast exporterade en säkerhetskopia. Statusen är Backup aktuell om den senaste säkerhetskopian gjordes inom 7 dagar, eller Backup rekommenderas om det gått längre eller om du aldrig har tagit en säkerhetskopia.',
+        },
+      },
+      trash: {
+        moveToTrash: {
+          title: 'Flytta till papperskorg',
+          body1: 'När du tar bort en asset normalt (via papperskorgikonen i detaljpanelen) flyttas den till sektionen Papperskorg i sidofältet. Den döljs från ditt huvudbibliotek men är inte borttagen permanent.',
+          body2: 'Om Vault är aktiverat markeras asset-posten som skräpad i vault-indexet – filen i sig förblir på plats.',
+        },
+        restore: {
+          title: 'Återställ från papperskorg',
+          body: 'Öppna sektionen Papperskorg i sidofältet för att se alla skräpade assets. Du kan återställa vilken som helst av dem tillbaka till ditt aktiva bibliotek. Återställda assets visas igen i alla filter och sökresultat.',
+        },
+        permDelete: {
+          title: 'Permanent radering',
+          body1a: 'I papperskorgen kan du ta bort en asset permanent. Den tas då helt bort från appen. Om Vault är aktiverat flyttas filen till mappen ',
+          body1b: ' – den tas aldrig bort hårt från disk, så du kan fortfarande återskapa den manuellt om det behövs.',
+        },
+        emptyTrash: {
+          title: 'Töm papperskorg',
+          body1a: 'Gå till Inställningar → Riskzon → Töm papperskorg för att ta bort alla skräpade assets permanent på en gång. Du måste skriva ',
+          body1b: ' för att bekräfta.',
+        },
+      },
+      updates: {
+        howToUpdate: {
+          title: 'Så uppdaterar du',
+          body1: 'Gå till Inställningar → Appuppdateringar och klicka på Sök efter uppdateringar. Uppdateraren hämtar den senaste commit:en från GitHub main-grenen och visar den nuvarande kontra den senaste commit:en.',
+          body2: 'Om en uppdatering är tillgänglig och alla säkerhetskontroller godkänns, klicka på Installera uppdatering. När det är klart, starta om dev-servern manuellt.',
+        },
+        threePhase: {
+          title: 'Trefasinstallation',
+          intro: 'Uppdateraren kör tre faser i ordning:',
+          item1: 'Fas 1 — Nedladdning: ',
+          item2: 'Fas 2 — Beroenden: ',
+          item3: 'Fas 3 — Verifiering: ',
+          note: 'Efter att bygget är klart, starta om dev-servern manuellt. Uppdateraren avslutar aldrig den körande processen.',
+        },
+        partialUpdate: {
+          title: 'Partiell uppdatering (gul varning)',
+          body1: 'Om fas 1 (git pull) lyckas men npm install eller npm run build misslyckas visar uppdateraren en gul varning i stället för ett rött fel. App-koden är redan uppdaterad på disk.',
+          body2: 'Kör i så fall fixkommandona manuellt i en terminal:',
+        },
+        safety: {
+          title: 'Säkerhetsgarantier',
+          body: 'Uppdateraren vägrar installera om ditt arbetsträd har ocommittade kodändringar, och vägrar om vault/ inte är git-ignorerad. Din vault-data, localStorage och personliga assets berörs aldrig av uppdateringsprocessen.',
+        },
+      },
+      privacy: {
+        noCloud: {
+          title: 'Inget moln, ingen spårning',
+          body1: 'PromptVault använder som standard inga molntjänster, databaser eller tredjeparts-API:er. Din profil, dina assets, inställningar och vault-filer lagras bara på din dator – i webbläsarens localStorage och i den lokala vault-mappen.',
+          body2: 'Det finns ingen telemetri, ingen analys och ingen datainsamling av något slag.',
+        },
+        storedWhere: {
+          title: 'Vad lagras var',
+          body1: 'Webbläsarens localStorage: ditt profilnamn/e-post, appinställningar (accentfärg, sorteringsordning osv.), asset-bibliotek och aviseringshistorik. Rensas om du rensar webbläsardata.',
+          body2a: 'Vault-mapp (valfritt): assets sparade som riktiga filer i ',
+          body2b: ' inuti projektet. Kvarstår oavsett webbläsartillstånd.',
+        },
+        gitHub: {
+          title: 'Git och GitHub',
+          body: 'Mappen vault/ finns listad i .gitignore. Om du klonar projektet och pushar det till GitHub inkluderas inte dina vault-filer. App-koden committeras; din personliga data gör det inte.',
+        },
+        ollamaPrivacy: {
+          title: 'Ollamaintegrationens integritet',
+          body: 'När du kör agenter med Ollama-integrationen skickas prompter bara till din lokala Ollama-instans – inte till någon extern server. Ingen data lämnar din dator.',
+        },
+      },
+      workflow: {
+        step1: 'Ta bort demotillgångarna (Inställningar → Riskzon → Rensa alla assets) eller behåll dem som referens.',
+        step2: 'Skapa din första riktiga asset – en agent du använder ofta eller en prompt du skriver om gång på gång. Tryck N var som helst i appen för att öppna modalen för ny asset.',
+        step3: 'Lägg till taggar och verktyg på dina assets så att du kan filtrera dem snabbt senare.',
+        step4: 'Aktivera Vault-lagring (Inställningar → Vault-lagring → Initiera → Synkronisera) för att spara dina assets som riktiga filer på disk.',
+        step5: 'Använd Kopiera-knappen på valfri asset för att direkt kopiera den till urklipp för användning i ChatGPT, Claude, Midjourney eller vilket annat verktyg som helst.',
+        step6: 'Om du har Ollama installerat, aktivera det under Inställningar → Lokal AI för att köra agenter lokalt utan API-kostnad.',
+        step7: 'Exportera en vault-backup regelbundet (Inställningar → Vault-lagring → Exportera Vault Backup). Förvara den på en extern disk eller en privat molnmapp.',
+        step8: 'Sök efter appuppdateringar under Inställningar → Appuppdateringar för att få de senaste funktionerna.',
+        language: {
+          title: 'Gränssnittsspråk',
+          body: 'Gå till Inställningar → Utseende → Språk för att växla gränssnittet mellan engelska och svenska. Språkinställningen påverkar alla UI-etiketter, knappar, sektionsrubriker och statusmeddelanden.',
+          note: 'Ditt asset-innehåll – titlar, beskrivningar, prompter, instruktioner – översätts aldrig. Bara gränssnittsetiketterna ändras.',
+        },
+        future: {
+          title: 'Framtida möjligheter',
+          body: 'PromptVault är designat för att växa. Framtida idéer inkluderar: Supabase-backend för synkronisering mellan enheter, teamdelning, Markdown-editor med liveförhandsvisning, kommandopalett och utökade AI-verktygsintegrationer.',
+          note: 'Det är avsiktligt lokal-first – en solid grund att bygga vidare på.',
+        },
+      },
+      promptBuilder: {
+        whatVars: {
+          title: 'Vad promptvariabler är',
+          body1: 'Du kan skriva prompter och agentinstruktioner som innehåller namngivna platshållare inslagna i klammerparenteser. PromptVault identifierar automatiskt alla {variabelnamn}-mönster i din prompt eller genereringsprompt.',
+          body2: 'Exempelprompt med variabler:',
+        },
+        howToUse: {
+          title: 'Så använder du Bygg prompt',
+          item1: 'Öppna en prompt- eller bild-asset som innehåller {variabel}-platshållare.',
+          item2: 'Klicka på Bygg prompt i snabbåtgärdsidfoten.',
+          item3: 'En modal öppnas och visar alla identifierade variabler som inmatningsfält.',
+          item4: 'Ange värden i varje fält – den genererade prompten uppdateras live.',
+          item5: 'Klicka på Kopiera genererad prompt för att kopiera det färdiga resultatet.',
+          item6: 'Eller klicka på Spara som ny asset för att spara resultatet som en ny prompt-asset i ditt bibliotek.',
+          note: 'Knappen Bygg prompt visas även i agentdetaljer när systemprompten eller instruktionerna innehåller variabler.',
+        },
+        neverChanged: {
+          title: 'Originaltillgången ändras aldrig',
+          body1: 'Att fylla i värden i prompt-byggaren ändrar inte din originalprompt. Byggaren är en tillfällig arbetsyta – din originalmall förblir intakt för återanvändning.',
+          body2: 'Alla genererade prompter du sparar blir en ny fristående asset. Om du redigerar den senare används vanlig versionshistorik – originalet påverkas inte.',
+        },
+        varRules: {
+          title: 'Variabelregler',
+          item1: 'Variabelnamn måste börja med en bokstav och får innehålla bokstäver, siffror, understreck och bindestreck.',
+          item2: 'Variabler identifieras i ordningen de förekommer och dedupliceras.',
+          item3: 'Ej ifyllda variabler förblir som {variabelnamn} i utdata – de markeras med gult så att du kan se dem.',
+          item4: 'Variabler identifieras bara i prompt- och bild-assets samt i agentens systemprompter och instruktioner. Kod- och JSON-assets utlöser inte byggaren automatiskt.',
+        },
+      },
+    },
   },
   status: {
     editedToday:     'Redigerad idag',
