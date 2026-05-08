@@ -23,6 +23,7 @@ import {
   History,
   HardDrive,
   Monitor,
+  FolderOpen,
 } from 'lucide-react'
 import { Asset, AssetType } from '@/types'
 import { AssetBadge } from './AssetBadge'
@@ -31,6 +32,7 @@ import { copyToClipboard } from '@/lib/clipboard'
 import { useAppStore } from '@/stores/useAppStore'
 import { useVersionStore } from '@/stores/useVersionStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useCollectionStore } from '@/stores/useCollectionStore'
 import { useI18n } from '@/lib/i18n/useI18n'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
 
@@ -63,6 +65,8 @@ export function AssetCard({ asset }: AssetCardProps) {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
 
   const versionCount = getVersions(asset.id).length
+  const { getCollectionsForAsset } = useCollectionStore()
+  const assetCollections = getCollectionsForAsset(asset.id)
   const isVaultSynced = !!(
     vault.vaultEnabled &&
     vault.vaultInitialized &&
@@ -289,6 +293,12 @@ export function AssetCard({ asset }: AssetCardProps) {
           <span className="flex items-center gap-0.5 text-[10px] text-text-dim flex-shrink-0">
             <History size={9} />
             {versionCount}
+          </span>
+        )}
+        {assetCollections.length > 0 && (
+          <span className="flex items-center gap-0.5 text-[10px] text-text-dim flex-shrink-0" title={assetCollections.map((c) => c.name).join(', ')}>
+            <FolderOpen size={9} />
+            {assetCollections.length}
           </span>
         )}
         <span className={cn(

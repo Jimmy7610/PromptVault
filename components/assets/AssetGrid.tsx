@@ -8,6 +8,7 @@ import { useI18n } from '@/lib/i18n/useI18n'
 import { cn } from '@/lib/utils'
 import { SettingsView } from '@/components/settings/SettingsView'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
+import { CollectionsView } from '@/components/collections/CollectionsView'
 
 export function AssetGrid() {
   const { activeSection, searchQuery, viewMode, openNewAssetModal, emptyTrash } = useAppStore()
@@ -39,14 +40,7 @@ export function AssetGrid() {
   }
 
   if (activeSection === 'collections') {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="text-text-muted text-sm mb-2">{t('grid.collectionsComingSoon')}</div>
-          <div className="text-text-dim text-xs">{t('grid.collectionsDesc')}</div>
-        </div>
-      </div>
-    )
+    return <CollectionsView />
   }
 
   return (

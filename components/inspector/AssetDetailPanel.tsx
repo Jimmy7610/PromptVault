@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
-import { X, Pencil, History } from 'lucide-react'
+import { X, Pencil, History, FolderOpen, Check } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
+import { useCollectionStore } from '@/stores/useCollectionStore'
 import { useI18n } from '@/lib/i18n/useI18n'
 import { AgentDetail } from './AgentDetail'
 import { PromptDetail } from './PromptDetail'
@@ -11,9 +12,11 @@ import { CodeDetail } from './CodeDetail'
 import { GenericDetail } from './GenericDetail'
 import { EditAssetModal } from '@/components/forms/EditAssetModal'
 import { VersionHistoryModal } from './VersionHistoryModal'
+import { cn } from '@/lib/utils'
 
 export function AssetDetailPanel() {
   const { selectedAssetId, assets, setSelectedAsset } = useAppStore()
+  const { collections, setAssetCollections } = useCollectionStore()
   const { t } = useI18n()
   const asset = assets.find((a) => a.id === selectedAssetId)
   const [editOpen, setEditOpen] = useState(false)
@@ -68,6 +71,46 @@ export function AssetDetailPanel() {
           <GenericDetail asset={asset} />
         )}
       </div>
+
+      {/* Collections footer */}
+      {collections.length > 0 && (
+        <div className="border-t border-border px-4 py-3 flex-shrink-0">
+          <div className="flex items-center gap-1.5 mb-2">
+            <FolderOpen size={11} className="text-text-dim" />
+            <span className="text-[10px] font-semibold text-text-dim uppercase tracking-wider">
+              {t('collections.inCollections')}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {collections.map((col) => {
+              const isMember = col.assetIds.includes(asset.id)
+              return (
+                <button
+                  key={col.id}
+                  onClick={() => {
+                    const current = collections
+                      .filter((c) => c.assetIds.includes(asset.id))
+                      .map((c) => c.id)
+                    const next = isMember
+                      ? current.filter((id) => id !== col.id)
+                      : [...current, col.id]
+                    setAssetCollections(asset.id, next)
+                  }}
+                  className={cn(
+                    'flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] border transition-all',
+                    isMember
+                      ? 'bg-accent-blue/10 border-accent-blue/30 text-accent-blue'
+                      : 'bg-surface-soft border-border text-text-dim hover:text-text-muted hover:border-border-soft'
+                  )}
+                >
+                  {isMember && <Check size={9} />}
+                  {col.name}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </aside>
   )
 }

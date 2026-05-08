@@ -1,9 +1,10 @@
 'use client'
 import { useState, useRef } from 'react'
-import { X, Plus, Trash2, Wand2 } from 'lucide-react'
+import { X, Plus, Trash2, Wand2, Check } from 'lucide-react'
 import { Asset, Variable } from '@/types'
 import { useAppStore } from '@/stores/useAppStore'
 import { useVersionStore } from '@/stores/useVersionStore'
+import { useCollectionStore } from '@/stores/useCollectionStore'
 import { useI18n } from '@/lib/i18n/useI18n'
 import { cn, assetTypeConfig } from '@/lib/utils'
 import { hasPromptVariables } from '@/lib/promptVariables'
@@ -56,6 +57,7 @@ const LABEL_CLS = 'block text-xs font-medium text-text-muted mb-1.5'
 export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
   const { updateAsset, showToast } = useAppStore()
   const { saveVersion } = useVersionStore()
+  const { collections, setAssetCollections } = useCollectionStore()
   const { t } = useI18n()
   const initialRef = useRef<FormState>(assetToForm(asset))
   const [form, setForm] = useState<FormState>(initialRef.current)
@@ -408,6 +410,42 @@ export function EditAssetModal({ asset, onClose }: EditAssetModalProps) {
                 </div>
               )}
             </div>
+
+            {/* Collections */}
+            {collections.length > 0 && (
+              <div>
+                <label className={LABEL_CLS}>{t('collections.inCollections')}</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {collections.map((col) => {
+                    const isMember = col.assetIds.includes(asset.id)
+                    return (
+                      <button
+                        key={col.id}
+                        type="button"
+                        onClick={() => {
+                          const current = collections
+                            .filter((c) => c.assetIds.includes(asset.id))
+                            .map((c) => c.id)
+                          const next = isMember
+                            ? current.filter((id) => id !== col.id)
+                            : [...current, col.id]
+                          setAssetCollections(asset.id, next)
+                        }}
+                        className={cn(
+                          'flex items-center gap-1 px-2 py-1 rounded-lg text-xs border transition-all',
+                          isMember
+                            ? 'bg-accent-blue/10 border-accent-blue/30 text-accent-blue'
+                            : 'bg-surface border-border text-text-dim hover:text-text-muted hover:border-border-soft'
+                        )}
+                      >
+                        {isMember && <Check size={10} />}
+                        {col.name}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             <div>
               <label className={LABEL_CLS}>{t('editModal.notes')}</label>

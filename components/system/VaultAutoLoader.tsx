@@ -11,7 +11,9 @@ import { useEffect, useRef } from 'react'
 import { Asset } from '@/types'
 import { useAppStore } from '@/stores/useAppStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useCollectionStore } from '@/stores/useCollectionStore'
 import { getVaultAssets } from '@/lib/vaultClient'
+import { loadCollectionsFromVault } from '@/lib/vaultCollections'
 import { useI18n } from '@/lib/i18n/useI18n'
 
 export function VaultAutoLoader() {
@@ -32,29 +34,34 @@ export function VaultAutoLoader() {
 
     ;(async () => {
       try {
-        const vaultAssets = (await getVaultAssets(true)) as Asset[]
-        if (!vaultAssets.length) return
+        const [vaultAssets, vaultCollections] = await Promise.all([
+          getVaultAssets(true) as Promise<Asset[]>,
+          loadCollectionsFromVault(),
+        ])
 
-        const { assets: local } = useAppStore.getState()
-
-        // Smart merge: prefer newer updatedAt; add vault-only IDs; keep local-only IDs
-        const merged = [...local]
-        for (const vAsset of vaultAssets) {
-          if (!vAsset.id) continue
-          const idx = merged.findIndex((a) => a.id === vAsset.id)
-          if (idx >= 0) {
-            const localTs = merged[idx].updatedAt ? new Date(merged[idx].updatedAt).getTime() : 0
-            const vaultTs = vAsset.updatedAt ? new Date(vAsset.updatedAt).getTime() : 0
-            // Prefer vault version if it is newer (or same age — vault is the source of truth)
-            if (vaultTs >= localTs) {
-              merged[idx] = { ...merged[idx], ...vAsset }
+        // Merge assets
+        if (vaultAssets.length) {
+          const { assets: local } = useAppStore.getState()
+          const merged = [...local]
+          for (const vAsset of vaultAssets) {
+            if (!vAsset.id) continue
+            const idx = merged.findIndex((a) => a.id === vAsset.id)
+            if (idx >= 0) {
+              const localTs = merged[idx].updatedAt ? new Date(merged[idx].updatedAt).getTime() : 0
+              const vaultTs = vAsset.updatedAt ? new Date(vAsset.updatedAt).getTime() : 0
+              if (vaultTs >= localTs) merged[idx] = { ...merged[idx], ...vAsset }
+            } else {
+              merged.push(vAsset)
             }
-          } else {
-            merged.push(vAsset)
           }
+          useAppStore.setState({ assets: merged })
         }
 
-        useAppStore.setState({ assets: merged })
+        // Merge collections
+        if (vaultCollections.length) {
+          useCollectionStore.getState().mergeCollections(vaultCollections)
+        }
+
         useAppStore.getState().showToast(t('vault.autoLoadSuccess'))
       } catch {
         useAppStore.getState().showToast(t('vault.autoLoadError'), 'error')

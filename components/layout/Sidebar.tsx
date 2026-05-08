@@ -25,6 +25,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
 import { useUserStore, getUserInitials } from '@/stores/useUserStore'
+import { useCollectionStore } from '@/stores/useCollectionStore'
 import { useAssetCounts } from '@/hooks/useFilteredAssets'
 import { useI18n } from '@/lib/i18n/useI18n'
 import { NavSection } from '@/types'
@@ -58,6 +59,7 @@ export function Sidebar() {
   const { activeSection, setActiveSection, openNewAssetModal, openClipboardModal } = useAppStore()
   const { user, logout } = useUserStore()
   const counts = useAssetCounts()
+  const collectionCount = useCollectionStore((s) => s.collections.length)
   const { t } = useI18n()
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
@@ -85,7 +87,7 @@ export function Sidebar() {
     {
       label: t('sidebar.organize'),
       items: [
-        { id: 'collections', label: t('nav.collections'), icon: FolderOpen },
+        { id: 'collections', label: t('nav.collections'), icon: FolderOpen, count: collectionCount || undefined },
         { id: 'templates',   label: t('nav.templates'),   icon: Layout, count: counts.templates },
       ],
     },
