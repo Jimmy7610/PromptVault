@@ -41,21 +41,14 @@ import { initVault, syncAssetsToVault, getVaultAssets, rebuildVaultIndex, health
 import { AppGuideModal } from '@/components/settings/AppGuideModal'
 import { UpdatesTab } from '@/components/settings/UpdatesTab'
 
-const ACCENT_OPTIONS: { value: AccentColor; label: string; color: string }[] = [
-  { value: 'blue', label: 'Blue', color: '#3b82f6' },
-  { value: 'purple', label: 'Purple', color: '#7c3aed' },
-  { value: 'green', label: 'Green', color: '#22c55e' },
-  { value: 'orange', label: 'Orange', color: '#f97316' },
+const ACCENT_VALUES: { value: AccentColor; color: string; key: string }[] = [
+  { value: 'blue',   color: '#3b82f6', key: 'settings.appearance.colorBlue' },
+  { value: 'purple', color: '#7c3aed', key: 'settings.appearance.colorPurple' },
+  { value: 'green',  color: '#22c55e', key: 'settings.appearance.colorGreen' },
+  { value: 'orange', color: '#f97316', key: 'settings.appearance.colorOrange' },
 ]
 
-const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: 'lastUsed', label: 'Last Used' },
-  { value: 'newest', label: 'Newest First' },
-  { value: 'updated', label: 'Recently Updated' },
-  { value: 'alphabetical', label: 'Alphabetical' },
-  { value: 'mostUsed', label: 'Most Used' },
-  { value: 'mostCopied', label: 'Most Copied' },
-]
+const SORT_VALUES: SortOption[] = ['lastUsed', 'newest', 'updated', 'alphabetical', 'mostUsed', 'mostCopied']
 
 type SettingsTab = 'profile' | 'appearance' | 'library' | 'export' | 'team' | 'ollama' | 'vault' | 'updates' | 'danger'
 
@@ -152,12 +145,28 @@ export function SettingsView() {
   const initials = user ? getUserInitials(user.name) : '?'
   const trashCount = assets.filter((a) => a.status === 'trash').length
 
+  const sortOptions: { value: SortOption; label: string }[] = [
+    { value: 'lastUsed',     label: t('settings.library.sortLastUsed') },
+    { value: 'newest',       label: t('settings.library.sortNewest') },
+    { value: 'updated',      label: t('settings.library.sortUpdated') },
+    { value: 'alphabetical', label: t('settings.library.sortAlphabetical') },
+    { value: 'mostUsed',     label: t('settings.library.sortMostUsed') },
+    { value: 'mostCopied',   label: t('settings.library.sortMostCopied') },
+  ]
+
+  const vaultStatusLabel: Record<string, { label: string; color: string }> = {
+    not_initialized: { label: t('settings.vault.statusNotInit'), color: 'text-text-dim' },
+    ready:           { label: t('settings.vault.statusReady'),   color: 'text-green-400' },
+    syncing:         { label: t('settings.vault.statusSyncing'), color: 'text-accent-blue' },
+    error:           { label: t('settings.vault.statusError'),   color: 'text-danger' },
+  }
+
   const handleSaveProfile = () => {
     if (!profileForm.name.trim() || !profileForm.email.trim()) return
     updateProfile({ name: profileForm.name, email: profileForm.email, workspaceName: profileForm.workspaceName })
     setProfileSaved(true)
     setTimeout(() => setProfileSaved(false), 2500)
-    showToast('Profile saved')
+    showToast(t('settings.profile.toastSaved'))
   }
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,11 +177,11 @@ export function SettingsView() {
     reader.onload = (ev) => {
       try {
         const result = parseImportJSON(ev.target?.result as string)
-        if (result.assets.length === 0) { setImportError('No valid assets found in file.'); return }
+        if (result.assets.length === 0) { setImportError(t('settings.export.noValidAssets')); return }
         result.assets.forEach((a) => useAppStore.getState().addAsset(a))
-        showToast(`Imported ${result.assets.length} assets`)
+        showToast(t('settings.export.importedN').replace('{n}', String(result.assets.length)))
       } catch {
-        setImportError('Invalid file format. Please use a PromptVault JSON export.')
+        setImportError(t('settings.export.invalidFormat'))
       }
     }
     reader.readAsText(file)
@@ -186,12 +195,12 @@ export function SettingsView() {
       const result = await testOllamaConnection(ollamaUrlInput)
       if (result.ok) {
         setOllamaStatus('connected')
-        setOllamaTestMessage(`Connected · ${result.modelCount} model${result.modelCount !== 1 ? 's' : ''} available`)
+        setOllamaTestMessage(t('settings.ollama.connectedMsg').replace('{n}', String(result.modelCount)))
         updateOllama({ baseUrl: ollamaUrlInput })
         // Fetch models immediately
         const models = await fetchOllamaModels(ollamaUrlInput)
         setOllamaModels(models)
-        showToast('Ollama connected')
+        showToast(t('settings.ollama.toastConnected'))
       } else {
         setOllamaStatus('error')
         setOllamaTestMessage(result.error ?? 'Connection failed')
@@ -208,17 +217,10 @@ export function SettingsView() {
       const models = await fetchOllamaModels(ollama.baseUrl)
       setOllamaModels(models)
       setOllamaStatus('connected')
-      showToast(`${models.length} models loaded`)
+      showToast(t('settings.ollama.modelsLoaded').replace('{n}', String(models.length)))
     } catch {
       setOllamaStatus('error')
     }
-  }
-
-  const vaultStatusLabel: Record<string, { label: string; color: string }> = {
-    not_initialized: { label: 'Not initialized', color: 'text-text-dim' },
-    ready:           { label: 'Ready',           color: 'text-green-400' },
-    syncing:         { label: 'Syncing…',         color: 'text-accent-blue' },
-    error:           { label: 'Error',            color: 'text-danger' },
   }
 
   const handleInitVault = async () => {
@@ -228,18 +230,18 @@ export function SettingsView() {
     const result = await initVault()
     if (result.ok) {
       updateVault({ vaultInitialized: true, vaultStatus: 'ready' })
-      setVaultOpMessage({ ok: true, text: 'Vault initialized. Folder structure and index.json created.' })
-      showToast('Vault initialized')
+      setVaultOpMessage({ ok: true, text: t('settings.vault.initSuccess') })
+      showToast(t('settings.vault.toastInitialized'))
     } else {
       setVaultStatus('error')
-      setVaultOpMessage({ ok: false, text: result.error ?? 'Failed to initialize vault.' })
+      setVaultOpMessage({ ok: false, text: result.error ?? t('settings.vault.initFailed') })
     }
     setVaultOpLoading(false)
   }
 
   const handleSyncToVault = async () => {
     if (!vault.vaultInitialized) {
-      setVaultOpMessage({ ok: false, text: 'Initialize vault first.' })
+      setVaultOpMessage({ ok: false, text: t('settings.vault.needsInit') })
       return
     }
     setVaultOpLoading(true)
@@ -248,19 +250,19 @@ export function SettingsView() {
     const result = await syncAssetsToVault(assets as Asset[])
     if (result.ok) {
       updateVault({ vaultStatus: 'ready', vaultLastSyncedAt: new Date().toISOString() })
-      setVaultOpMessage({ ok: true, text: `Synced ${result.saved} asset${result.saved !== 1 ? 's' : ''} to vault.` })
-      showToast(`${result.saved} assets synced`)
+      setVaultOpMessage({ ok: true, text: t('settings.vault.syncSuccess').replace('{n}', String(result.saved)) })
+      showToast(t('settings.vault.syncToast').replace('{n}', String(result.saved)))
     } else {
       setVaultStatus('error')
       const summary = result.errors.slice(0, 3).join('; ')
-      setVaultOpMessage({ ok: false, text: `Synced ${result.saved} — ${result.errors.length} error(s): ${summary}` })
+      setVaultOpMessage({ ok: false, text: t('settings.vault.syncError').replace('{saved}', String(result.saved)).replace('{n}', String(result.errors.length)).replace('{details}', summary) })
     }
     setVaultOpLoading(false)
   }
 
   const handleLoadFromVault = async () => {
     if (!vault.vaultInitialized) {
-      setVaultOpMessage({ ok: false, text: 'Initialize vault first.' })
+      setVaultOpMessage({ ok: false, text: t('settings.vault.needsInit') })
       return
     }
     setVaultOpLoading(true)
@@ -268,14 +270,14 @@ export function SettingsView() {
     try {
       const loaded = (await getVaultAssets(true)) as Asset[]
       if (loaded.length === 0) {
-        setVaultOpMessage({ ok: false, text: 'No assets found in vault.' })
+        setVaultOpMessage({ ok: false, text: t('settings.vault.noAssetsInVault') })
         setVaultOpLoading(false)
         return
       }
       setPendingLoadAssets(loaded)
       setLoadConfirmOpen(true)
     } catch (err) {
-      setVaultOpMessage({ ok: false, text: err instanceof Error ? err.message : 'Failed to load from vault.' })
+      setVaultOpMessage({ ok: false, text: err instanceof Error ? err.message : t('settings.vault.loadFailed') })
     }
     setVaultOpLoading(false)
   }
@@ -297,23 +299,23 @@ export function SettingsView() {
     updateVault({ vaultLastSyncedAt: new Date().toISOString(), vaultStatus: 'ready' })
     setLoadConfirmOpen(false)
     setPendingLoadAssets([])
-    setVaultOpMessage({ ok: true, text: `Loaded ${pendingLoadAssets.length} asset${pendingLoadAssets.length !== 1 ? 's' : ''} from vault.` })
-    showToast(`${pendingLoadAssets.length} assets loaded from vault`)
+    setVaultOpMessage({ ok: true, text: t('settings.vault.loadSuccess').replace('{n}', String(pendingLoadAssets.length)) })
+    showToast(t('settings.vault.loadToast').replace('{n}', String(pendingLoadAssets.length)))
   }
 
   const handleRebuildIndex = async () => {
     if (!vault.vaultInitialized) {
-      setVaultOpMessage({ ok: false, text: 'Initialize vault first.' })
+      setVaultOpMessage({ ok: false, text: t('settings.vault.needsInit') })
       return
     }
     setVaultOpLoading(true)
     setVaultOpMessage(null)
     const result = await rebuildVaultIndex()
     if (result.ok) {
-      setVaultOpMessage({ ok: true, text: `Index rebuilt — ${result.count} asset${result.count !== 1 ? 's' : ''} found.` })
-      showToast('Vault index rebuilt')
+      setVaultOpMessage({ ok: true, text: t('settings.vault.rebuildSuccess').replace('{n}', String(result.count)) })
+      showToast(t('settings.vault.rebuildToast'))
     } else {
-      setVaultOpMessage({ ok: false, text: result.error ?? 'Rebuild failed.' })
+      setVaultOpMessage({ ok: false, text: result.error ?? t('settings.vault.rebuildFailed') })
     }
     setVaultOpLoading(false)
   }
@@ -335,8 +337,8 @@ export function SettingsView() {
     }
     setBackupMessage(
       result.ok
-        ? { ok: true, text: 'Vault backup downloaded successfully.' }
-        : { ok: false, text: result.error ?? 'Export failed.' }
+        ? { ok: true, text: t('settings.vault.backupSuccess') }
+        : { ok: false, text: result.error ?? t('settings.vault.backupFailed') }
     )
     setBackupLoading(false)
   }
@@ -403,7 +405,7 @@ export function SettingsView() {
             className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs text-text-muted hover:text-accent-blue hover:bg-accent-blue/8 transition-all"
           >
             <BookOpen size={13} className="flex-shrink-0" />
-            App Guide
+            {t('settings.appGuide')}
           </button>
         </div>
       </div>
@@ -416,8 +418,8 @@ export function SettingsView() {
           <Shield size={13} className="text-accent-blue flex-shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <p className="text-xs text-text-muted leading-relaxed">
-              <span className="font-semibold text-text-main">PromptVault is local-first.</span>{' '}
-              Your vault files stay in your project folder and are ignored from Git by default. Nothing is uploaded to any server.
+              <span className="font-semibold text-text-main">{t('settings.localFirstBold')}</span>{' '}
+              {t('settings.localFirstText')}
             </p>
           </div>
           <button
@@ -425,14 +427,14 @@ export function SettingsView() {
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-accent-blue/10 hover:bg-accent-blue/20 text-accent-blue text-[11px] font-medium transition-colors flex-shrink-0"
           >
             <BookOpen size={11} />
-            App Guide
+            {t('settings.appGuide')}
           </button>
         </div>
 
         {/* Profile */}
         {activeTab === 'profile' && (
           <div>
-            <SectionLabel>Profile</SectionLabel>
+            <SectionLabel>{t('settings.profile.heading')}</SectionLabel>
             <div className="flex items-center gap-4 mb-6 p-4 rounded-xl bg-surface border border-border">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent-violet to-accent-blue flex items-center justify-center flex-shrink-0">
                 <span className="text-base font-bold text-white">{initials}</span>
@@ -441,14 +443,14 @@ export function SettingsView() {
                 <div className="text-sm font-semibold text-text-main">{user?.name}</div>
                 <div className="text-xs text-text-muted">{user?.email}</div>
                 <div className="text-[10px] text-text-dim mt-0.5">
-                  Member since {user?.createdAt ? formatDate(user.createdAt) : '—'}
+                  {t('settings.profile.memberSince')} {user?.createdAt ? formatDate(user.createdAt) : '—'}
                 </div>
               </div>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-text-muted mb-1.5">Display Name</label>
+                <label className="block text-xs font-medium text-text-muted mb-1.5">{t('settings.profile.displayName')}</label>
                 <input
                   type="text"
                   value={profileForm.name}
@@ -457,7 +459,7 @@ export function SettingsView() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-text-muted mb-1.5">Email</label>
+                <label className="block text-xs font-medium text-text-muted mb-1.5">{t('settings.profile.email')}</label>
                 <input
                   type="email"
                   value={profileForm.email}
@@ -467,7 +469,7 @@ export function SettingsView() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-text-muted mb-1.5">
-                  Workspace Name <span className="text-text-dim font-normal">(optional)</span>
+                  {t('settings.profile.workspaceName')} <span className="text-text-dim font-normal">({t('common.optional')})</span>
                 </label>
                 <input
                   type="text"
@@ -482,7 +484,7 @@ export function SettingsView() {
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-blue text-white text-sm font-medium hover:bg-blue-500 transition-colors"
               >
                 {profileSaved ? <Check size={14} /> : <Save size={14} />}
-                {profileSaved ? 'Saved!' : 'Save Changes'}
+                {profileSaved ? t('settings.profile.saved') : t('settings.profile.saveChanges')}
               </button>
             </div>
           </div>
@@ -519,7 +521,7 @@ export function SettingsView() {
             <div className="mb-5">
               <div className="text-xs font-medium text-text-muted mb-3">{t('settings.appearance.accentColor')}</div>
               <div className="flex gap-3">
-                {ACCENT_OPTIONS.map((opt) => (
+                {ACCENT_VALUES.map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setAccentColor(opt.value)}
@@ -538,7 +540,7 @@ export function SettingsView() {
                         <Check size={16} className="text-white" />
                       )}
                     </div>
-                    <span className="text-[10px] text-text-dim">{opt.label}</span>
+                    <span className="text-[10px] text-text-dim">{t(opt.key)}</span>
                   </button>
                 ))}
               </div>
@@ -555,20 +557,20 @@ export function SettingsView() {
         {/* Library */}
         {activeTab === 'library' && (
           <div>
-            <SectionLabel>Library Preferences</SectionLabel>
+            <SectionLabel>{t('settings.library.heading')}</SectionLabel>
             <div className="rounded-xl border border-border overflow-hidden">
-              <SettingRow label="Default Sort" description="How assets are sorted when you open a section">
+              <SettingRow label={t('settings.library.defaultSort')} description={t('settings.library.defaultSortDesc')}>
                 <select
                   value={settings.defaultSortBy}
                   onChange={(e) => setDefaultSort(e.target.value as SortOption)}
                   className="text-xs rounded-lg bg-background border border-border text-text-main px-2 py-1.5 focus:outline-none focus:border-accent-blue/50"
                 >
-                  {SORT_OPTIONS.map((o) => (
+                  {sortOptions.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>
               </SettingRow>
-              <SettingRow label="Default View Mode" description="Grid or list layout for asset cards">
+              <SettingRow label={t('settings.library.defaultViewMode')} description={t('settings.library.defaultViewModeDesc')}>
                 <div className="flex gap-1">
                   {(['grid', 'list'] as ViewMode[]).map((m) => (
                     <button
@@ -581,15 +583,15 @@ export function SettingsView() {
                           : 'text-text-dim hover:text-text-muted border border-border'
                       )}
                     >
-                      {m}
+                      {m === 'grid' ? t('settings.library.viewGrid') : t('settings.library.viewList')}
                     </button>
                   ))}
                 </div>
               </SettingRow>
-              <SettingRow label="Show Usage Count" description="Display usage stats on asset cards">
+              <SettingRow label={t('settings.library.showUsageCount')} description={t('settings.library.showUsageCountDesc')}>
                 <Toggle checked={settings.showUsageCount} onChange={toggleShowUsageCount} />
               </SettingRow>
-              <SettingRow label="Compact Cards" description="Reduce card padding for denser layouts">
+              <SettingRow label={t('settings.library.compactCards')} description={t('settings.library.compactCardsDesc')}>
                 <Toggle checked={settings.compactCards} onChange={toggleCompactCards} />
               </SettingRow>
             </div>
@@ -600,17 +602,17 @@ export function SettingsView() {
         {activeTab === 'export' && (
           <div className="space-y-6">
             <div>
-              <SectionLabel>Export</SectionLabel>
+              <SectionLabel>{t('settings.export.heading')}</SectionLabel>
               <div className="space-y-2">
                 <button
                   onClick={() => {
                     downloadAllJSON(assets)
                     useNotificationStore.getState().addNotification({
                       type: 'export_completed',
-                      title: 'Export complete',
-                      message: `${assets.length} assets exported as JSON.`,
+                      title: t('settings.export.exportCompleteTitle'),
+                      message: t('settings.export.exportedNJson').replace('{n}', String(assets.length)),
                     })
-                    showToast('Exported as JSON')
+                    showToast(t('settings.export.toastJson'))
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-border hover:border-border-soft hover:bg-surface-hover text-left transition-all group"
                 >
@@ -618,8 +620,8 @@ export function SettingsView() {
                     <Download size={14} className="text-accent-blue" />
                   </div>
                   <div>
-                    <div className="text-sm text-text-main">Export all assets as JSON</div>
-                    <div className="text-xs text-text-dim mt-0.5">Full data backup including all metadata · {assets.length} assets</div>
+                    <div className="text-sm text-text-main">{t('settings.export.exportJson')}</div>
+                    <div className="text-xs text-text-dim mt-0.5">{t('settings.export.exportJsonDesc').replace('{n}', String(assets.length))}</div>
                   </div>
                 </button>
                 <button
@@ -627,10 +629,10 @@ export function SettingsView() {
                     downloadAllMarkdown(assets)
                     useNotificationStore.getState().addNotification({
                       type: 'export_completed',
-                      title: 'Export complete',
-                      message: `${assets.length} assets exported as Markdown.`,
+                      title: t('settings.export.exportCompleteTitle'),
+                      message: t('settings.export.exportedNMarkdown').replace('{n}', String(assets.length)),
                     })
-                    showToast('Exported as Markdown')
+                    showToast(t('settings.export.toastMarkdown'))
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-border hover:border-border-soft hover:bg-surface-hover text-left transition-all group"
                 >
@@ -638,22 +640,22 @@ export function SettingsView() {
                     <Download size={14} className="text-accent-blue" />
                   </div>
                   <div>
-                    <div className="text-sm text-text-main">Export all assets as Markdown</div>
-                    <div className="text-xs text-text-dim mt-0.5">Human-readable format for documentation</div>
+                    <div className="text-sm text-text-main">{t('settings.export.exportMarkdown')}</div>
+                    <div className="text-xs text-text-dim mt-0.5">{t('settings.export.exportMarkdownDesc')}</div>
                   </div>
                 </button>
               </div>
             </div>
 
             <div>
-              <SectionLabel>Import</SectionLabel>
+              <SectionLabel>{t('settings.export.importHeading')}</SectionLabel>
               <label className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-border hover:border-border-soft hover:bg-surface-hover cursor-pointer transition-all">
                 <div className="w-8 h-8 rounded-lg bg-surface-soft flex items-center justify-center flex-shrink-0">
                   <Upload size={14} className="text-text-muted" />
                 </div>
                 <div>
-                  <div className="text-sm text-text-main">Import from JSON</div>
-                  <div className="text-xs text-text-dim mt-0.5">Restore assets from a PromptVault backup file</div>
+                  <div className="text-sm text-text-main">{t('settings.export.importJson')}</div>
+                  <div className="text-xs text-text-dim mt-0.5">{t('settings.export.importJsonDesc')}</div>
                 </div>
                 <input type="file" accept=".json" onChange={handleImport} className="hidden" />
               </label>
@@ -667,24 +669,24 @@ export function SettingsView() {
         {/* Team */}
         {activeTab === 'team' && (
           <div>
-            <SectionLabel>Team & Invites</SectionLabel>
+            <SectionLabel>{t('settings.team.heading')}</SectionLabel>
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs text-text-muted">
-                Invites are stored locally. Email sending available when Supabase is connected.
+                {t('settings.team.localNote')}
               </p>
               <button
                 onClick={() => setInviteModalOpen(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-blue text-white text-xs font-medium hover:bg-blue-500 transition-colors flex-shrink-0 ml-3"
               >
-                <Users size={12} /> Invite
+                <Users size={12} /> {t('settings.team.invite')}
               </button>
             </div>
 
             {invites.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center border border-border rounded-xl">
                 <Users size={28} className="text-text-dim mb-2" />
-                <div className="text-sm text-text-muted">No pending invites</div>
-                <div className="text-xs text-text-dim mt-1">Invite team members to collaborate</div>
+                <div className="text-sm text-text-muted">{t('settings.team.noPending')}</div>
+                <div className="text-xs text-text-dim mt-1">{t('settings.team.noPendingDesc')}</div>
               </div>
             ) : (
               <div className="space-y-1.5">
@@ -703,12 +705,12 @@ export function SettingsView() {
                     </div>
                     <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                       <span className="px-2 py-0.5 rounded-full text-[10px] bg-surface-soft border border-border text-text-dim">
-                        Pending
+                        {t('settings.team.pending')}
                       </span>
                       <button
                         onClick={() => removeInvite(invite.id)}
                         className="text-text-dim hover:text-danger transition-colors"
-                        aria-label="Remove invite"
+                        aria-label={t('settings.team.removeInvite')}
                       >
                         <Trash2 size={13} />
                       </button>
@@ -723,11 +725,11 @@ export function SettingsView() {
         {/* Local AI / Ollama */}
         {activeTab === 'ollama' && (
           <div className="space-y-5">
-            <SectionLabel>Local AI — Ollama</SectionLabel>
+            <SectionLabel>{t('settings.ollama.heading')}</SectionLabel>
 
             {/* Enable toggle */}
             <div className="rounded-xl border border-border overflow-hidden">
-              <SettingRow label="Enable Ollama" description="Run agents locally using your Ollama instance">
+              <SettingRow label={t('settings.ollama.enable')} description={t('settings.ollama.enableDesc')}>
                 <Toggle
                   checked={ollama.enabled}
                   onChange={() => updateOllama({ enabled: !ollama.enabled })}
@@ -739,7 +741,7 @@ export function SettingsView() {
               <>
                 {/* URL + test */}
                 <div>
-                  <label className="block text-xs font-medium text-text-muted mb-1.5">Base URL</label>
+                  <label className="block text-xs font-medium text-text-muted mb-1.5">{t('settings.ollama.baseUrl')}</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -760,7 +762,7 @@ export function SettingsView() {
                         : ollamaStatus === 'error'
                         ? <XCircle size={12} className="text-danger" />
                         : null}
-                      Test Connection
+                      {t('settings.ollama.testConnection')}
                     </button>
                   </div>
                   {ollamaTestMessage && (
@@ -776,22 +778,22 @@ export function SettingsView() {
                 {/* Model list */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-xs font-medium text-text-muted">Available Models</div>
+                    <div className="text-xs font-medium text-text-muted">{t('settings.ollama.availableModels')}</div>
                     <button
                       onClick={handleRefreshModels}
                       disabled={ollamaStatus === 'checking'}
                       className="flex items-center gap-1 text-[11px] text-text-dim hover:text-text-muted transition-colors disabled:opacity-50"
                     >
                       <RefreshCw size={11} className={ollamaStatus === 'checking' ? 'animate-spin' : ''} />
-                      Refresh
+                      {t('settings.ollama.refresh')}
                     </button>
                   </div>
 
                   {ollama.models.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-6 border border-border rounded-xl text-center">
                       <Cpu size={22} className="text-text-dim mb-2" />
-                      <div className="text-xs text-text-muted">No models found</div>
-                      <div className="text-[11px] text-text-dim mt-1">Test connection to load available models</div>
+                      <div className="text-xs text-text-muted">{t('settings.ollama.noModels')}</div>
+                      <div className="text-[11px] text-text-dim mt-1">{t('settings.ollama.noModelsDesc')}</div>
                     </div>
                   ) : (
                     <div className="space-y-1.5">
@@ -817,7 +819,7 @@ export function SettingsView() {
                               </span>
                             )}
                             {ollama.preferredModel === model.name && !ollama.autoSelect && (
-                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent-blue/15 text-accent-blue font-medium">preferred</span>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent-blue/15 text-accent-blue font-medium">{t('settings.ollama.preferred')}</span>
                             )}
                           </div>
                         </div>
@@ -827,7 +829,7 @@ export function SettingsView() {
 
                   {ollama.lastCheckedAt && (
                     <p className="text-[10px] text-text-dim mt-1.5">
-                      Last checked {formatRelativeTime(ollama.lastCheckedAt)}
+                      {t('settings.ollama.lastChecked').replace('{time}', formatRelativeTime(ollama.lastCheckedAt))}
                     </p>
                   )}
                 </div>
@@ -835,8 +837,8 @@ export function SettingsView() {
                 {/* Auto-select toggle */}
                 <div className="rounded-xl border border-border overflow-hidden">
                   <SettingRow
-                    label="Auto-select model"
-                    description="Pick the best model for each task type (coding, writing, reasoning)"
+                    label={t('settings.ollama.autoSelect')}
+                    description={t('settings.ollama.autoSelectDesc')}
                   >
                     <Toggle
                       checked={ollama.autoSelect}
@@ -847,7 +849,7 @@ export function SettingsView() {
 
                 {!ollama.autoSelect && ollama.models.length > 0 && (
                   <div>
-                    <label className="block text-xs font-medium text-text-muted mb-1.5">Preferred Model</label>
+                    <label className="block text-xs font-medium text-text-muted mb-1.5">{t('settings.ollama.preferredModel')}</label>
                     <select
                       value={ollama.preferredModel || ollama.models[0]?.name || ''}
                       onChange={(e) => updateOllama({ preferredModel: e.target.value })}
@@ -862,8 +864,7 @@ export function SettingsView() {
 
                 <div className="p-3 rounded-xl bg-surface-soft border border-border">
                   <p className="text-[11px] text-text-dim leading-relaxed">
-                    Ollama runs locally on your machine. No data is sent to external servers.
-                    Make sure Ollama is running before testing. Models are pulled via <code className="text-text-muted">ollama pull &lt;model&gt;</code>.
+                    {t('settings.ollama.localNote')} <code className="text-text-muted">ollama pull &lt;model&gt;</code>.
                   </p>
                 </div>
               </>
@@ -872,9 +873,9 @@ export function SettingsView() {
             {!ollama.enabled && (
               <div className="flex flex-col items-center justify-center py-10 text-center border border-border rounded-xl">
                 <Cpu size={32} className="text-text-dim mb-3" />
-                <div className="text-sm text-text-muted font-medium mb-1">Enable Local AI</div>
+                <div className="text-sm text-text-muted font-medium mb-1">{t('settings.ollama.enableLocal')}</div>
                 <div className="text-xs text-text-dim max-w-xs">
-                  Toggle on to connect Ollama and run agents locally with no internet required.
+                  {t('settings.ollama.enableLocalDesc')}
                 </div>
               </div>
             )}
@@ -884,13 +885,13 @@ export function SettingsView() {
         {/* Vault Storage */}
         {activeTab === 'vault' && (
           <div className="space-y-5">
-            <SectionLabel>Local Vault File Storage</SectionLabel>
+            <SectionLabel>{t('settings.vault.heading')}</SectionLabel>
 
             {/* Enable toggle + status */}
             <div className="rounded-xl border border-border overflow-hidden">
               <SettingRow
-                label="Use Local Vault Storage"
-                description="Save assets as real files inside the project's vault/ folder"
+                label={t('settings.vault.enable')}
+                description={t('settings.vault.enableDesc')}
               >
                 <Toggle
                   checked={vault.vaultEnabled}
@@ -902,7 +903,7 @@ export function SettingsView() {
             {/* Status + path */}
             <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-surface-soft border border-border">
               <div className="space-y-0.5">
-                <div className="text-xs font-medium text-text-muted">Vault Path</div>
+                <div className="text-xs font-medium text-text-muted">{t('settings.vault.pathLabel')}</div>
                 <div className="text-[11px] font-mono text-text-dim">project-root/vault</div>
               </div>
               <div className="flex items-center gap-1.5">
@@ -943,8 +944,8 @@ export function SettingsView() {
                     : <HardDrive size={14} className="text-accent-blue" />}
                 </div>
                 <div>
-                  <div className="text-sm text-text-main">Initialize Vault</div>
-                  <div className="text-xs text-text-dim mt-0.5">Create folder structure and index.json</div>
+                  <div className="text-sm text-text-main">{t('settings.vault.initVault')}</div>
+                  <div className="text-xs text-text-dim mt-0.5">{t('settings.vault.initVaultDesc')}</div>
                 </div>
               </button>
 
@@ -960,11 +961,11 @@ export function SettingsView() {
                     : <FolderSync size={14} className="text-violet-400" />}
                 </div>
                 <div>
-                  <div className="text-sm text-text-main">Sync Current Assets to Vault</div>
+                  <div className="text-sm text-text-main">{t('settings.vault.syncToVault')}</div>
                   <div className="text-xs text-text-dim mt-0.5">
-                    Write {assets.length} asset{assets.length !== 1 ? 's' : ''} as files · one file per asset
+                    {t('settings.vault.syncDescBase').replace('{n}', String(assets.length))}
                     {vault.vaultLastSyncedAt && (
-                      <> · last synced {formatRelativeTime(vault.vaultLastSyncedAt)}</>
+                      <> · {t('settings.vault.lastSynced').replace('{time}', formatRelativeTime(vault.vaultLastSyncedAt))}</>
                     )}
                   </div>
                 </div>
@@ -982,8 +983,8 @@ export function SettingsView() {
                     : <FolderOpen size={14} className="text-green-400" />}
                 </div>
                 <div>
-                  <div className="text-sm text-text-main">Load Assets from Vault</div>
-                  <div className="text-xs text-text-dim mt-0.5">Read vault files and merge into library (vault wins on conflict)</div>
+                  <div className="text-sm text-text-main">{t('settings.vault.loadFromVault')}</div>
+                  <div className="text-xs text-text-dim mt-0.5">{t('settings.vault.loadFromVaultDesc')}</div>
                 </div>
               </button>
               {vault.vaultEnabled && vault.vaultInitialized && (
@@ -1000,8 +1001,8 @@ export function SettingsView() {
                   <RotateCcw size={14} className="text-orange-400" />
                 </div>
                 <div>
-                  <div className="text-sm text-text-main">Rebuild Vault Index</div>
-                  <div className="text-xs text-text-dim mt-0.5">Scan vault folders and regenerate index.json (use after manual file edits)</div>
+                  <div className="text-sm text-text-main">{t('settings.vault.rebuildIndex')}</div>
+                  <div className="text-xs text-text-dim mt-0.5">{t('settings.vault.rebuildIndexDesc')}</div>
                 </div>
               </button>
 
@@ -1017,8 +1018,8 @@ export function SettingsView() {
                     : <Activity size={14} className="text-teal-400" />}
                 </div>
                 <div>
-                  <div className="text-sm text-text-main">Run Vault Health Check</div>
-                  <div className="text-xs text-text-dim mt-0.5">Verify folder structure, index.json, asset counts, and file references</div>
+                  <div className="text-sm text-text-main">{t('settings.vault.healthCheck')}</div>
+                  <div className="text-xs text-text-dim mt-0.5">{t('settings.vault.healthCheckDesc')}</div>
                 </div>
               </button>
             </div>
@@ -1034,21 +1035,21 @@ export function SettingsView() {
               const StatusIcon  = isHealthy ? CheckCircle2 : isWarning ? AlertTriangle : XCircle
 
               const checks: { label: string; ok: boolean; detail?: string }[] = [
-                { label: 'Vault folder',      ok: healthResult.vaultExists },
-                { label: 'index.json',        ok: healthResult.indexExists },
-                { label: 'JSON valid',        ok: healthResult.indexValid },
+                { label: t('settings.vault.checkVaultFolder'),    ok: healthResult.vaultExists },
+                { label: t('settings.vault.checkIndexJson'),      ok: healthResult.indexExists },
+                { label: t('settings.vault.checkJsonValid'),      ok: healthResult.indexValid },
                 {
-                  label: 'Required folders',
+                  label: t('settings.vault.checkRequiredFolders'),
                   ok: healthResult.requiredFolders.every((f) => f.exists),
                   detail: healthResult.requiredFolders.filter((f) => !f.exists).map((f) => f.name).join(', ') || undefined,
                 },
                 {
-                  label: 'File references',
+                  label: t('settings.vault.checkFileRefs'),
                   ok: healthResult.missingFiles.length === 0,
                   detail: healthResult.missingFiles.length > 0 ? `${healthResult.missingFiles.length} missing` : undefined,
                 },
                 {
-                  label: 'Duplicate IDs',
+                  label: t('settings.vault.checkDupIds'),
                   ok: healthResult.duplicateIds.length === 0,
                   detail: healthResult.duplicateIds.length > 0 ? `${healthResult.duplicateIds.length} found` : undefined,
                 },
@@ -1060,7 +1061,7 @@ export function SettingsView() {
                   <div className={cn('flex items-center gap-2.5 px-4 py-3 border-b border-border', statusBg)}>
                     <StatusIcon size={14} className={statusColor} />
                     <span className={cn('text-sm font-semibold', statusColor)}>
-                      {isHealthy ? 'Vault is healthy' : isWarning ? 'Vault has warnings' : 'Vault has errors'}
+                      {isHealthy ? t('settings.vault.healthHealthy') : isWarning ? t('settings.vault.healthWarning') : t('settings.vault.healthError')}
                     </span>
                   </div>
 
@@ -1086,10 +1087,10 @@ export function SettingsView() {
                   {/* Summary numbers */}
                   <div className="grid grid-cols-4 divide-x divide-border border-t border-border">
                     {[
-                      { label: 'Assets',       value: healthResult.assetCount },
-                      { label: 'Trashed',      value: healthResult.trashedCount },
-                      { label: 'Missing files', value: healthResult.missingFiles.length },
-                      { label: 'Dup IDs',      value: healthResult.duplicateIds.length },
+                      { label: t('settings.vault.statAssets'),       value: healthResult.assetCount },
+                      { label: t('settings.vault.statTrashed'),      value: healthResult.trashedCount },
+                      { label: t('settings.vault.statMissingFiles'), value: healthResult.missingFiles.length },
+                      { label: t('settings.vault.statDupIds'),       value: healthResult.duplicateIds.length },
                     ].map(({ label, value }) => (
                       <div key={label} className="flex flex-col items-center py-2.5 gap-0.5">
                         <span className={cn('text-base font-bold font-mono', value > 0 && label !== 'Assets' && label !== 'Trashed' ? 'text-amber-400' : 'text-text-main')}>{value}</span>
@@ -1126,7 +1127,7 @@ export function SettingsView() {
                   {(healthResult.warnings.length > 0 || healthResult.errors.length > 0) && (
                     <div className="px-4 py-2.5 border-t border-border bg-surface-soft">
                       <p className="text-[11px] text-text-dim leading-snug">
-                        You can try <span className="text-text-muted font-medium">Rebuild Vault Index</span> if files were edited manually or file references are out of sync.
+                        {t('settings.vault.rebuildHint')}
                       </p>
                     </div>
                   )}
@@ -1134,7 +1135,7 @@ export function SettingsView() {
                   {/* Privacy note */}
                   <div className="px-4 py-2.5 border-t border-border">
                     <p className="text-[10px] text-text-dim leading-snug">
-                      Health Check only inspects folder structure and index metadata. It does not read or upload your prompt contents.
+                      {t('settings.vault.healthPrivacy')}
                     </p>
                   </div>
                 </div>
@@ -1156,9 +1157,9 @@ export function SettingsView() {
                     : 'bg-amber-500/5 border-amber-500/25'
                 )}>
                   <div className="space-y-0.5 min-w-0">
-                    <div className="text-xs font-medium text-text-muted">Vault Backup</div>
+                    <div className="text-xs font-medium text-text-muted">{t('settings.vault.backupLabel')}</div>
                     <div className="text-[11px] text-text-dim">
-                      {lastBackup ? `Last backup ${formatRelativeTime(lastBackup)}` : 'No backup on record'}
+                      {lastBackup ? t('settings.vault.lastBackup').replace('{time}', formatRelativeTime(lastBackup)) : t('settings.vault.noBackup')}
                     </div>
                   </div>
                   <div className="flex items-center gap-2.5 flex-shrink-0 ml-3">
@@ -1168,7 +1169,7 @@ export function SettingsView() {
                         ? 'text-green-400 bg-green-500/10 border-green-500/20'
                         : 'text-amber-400 bg-amber-500/10 border-amber-500/20'
                     )}>
-                      {isCurrent ? 'Backup current' : 'Backup recommended'}
+                      {isCurrent ? t('settings.vault.backupCurrent') : t('settings.vault.backupRecommended')}
                     </span>
                     <button
                       onClick={handleExportVault}
@@ -1176,7 +1177,7 @@ export function SettingsView() {
                       className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface border border-border text-[11px] text-text-muted hover:text-text-main hover:border-border-soft transition-all disabled:opacity-50"
                     >
                       {backupLoading ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
-                      Export backup
+                      {t('settings.vault.exportBackupBtn')}
                     </button>
                   </div>
                 </div>
@@ -1187,15 +1188,13 @@ export function SettingsView() {
             <div className="rounded-xl border border-border overflow-hidden">
               <div className="px-4 py-3 bg-surface-soft border-b border-border">
                 <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider">
-                  Vault Backup &amp; Transfer
+                  {t('settings.vault.transferHeading')}
                 </div>
               </div>
               <div className="p-4 space-y-3">
                 <p className="text-[11px] text-text-dim leading-relaxed">
-                  Export your entire local vault as a <code className="text-text-muted">.zip</code> file,
-                  or import a backup on another computer. Useful for USB drives, external disks, or
-                  private cloud backup folders.{' '}
-                  <span className="text-text-muted font-medium">Nothing is uploaded by PromptVault.</span>
+                  {t('settings.vault.transferDesc')}{' '}
+                  <span className="text-text-muted font-medium">{t('settings.vault.transferNoteUpload')}</span>
                 </p>
 
                 {/* Result banners */}
@@ -1217,7 +1216,7 @@ export function SettingsView() {
                 {importResult?.ok && importResult.backupPath && (
                   <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-surface-soft border border-border text-[11px] text-text-dim leading-snug">
                     <Check size={11} className="text-green-400 flex-shrink-0 mt-0.5" />
-                    Previous vault backed up to:{' '}
+                    {t('settings.vault.prevBackupNote')}{' '}
                     <code className="font-mono text-text-muted ml-1 break-all">{importResult.backupPath}</code>
                   </div>
                 )}
@@ -1225,7 +1224,7 @@ export function SettingsView() {
                 {importResult?.ok && (
                   <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-teal-500/5 border border-teal-500/20 text-[11px] text-teal-400/90 leading-snug">
                     <Activity size={11} className="flex-shrink-0 mt-0.5" />
-                    Vault Health Check ran automatically after import — see results above.
+                    {t('settings.vault.autoHealthCheck')}
                   </div>
                 )}
 
@@ -1239,7 +1238,7 @@ export function SettingsView() {
                     {backupLoading
                       ? <Loader2 size={12} className="animate-spin" />
                       : <Download size={12} />}
-                    {backupLoading ? 'Exporting…' : 'Export Vault Backup'}
+                    {backupLoading ? t('settings.vault.exporting') : t('settings.vault.exportVaultBackup')}
                   </button>
 
                   <button
@@ -1250,14 +1249,12 @@ export function SettingsView() {
                     {importLoading
                       ? <Loader2 size={12} className="animate-spin" />
                       : <Upload size={12} />}
-                    {importLoading ? 'Importing…' : 'Import Vault Backup'}
+                    {importLoading ? t('settings.vault.importing') : t('settings.vault.importVaultBackup')}
                   </button>
                 </div>
 
                 <p className="text-[10px] text-text-dim leading-snug">
-                  Import replaces the vault folder and auto-backs up the existing one first.
-                  Use <span className="text-text-muted font-medium">Load Assets from Vault</span> afterwards
-                  to bring imported assets into the app library.
+                  {t('settings.vault.importNote')}
                 </p>
               </div>
             </div>
@@ -1273,21 +1270,15 @@ export function SettingsView() {
 
             {/* Explanation */}
             <div className="p-4 rounded-xl bg-surface-soft border border-border space-y-2">
-              <div className="text-xs font-medium text-text-muted">About Vault Storage</div>
+              <div className="text-xs font-medium text-text-muted">{t('settings.vault.aboutHeading')}</div>
               <p className="text-[11px] text-text-dim leading-relaxed">
-                Each asset is stored as a single file inside <code className="text-text-muted">project-root/vault/</code>.
-                Prompts, agents, and templates use Markdown with YAML frontmatter.
-                Workflows and JSON configs use <code className="text-text-muted">.json</code>.
-                The <code className="text-text-muted">index.json</code> file is the fast lookup map — full content lives in each asset file.
-                Nothing is uploaded. All data stays local.
+                {t('settings.vault.aboutDesc1')}
               </p>
               <p className="text-[11px] text-text-dim leading-relaxed">
-                <span className="text-yellow-400 font-medium">Note:</span> Permanent delete moves files to{' '}
-                <code className="text-text-muted">vault/.deleted/</code> — files are never hard-deleted automatically.
+                <span className="text-yellow-400 font-medium">Note:</span> {t('settings.vault.aboutNote')}
               </p>
               <p className="text-[11px] text-text-dim leading-relaxed">
-                <span className="text-yellow-400 font-medium">Warning:</span> Do not rename vault files while the app is open
-                unless you click Rebuild Vault Index afterwards.
+                <span className="text-yellow-400 font-medium">Warning:</span> {t('settings.vault.aboutWarning')}
               </p>
             </div>
           </div>
@@ -1299,45 +1290,45 @@ export function SettingsView() {
         {/* Danger Zone */}
         {activeTab === 'danger' && (
           <div>
-            <SectionLabel>Danger Zone</SectionLabel>
+            <SectionLabel>{t('settings.danger.heading')}</SectionLabel>
             <div className="space-y-2">
               <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-border">
                 <div>
-                  <div className="text-sm text-text-main">Empty Trash</div>
-                  <div className="text-xs text-text-dim mt-0.5">{trashCount} item{trashCount !== 1 ? 's' : ''} in trash</div>
+                  <div className="text-sm text-text-main">{t('settings.danger.emptyTrash')}</div>
+                  <div className="text-xs text-text-dim mt-0.5">{t('settings.danger.emptyTrashDesc').replace('{n}', String(trashCount))}</div>
                 </div>
                 <button
                   onClick={() => setEmptyTrashConfirmOpen(true)}
                   disabled={trashCount === 0}
                   className="px-3 py-1.5 rounded-lg text-xs text-danger border border-danger/30 hover:bg-danger/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Empty Trash
+                  {t('settings.danger.emptyTrashBtn')}
                 </button>
               </div>
 
               <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-danger/25 bg-danger/5">
                 <div>
-                  <div className="text-sm text-text-main">Clear All Data</div>
-                  <div className="text-xs text-text-dim mt-0.5">Permanently delete all {assets.length} assets</div>
+                  <div className="text-sm text-text-main">{t('settings.danger.clearAllData')}</div>
+                  <div className="text-xs text-text-dim mt-0.5">{t('settings.danger.clearAllDataDesc').replace('{n}', String(assets.length))}</div>
                 </div>
                 <button
                   onClick={() => setClearDataConfirmOpen(true)}
                   className="px-3 py-1.5 rounded-lg text-xs text-danger bg-danger/10 hover:bg-danger/20 border border-danger/30 transition-colors"
                 >
-                  Clear Data
+                  {t('settings.danger.clearDataBtn')}
                 </button>
               </div>
 
               <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-border">
                 <div>
-                  <div className="text-sm text-text-main">Log Out</div>
-                  <div className="text-xs text-text-dim mt-0.5">Sign out and return to the login screen</div>
+                  <div className="text-sm text-text-main">{t('settings.danger.logOut')}</div>
+                  <div className="text-xs text-text-dim mt-0.5">{t('settings.danger.logOutDesc')}</div>
                 </div>
                 <button
                   onClick={() => setLogoutConfirmOpen(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-text-muted border border-border hover:text-danger hover:border-danger/30 transition-colors"
                 >
-                  <LogOut size={12} /> Log Out
+                  <LogOut size={12} /> {t('settings.danger.logOutBtn')}
                 </button>
               </div>
             </div>
@@ -1346,7 +1337,7 @@ export function SettingsView() {
 
         {/* Footer */}
         <div className="mt-8 pt-4 border-t border-border text-center">
-          <p className="text-[10px] text-text-dim">PromptVault — Local-first AI Workspace · Copyright © Jimmy Eliasson</p>
+          <p className="text-[10px] text-text-dim">{t('settings.footer')}</p>
         </div>
       </div>
 
@@ -1355,9 +1346,9 @@ export function SettingsView() {
         open={emptyTrashConfirmOpen}
         onClose={() => setEmptyTrashConfirmOpen(false)}
         onConfirm={emptyTrash}
-        title="Empty trash?"
-        message={`Permanently delete all ${trashCount} item${trashCount !== 1 ? 's' : ''} in the trash. This cannot be undone.`}
-        confirmLabel="Empty Trash"
+        title={t('settings.danger.confirmEmptyTrash')}
+        message={t('settings.danger.confirmEmptyTrashMsg').replace('{n}', String(trashCount))}
+        confirmLabel={t('settings.danger.confirmEmptyTrashBtn')}
         requireWord="DELETE"
       />
       <ConfirmModal
@@ -1368,18 +1359,18 @@ export function SettingsView() {
           clearUserData()
           clearNotifications()
         }}
-        title="Clear all data?"
-        message={`This will permanently delete all ${assets.length} assets and reset your profile. This cannot be undone.`}
-        confirmLabel="Clear All"
+        title={t('settings.danger.confirmClearData')}
+        message={t('settings.danger.confirmClearDataMsg').replace('{n}', String(assets.length))}
+        confirmLabel={t('settings.danger.confirmClearDataBtn')}
         requireWord="DELETE"
       />
       <ConfirmModal
         open={logoutConfirmOpen}
         onClose={() => setLogoutConfirmOpen(false)}
         onConfirm={logout}
-        title="Log out?"
-        message="You'll return to the login screen. Your data will remain saved locally in this browser."
-        confirmLabel="Log Out"
+        title={t('settings.danger.confirmLogout')}
+        message={t('settings.danger.confirmLogoutMsg')}
+        confirmLabel={t('settings.danger.confirmLogoutBtn')}
         danger={false}
       />
       <InviteTeamModal open={inviteModalOpen} onClose={() => setInviteModalOpen(false)} />
@@ -1390,9 +1381,9 @@ export function SettingsView() {
         open={loadConfirmOpen}
         onClose={() => { setLoadConfirmOpen(false); setPendingLoadAssets([]) }}
         onConfirm={handleConfirmLoad}
-        title="Load assets from Vault?"
-        message={`This will merge ${pendingLoadAssets.length} asset${pendingLoadAssets.length !== 1 ? 's' : ''} from the vault into your library. For any conflicting IDs, the vault version will overwrite the current one. Your existing assets that are not in the vault will be kept.`}
-        confirmLabel="Load from Vault"
+        title={t('settings.vault.confirmLoadTitle')}
+        message={t('settings.vault.confirmLoadMsg').replace('{n}', String(pendingLoadAssets.length))}
+        confirmLabel={t('settings.vault.confirmLoadBtn')}
         danger={false}
       />
 
@@ -1401,9 +1392,9 @@ export function SettingsView() {
         open={importConfirmOpen}
         onClose={() => { setImportConfirmOpen(false); setImportFile(null) }}
         onConfirm={handleConfirmImport}
-        title="Import Vault Backup"
-        message={`This will replace your current local vault with "${importFile?.name ?? 'the selected backup'}". Your existing vault will be backed up automatically before the import. This does not affect your app code or localStorage assets.`}
-        confirmLabel="Import vault"
+        title={t('settings.vault.confirmImportTitle')}
+        message={t('settings.vault.confirmImportMsg').replace('{name}', importFile?.name ?? 'the selected backup')}
+        confirmLabel={t('settings.vault.confirmImportBtn')}
         requireWord="IMPORT"
       />
     </div>

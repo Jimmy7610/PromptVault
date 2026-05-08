@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useI18n } from '@/lib/i18n/useI18n'
 import {
   RefreshCw,
   Download,
@@ -98,18 +99,20 @@ function StepRow({
   icon: Icon,
   label,
   state,
+  t,
 }: {
   icon: React.ElementType
   label: string
   state: 'ok' | 'failed' | 'skipped' | 'pending'
+  t: (key: string) => string
 }) {
   const badge =
     state === 'ok' ? (
-      <StatusBadge variant="ok"><Check size={9} /> Completed</StatusBadge>
+      <StatusBadge variant="ok"><Check size={9} /> {t('updates.badgeCompleted')}</StatusBadge>
     ) : state === 'failed' ? (
-      <StatusBadge variant="error"><XCircle size={9} /> Failed</StatusBadge>
+      <StatusBadge variant="error"><XCircle size={9} /> {t('updates.badgeFailed')}</StatusBadge>
     ) : state === 'skipped' ? (
-      <StatusBadge variant="neutral">Skipped</StatusBadge>
+      <StatusBadge variant="neutral">{t('updates.badgeSkipped')}</StatusBadge>
     ) : (
       <StatusBadge variant="neutral">—</StatusBadge>
     )
@@ -143,7 +146,7 @@ function StepRow({
   )
 }
 
-function ConsolePanel({ logs }: { logs: string[] }) {
+function ConsolePanel({ logs, t }: { logs: string[]; t: (key: string) => string }) {
   const [open, setOpen] = useState(true)
 
   if (logs.length === 0) return null
@@ -156,9 +159,9 @@ function ConsolePanel({ logs }: { logs: string[] }) {
       >
         <div className="flex items-center gap-2 text-xs text-text-muted">
           <Terminal size={12} />
-          Output log
+          {t('updates.outputLog')}
         </div>
-        <span className="text-[10px] text-text-dim">{open ? '▲ hide' : '▼ show'}</span>
+        <span className="text-[10px] text-text-dim">{open ? t('updates.hide') : t('updates.show')}</span>
       </button>
       {open && (
         <div className="max-h-52 overflow-y-auto bg-[#0d0d0f] px-4 py-3">
@@ -171,7 +174,7 @@ function ConsolePanel({ logs }: { logs: string[] }) {
   )
 }
 
-function CopyButton({ text, label }: { text: string; label: string }) {
+function CopyButton({ text, label, t }: { text: string; label: string; t: (key: string) => string }) {
   const [copied, setCopied] = useState(false)
   const handle = () => {
     copyText(text)
@@ -184,7 +187,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-border text-xs text-text-muted hover:text-text-main hover:border-border-soft transition-all"
     >
       {copied ? <Check size={11} className="text-green-400" /> : <Copy size={11} />}
-      {copied ? 'Copied!' : label}
+      {copied ? t('updates.copiedBtn') : label}
     </button>
   )
 }
@@ -192,6 +195,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export function UpdatesTab() {
+  const { t } = useI18n()
   const [phase, setPhase] = useState<Phase>('idle')
   const [checkResult, setCheckResult] = useState<UpdateCheckResult | null>(null)
   const [installResult, setInstallResult] = useState<UpdateInstallResult | null>(null)
@@ -269,15 +273,15 @@ export function UpdatesTab() {
 
   function OverallBadge() {
     if (phase === 'idle') return null
-    if (phase === 'checking') return <StatusBadge variant="info"><Loader2 size={9} className="animate-spin" /> Checking…</StatusBadge>
-    if (phase === 'installing') return <StatusBadge variant="info"><Loader2 size={9} className="animate-spin" /> Installing…</StatusBadge>
-    if (installSucceeded && restartRequired) return <StatusBadge variant="ok"><CheckCircle2 size={9} /> Installed — restart required</StatusBadge>
-    if (partialSuccess) return <StatusBadge variant="warn"><AlertTriangle size={9} /> Downloaded — needs attention</StatusBadge>
-    if (installResult && !installSucceeded && !partialSuccess) return <StatusBadge variant="error"><XCircle size={9} /> Download failed</StatusBadge>
-    if (alreadyUpToDate) return <StatusBadge variant="ok"><CheckCircle2 size={9} /> Up to date</StatusBadge>
-    if (updateAvailable && checkResult?.canInstall) return <StatusBadge variant="info"><ArrowRight size={9} /> Update available</StatusBadge>
-    if (updateAvailable && !checkResult?.canInstall) return <StatusBadge variant="warn"><AlertTriangle size={9} /> Update available — blocked</StatusBadge>
-    if (checkResult && !checkResult.ok) return <StatusBadge variant="error"><XCircle size={9} /> Check failed</StatusBadge>
+    if (phase === 'checking') return <StatusBadge variant="info"><Loader2 size={9} className="animate-spin" /> {t('updates.badgeChecking')}</StatusBadge>
+    if (phase === 'installing') return <StatusBadge variant="info"><Loader2 size={9} className="animate-spin" /> {t('updates.badgeInstalling')}</StatusBadge>
+    if (installSucceeded && restartRequired) return <StatusBadge variant="ok"><CheckCircle2 size={9} /> {t('updates.badgeInstalled')}</StatusBadge>
+    if (partialSuccess) return <StatusBadge variant="warn"><AlertTriangle size={9} /> {t('updates.badgeDownloaded')}</StatusBadge>
+    if (installResult && !installSucceeded && !partialSuccess) return <StatusBadge variant="error"><XCircle size={9} /> {t('updates.badgeDownloadFailed')}</StatusBadge>
+    if (alreadyUpToDate) return <StatusBadge variant="ok"><CheckCircle2 size={9} /> {t('updates.badgeUpToDate')}</StatusBadge>
+    if (updateAvailable && checkResult?.canInstall) return <StatusBadge variant="info"><ArrowRight size={9} /> {t('updates.badgeUpdateAvailable')}</StatusBadge>
+    if (updateAvailable && !checkResult?.canInstall) return <StatusBadge variant="warn"><AlertTriangle size={9} /> {t('updates.badgeUpdateBlocked')}</StatusBadge>
+    if (checkResult && !checkResult.ok) return <StatusBadge variant="error"><XCircle size={9} /> {t('updates.badgeCheckFailed')}</StatusBadge>
     return null
   }
 
@@ -287,13 +291,12 @@ export function UpdatesTab() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[10px] font-semibold text-text-dim uppercase tracking-wider">
-            App Updates
+            {t('updates.heading')}
           </span>
           <OverallBadge />
         </div>
         <p className="text-xs text-text-dim leading-relaxed max-w-md">
-          Update PromptVault from the GitHub <code className="text-text-muted">main</code> branch.
-          Your local vault files are never touched — they stay on this computer and are excluded from git.
+          {t('updates.desc')}
         </p>
       </div>
 
@@ -307,7 +310,7 @@ export function UpdatesTab() {
           {isChecking
             ? <Loader2 size={13} className="animate-spin text-accent-blue" />
             : <RefreshCw size={13} />}
-          Check for updates
+          {t('updates.checkForUpdates')}
         </button>
 
         <button
@@ -323,7 +326,7 @@ export function UpdatesTab() {
           {isInstalling
             ? <Loader2 size={13} className="animate-spin" />
             : <Download size={13} />}
-          {isInstalling ? 'Installing…' : 'Install update'}
+          {isInstalling ? t('updates.installing') : t('updates.installUpdate')}
         </button>
       </div>
 
@@ -332,59 +335,59 @@ export function UpdatesTab() {
         <div className="rounded-xl border border-border overflow-hidden bg-surface/50">
           <StatusRow
             icon={GitCommit}
-            label="Current commit"
+            label={t('updates.labelCurrentCommit')}
             value={shortCommit(checkResult.currentCommit)}
           />
           <StatusRow
             icon={GitCommit}
-            label="Latest commit"
+            label={t('updates.labelLatestCommit')}
             value={shortCommit(checkResult.latestCommit)}
             badge={
               alreadyUpToDate ? (
-                <StatusBadge variant="ok"><Check size={9} /> Up to date</StatusBadge>
+                <StatusBadge variant="ok"><Check size={9} /> {t('updates.badgeUpToDate')}</StatusBadge>
               ) : updateAvailable ? (
-                <StatusBadge variant="info"><ArrowRight size={9} /> New version</StatusBadge>
+                <StatusBadge variant="info"><ArrowRight size={9} /> {t('updates.badgeNewVersion')}</StatusBadge>
               ) : null
             }
           />
           <StatusRow
             icon={GitBranch}
-            label="Branch"
+            label={t('updates.labelBranch')}
             value={checkResult.branch ?? '—'}
           />
           <StatusRow
             icon={Globe}
-            label="Remote"
+            label={t('updates.labelRemote')}
             value={checkResult.remoteUrl ?? '—'}
             badge={
               checkResult.remoteUrl ? (
-                <StatusBadge variant="ok"><ShieldCheck size={9} /> Verified</StatusBadge>
+                <StatusBadge variant="ok"><ShieldCheck size={9} /> {t('updates.badgeVerified')}</StatusBadge>
               ) : (
-                <StatusBadge variant="error"><XCircle size={9} /> Missing</StatusBadge>
+                <StatusBadge variant="error"><XCircle size={9} /> {t('updates.badgeMissing')}</StatusBadge>
               )
             }
           />
           <StatusRow
             icon={ShieldCheck}
-            label="Working tree"
+            label={t('updates.labelWorkingTree')}
             badge={
               checkResult.workingTreeClean ? (
-                <StatusBadge variant="ok"><Check size={9} /> Clean</StatusBadge>
+                <StatusBadge variant="ok"><Check size={9} /> {t('updates.badgeClean')}</StatusBadge>
               ) : checkResult.onlyAutoFixableChanges ? (
-                <StatusBadge variant="warn"><AlertTriangle size={9} /> Generated files changed</StatusBadge>
+                <StatusBadge variant="warn"><AlertTriangle size={9} /> {t('updates.badgeGenChanged')}</StatusBadge>
               ) : (
-                <StatusBadge variant="error"><XCircle size={9} /> Has changes</StatusBadge>
+                <StatusBadge variant="error"><XCircle size={9} /> {t('updates.badgeHasChanges')}</StatusBadge>
               )
             }
           />
           <StatusRow
             icon={FolderLock}
-            label="vault/ ignored"
+            label={t('updates.labelVaultIgnored')}
             badge={
               checkResult.vaultIgnored ? (
-                <StatusBadge variant="ok"><Check size={9} /> Yes — data is safe</StatusBadge>
+                <StatusBadge variant="ok"><Check size={9} /> {t('updates.badgeSafe')}</StatusBadge>
               ) : (
-                <StatusBadge variant="error"><XCircle size={9} /> Not ignored</StatusBadge>
+                <StatusBadge variant="error"><XCircle size={9} /> {t('updates.badgeNotIgnored')}</StatusBadge>
               )
             }
           />
@@ -398,7 +401,7 @@ export function UpdatesTab() {
             <AlertTriangle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
             <div className="space-y-1.5 flex-1 min-w-0">
               <p className="text-xs font-semibold text-amber-300">
-                Only generated/install files have changed
+                {t('updates.genFilesTitle')}
               </p>
               <ul className="space-y-0.5">
                 {checkResult.autoFixableDirtyFiles?.map((f) => (
@@ -408,10 +411,9 @@ export function UpdatesTab() {
                 ))}
               </ul>
               <p className="text-[11px] text-amber-400/70 leading-snug">
-                These files are generated by Next.js and npm. They can be safely restored to the
-                GitHub version before updating.{' '}
+                {t('updates.genFilesDesc')}{' '}
                 <span className="text-amber-300 font-medium">
-                  Your vault/ data and saved prompts/assets are not affected.
+                  {t('updates.genFilesSafe')}
                 </span>
               </p>
             </div>
@@ -424,7 +426,7 @@ export function UpdatesTab() {
             {isCleaning
               ? <Loader2 size={12} className="animate-spin" />
               : <Wrench size={12} />}
-            {isCleaning ? 'Cleaning…' : 'Clean generated changes'}
+            {isCleaning ? t('updates.cleaning') : t('updates.cleanGenerated')}
           </button>
           {cleanLogs.length > 0 && (
             <div className="rounded-lg bg-[#0d0d0f] px-3 py-2 max-h-28 overflow-y-auto">
@@ -443,7 +445,7 @@ export function UpdatesTab() {
             <XCircle size={14} className="text-danger flex-shrink-0 mt-0.5" />
             <div className="space-y-1.5 flex-1 min-w-0">
               <p className="text-xs font-semibold text-danger">
-                Working tree has uncommitted code changes
+                {t('updates.blockingTitle')}
               </p>
               <ul className="space-y-0.5">
                 {checkResult!.blockingDirtyFiles!.map((f) => (
@@ -453,8 +455,7 @@ export function UpdatesTab() {
                 ))}
               </ul>
               <p className="text-[11px] text-danger/70 leading-snug">
-                Commit, stash, or discard these changes before installing an update.
-                The updater only updates app code — your vault/ data and saved assets are never touched.
+                {t('updates.blockingDesc')}
               </p>
             </div>
           </div>
@@ -514,26 +515,25 @@ export function UpdatesTab() {
             {installSucceeded ? (
               <>
                 <p className="text-sm font-semibold text-green-400 leading-tight">
-                  Update installed successfully.
+                  {t('updates.installedTitle')}
                 </p>
                 <p className="text-xs text-text-muted mt-1">
-                  Restart PromptVault to use the new version.
+                  {t('updates.installedDesc')}
                 </p>
               </>
             ) : partialSuccess ? (
               <>
                 <p className="text-sm font-semibold text-amber-300 leading-tight">
-                  Update downloaded, but verification needs attention.
+                  {t('updates.partialTitle')}
                 </p>
                 <p className="text-xs text-amber-400/80 mt-1">
-                  {installResult.message ??
-                    'App code was updated from GitHub, but npm install or build did not complete. Restart PromptVault or run the manual fix command below.'}
+                  {installResult.message ?? t('updates.partialDescDefault')}
                 </p>
               </>
             ) : (
               <>
                 <p className="text-sm font-semibold text-danger leading-tight">
-                  Update could not be downloaded.
+                  {t('updates.failedTitle')}
                 </p>
                 {installResult.errors.map((e, i) => (
                   <p key={i} className="text-xs text-danger/80 mt-1">{e}</p>
@@ -549,36 +549,20 @@ export function UpdatesTab() {
         <div className="rounded-xl border border-border overflow-hidden bg-surface/50">
           <div className="px-4 py-2.5 bg-surface-soft border-b border-border">
             <span className="text-[10px] font-semibold text-text-dim uppercase tracking-wider">
-              Update steps
+              {t('updates.stepsHeading')}
             </span>
           </div>
           <div className="px-4">
-            <StepRow
-              icon={GitPullRequest}
-              label="Download from GitHub"
-              state={stepState(installResult.gitUpdated, true)}
-            />
-            <StepRow
-              icon={PackageCheck}
-              label="Install dependencies (npm install)"
-              state={stepState(installResult.npmInstallOk, installResult.gitUpdated)}
-            />
-            <StepRow
-              icon={Hammer}
-              label="Build verification (npm run build)"
-              state={stepState(installResult.buildOk, installResult.npmInstallOk)}
-            />
-            <StepRow
-              icon={RotateCcw}
-              label="Restart required"
-              state={restartRequired ? 'ok' : 'pending'}
-            />
+            <StepRow icon={GitPullRequest} label={t('updates.stepDownload')}      state={stepState(installResult.gitUpdated, true)}                               t={t} />
+            <StepRow icon={PackageCheck}   label={t('updates.stepDependencies')}  state={stepState(installResult.npmInstallOk, installResult.gitUpdated)}         t={t} />
+            <StepRow icon={Hammer}         label={t('updates.stepBuild')}         state={stepState(installResult.buildOk, installResult.npmInstallOk)}            t={t} />
+            <StepRow icon={RotateCcw}      label={t('updates.stepRestart')}       state={restartRequired ? 'ok' : 'pending'}                                      t={t} />
           </div>
         </div>
       )}
 
       {/* Console output */}
-      <ConsolePanel logs={installLogs} />
+      <ConsolePanel logs={installLogs} t={t} />
 
       {/* Partial success — manual fix panel */}
       {partialSuccess && (
@@ -587,10 +571,10 @@ export function UpdatesTab() {
             <Wrench size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p className="text-xs font-semibold text-amber-300">
-                Manual fix commands
+                {t('updates.manualFixTitle')}
               </p>
               <p className="text-[11px] text-amber-400/70 leading-snug">
-                Run these in your terminal to complete the update. Your vault/ data is not affected.
+                {t('updates.manualFixDesc')}
               </p>
             </div>
           </div>
@@ -599,7 +583,7 @@ export function UpdatesTab() {
               {`cd "C:\\Projects\\_Active\\PromptVault"\nnpm install\nnpm run build\nnpm run dev`}
             </pre>
           </div>
-          <CopyButton text={manualFixCmd} label="Copy commands" />
+          <CopyButton text={manualFixCmd} label={t('updates.copyCommands')} t={t} />
         </div>
       )}
 
@@ -607,23 +591,23 @@ export function UpdatesTab() {
       {(restartRequired || phase === 'done') && (
         <div className="space-y-3">
           <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider">
-            Restart PromptVault
+            {t('updates.restartHeading')}
           </div>
           <div className="p-3.5 rounded-xl bg-surface-soft border border-border space-y-2">
             <p className="text-[11px] text-text-muted">
-              Stop the current server and run one of these commands to restart:
+              {t('updates.restartDesc')}
             </p>
             <div className="flex items-center gap-2">
               <code className="flex-1 text-[11px] font-mono text-text-main bg-background border border-border rounded-lg px-3 py-2 truncate">
                 {restartCmd}
               </code>
-              <CopyButton text={restartCmd} label="Copy" />
+              <CopyButton text={restartCmd} label={t('updates.copyBtn')} t={t} />
             </div>
             <div className="flex items-center gap-2">
               <code className="flex-1 text-[11px] font-mono text-text-dim bg-background border border-border rounded-lg px-3 py-2 truncate">
                 {restartCmdFull}
               </code>
-              <CopyButton text={restartCmdFull} label="Copy" />
+              <CopyButton text={restartCmdFull} label={t('updates.copyBtn')} t={t} />
             </div>
           </div>
         </div>
@@ -632,7 +616,7 @@ export function UpdatesTab() {
       {/* Build Info */}
       <div className="p-3.5 rounded-xl bg-surface-soft border border-border">
         <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2.5">
-          Build Info
+          {t('updates.buildInfoHeading')}
         </div>
         <div className="space-y-1.5">
           {[
@@ -653,7 +637,7 @@ export function UpdatesTab() {
       {/* How this updater works */}
       <div className="p-3.5 rounded-xl bg-surface-soft border border-border">
         <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-2">
-          How this updater works
+          {t('updates.howItWorksHeading')}
         </div>
         <ul className="space-y-1">
           {[

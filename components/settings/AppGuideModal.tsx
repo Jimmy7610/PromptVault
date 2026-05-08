@@ -165,8 +165,8 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'what' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">What is PromptVault?</h2>
-                <p className="text-xs text-text-dim mb-4">Your personal AI workspace — no cloud required.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.what')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.what')}</p>
 
                 <GuideCard icon={Sparkles} title="A personal AI workspace">
                   <p>PromptVault is a local-first app for organizing everything you use with AI tools — prompts, agents, notes, code snippets, workflows, image references, and templates.</p>
@@ -200,8 +200,8 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'login' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Login & Profile</h2>
-                <p className="text-xs text-text-dim mb-4">A local identity — no account, no server, no password.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.login')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.login')}</p>
 
                 <GuideCard icon={User} title="What the login screen is">
                   <p>When you first open PromptVault, you see a login screen that asks for a name and email. This is <strong className="text-text-main">not</strong> creating an account on any server. Your name and email are stored only in your own browser's localStorage — they are used to personalize the interface and identify you locally.</p>
@@ -224,11 +224,11 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'assets' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Asset Library</h2>
-                <p className="text-xs text-text-dim mb-4">11 asset types, instant search, advanced filters, and one-click copy.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.assets')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.assets')}</p>
 
                 <div className="bg-surface border border-border rounded-xl p-4 mb-4">
-                  <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-3">Asset Types</div>
+                  <div className="text-[10px] font-semibold text-text-dim uppercase tracking-wider mb-3">{t('guide.assetTypesHeading')}</div>
                   <div className="space-y-0.5">
                     <AssetTypeRow icon={Bot}       label="Agents"      desc="full agent instructions with system prompt, variables, tools, and example output" />
                     <AssetTypeRow icon={Sparkles}  label="Prompts"     desc="single prompts by category (image, text, code, video, music, general)" />
@@ -294,8 +294,8 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'agents' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Agents & Local AI</h2>
-                <p className="text-xs text-text-dim mb-4">Run agents locally with Ollama — or preview them without AI.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.agents')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.agents')}</p>
 
                 <GuideCard icon={Bot} title="What an Agent is">
                   <p>An Agent asset contains everything you need to define an AI assistant: a <strong className="text-text-main">system prompt</strong>, an optional <strong className="text-text-main">instruction block</strong>, named <strong className="text-text-main">variables</strong>, a list of <strong className="text-text-main">tools</strong>, and an <strong className="text-text-main">example output</strong>. Think of it as a saved AI persona or task configuration.</p>
@@ -328,8 +328,8 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'vault' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Vault Storage</h2>
-                <p className="text-xs text-text-dim mb-4">Save every asset as a real file on your disk.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.vault')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.vault')}</p>
 
                 <GuideCard icon={HardDrive} title="What the Vault is">
                   <p>By default, PromptVault stores assets in your browser's localStorage — which can be lost if you clear browser data. Vault Storage saves every asset as a real file in a <code className="bg-surface-soft px-1 rounded text-text-main">vault/</code> folder inside the project directory on your computer.</p>
@@ -370,8 +370,8 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'backup' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Vault Backup & Transfer</h2>
-                <p className="text-xs text-text-dim mb-4">Move your vault between computers with a .zip backup.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.backup')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.backup')}</p>
 
                 <div className="bg-amber-500/10 border border-amber-500/25 rounded-xl p-4 mb-4">
                   <div className="flex items-start gap-2.5">
@@ -406,8 +406,8 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'trash' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Trash & Delete</h2>
-                <p className="text-xs text-text-dim mb-4">Two levels of deletion to keep your data safe.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.trash')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.trash')}</p>
 
                 <GuideCard icon={Trash2} title="Move to Trash">
                   <p>When you delete an asset normally (via the trash icon in the detail panel), the asset is moved to the <strong className="text-text-main">Trash</strong> section in the sidebar. It is hidden from your main library but not permanently gone.</p>
@@ -430,8 +430,8 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'updates' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">App Updates</h2>
-                <p className="text-xs text-text-dim mb-4">Pull the latest version from GitHub without touching your vault.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.updates')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.updates')}</p>
 
                 <GuideCard icon={RefreshCw} title="How to update">
                   <p>Go to <strong className="text-text-main">Settings → App Updates</strong> and click <strong className="text-text-main">Check for Updates</strong>. The updater fetches the latest commit from the GitHub main branch and shows you the current vs. latest commit.</p>
@@ -466,8 +466,8 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'privacy' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Privacy & Local-First</h2>
-                <p className="text-xs text-text-dim mb-4">Your data never leaves your machine unless you choose to share it.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.privacy')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.privacy')}</p>
 
                 <GuideCard icon={Shield} title="No cloud, no tracking">
                   <p>PromptVault does not use any cloud service, database, or third-party API by default. Your profile, assets, settings, and vault files are stored only on your computer — in browser localStorage and in the local vault folder.</p>
@@ -491,8 +491,8 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'workflow' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Recommended Workflow</h2>
-                <p className="text-xs text-text-dim mb-4">How to get the most out of PromptVault.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.workflow')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.workflow')}</p>
 
                 <div className="bg-surface border border-border rounded-xl p-4 mb-4">
                   <WorkflowStep n={1} text="Delete the demo assets (Settings → Danger Zone → Clear All Assets) or keep them as reference." />
@@ -519,8 +519,8 @@ export function AppGuideModal({ open, onClose }: Props) {
 
             {section === 'promptBuilder' && (
               <>
-                <h2 className="text-base font-bold text-text-main mb-1">Prompt Builder / Variables</h2>
-                <p className="text-xs text-text-dim mb-4">Fill in variables to generate a finished prompt — without changing the original.</p>
+                <h2 className="text-base font-bold text-text-main mb-1">{t('guide.sections.promptBuilder')}</h2>
+                <p className="text-xs text-text-dim mb-4">{t('guide.sub.promptBuilder')}</p>
 
                 <GuideCard icon={Wand2} title="What are prompt variables?">
                   <p>You can write prompts and agent instructions that contain named placeholders wrapped in curly braces, like <code className="bg-surface-soft px-1 rounded text-text-main">{"{"}</code><code className="bg-surface-soft px-1 rounded text-text-main">{"subject}"}</code> or <code className="bg-surface-soft px-1 rounded text-text-main">{"{lighting}"}</code>. PromptVault automatically detects any <code className="bg-surface-soft px-1 rounded text-text-main">{"{variablename}"}</code> patterns in your prompt or generation prompt.</p>
@@ -568,7 +568,7 @@ export function AppGuideModal({ open, onClose }: Props) {
             onClick={onClose}
             className="px-4 py-1.5 rounded-lg bg-surface-soft border border-border text-xs text-text-muted hover:text-text-main hover:border-border transition-colors"
           >
-            Close
+            {t('guide.close')}
           </button>
         </div>
       </div>
