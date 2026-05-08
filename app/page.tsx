@@ -12,6 +12,7 @@ import { Toast } from '@/components/ui/Toast'
 import { NewAssetModal } from '@/components/forms/NewAssetModal'
 import { CreateFromClipboardModal } from '@/components/forms/CreateFromClipboardModal'
 import { LandingPage } from '@/components/landing/LandingPage'
+import { VaultAutoLoader } from '@/components/system/VaultAutoLoader'
 
 function LoadingSplash() {
   return (
@@ -74,6 +75,9 @@ export default function PromptVaultApp() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      {/* Auto-load vault assets on startup (renders nothing) */}
+      <VaultAutoLoader />
+
       {/* Left Sidebar */}
       <Sidebar />
 

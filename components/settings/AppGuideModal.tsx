@@ -347,7 +347,8 @@ export function AppGuideModal({ open, onClose }: Props) {
                 </GuideCard>
 
                 <GuideCard icon={HardDrive} title="Vault tools">
-                  <p><strong className="text-text-main">Load Assets from Vault</strong> — reads vault files and merges them into your library. Useful when moving the app to a new browser or after a clean reinstall.</p>
+                  <p><strong className="text-text-main">Auto-load on startup</strong> — when Vault Storage is enabled and initialized, PromptVault automatically loads your assets from the vault every time the app starts. You do not need to click anything.</p>
+                  <p><strong className="text-text-main">Load Assets from Vault</strong> — manually reads vault files and merges them into your library. Still useful after importing a backup or after editing vault files outside the app.</p>
                   <p><strong className="text-text-main">Rebuild Vault Index</strong> — scans all vault folders and regenerates index.json. Use this after manually editing vault files outside the app.</p>
                 </GuideCard>
 

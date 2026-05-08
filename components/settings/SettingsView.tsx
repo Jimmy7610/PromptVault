@@ -986,6 +986,9 @@ export function SettingsView() {
                   <div className="text-xs text-text-dim mt-0.5">Read vault files and merge into library (vault wins on conflict)</div>
                 </div>
               </button>
+              {vault.vaultEnabled && vault.vaultInitialized && (
+                <p className="text-[11px] text-text-dim px-1">{t('vault.autoLoadInfo')}</p>
+              )}
 
               {/* Rebuild index */}
               <button

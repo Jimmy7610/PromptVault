@@ -160,6 +160,7 @@ You are an expert SEO content writer...
 2. Enable the vault toggle
 3. **Sync to Vault** — writes all current assets to disk
 4. From now on, every create/update/trash/restore/delete is mirrored to disk automatically
+5. **Auto-load on startup** — when vault is enabled and initialized, PromptVault automatically loads assets from the vault each time the app starts. No manual action needed after a restart or browser refresh.
 
 ### Moving your Vault between computers
 

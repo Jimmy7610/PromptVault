@@ -270,6 +270,13 @@ const en: NestedStrings = {
     removedFavorites: 'Removed from favorites',
   },
 
+  // ── Vault auto-load ───────────────────────────────────────────────────────────
+  vault: {
+    autoLoadSuccess: 'Loaded assets from Vault',
+    autoLoadError:   'Could not load assets from Vault',
+    autoLoadInfo:    'Vault assets are loaded automatically when PromptVault starts.',
+  },
+
   // ── Prompt Builder ───────────────────────────────────────────────────────────
   promptBuilder: {
     title:             'Build Prompt',
@@ -570,6 +577,12 @@ const sv: NestedStrings = {
   toast: {
     addedFavorites:   'Tillagd i favoriter',
     removedFavorites: 'Borttagen från favoriter',
+  },
+
+  vault: {
+    autoLoadSuccess: 'Laddade assets från Vault',
+    autoLoadError:   'Kunde inte ladda assets från Vault',
+    autoLoadInfo:    'Vault-assets laddas automatiskt när PromptVault startar.',
   },
 
   promptBuilder: {
